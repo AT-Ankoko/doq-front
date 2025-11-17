@@ -21,6 +21,26 @@ const routes = [
     name: 'Home',
     component: () => import(/* webpackChunkName: "home" */ "@/pages/Home.vue")
   },
+  {
+    path: '/about',
+    name: 'About',
+    component: () => import(/* webpackChunkName: "about" */ "@/pages/Info/About.vue")
+  },
+  {
+    path: '/archive',
+    name: 'Archive',
+    component: () => import(/* webpackChunkName: "archive" */ "@/pages/Info/Archive.vue")
+  },
+  {
+    path: '/howtouse',
+    name: 'HowToUse',
+    component: () => import(/* webpackChunkName: "howtouse" */ "@/pages/Info/HowToUse.vue")
+  },
+  {
+    path: '/team',
+    name: 'Team',
+    component: () => import(/* webpackChunkName: "team" */ "@/pages/Info/Team.vue")
+  },
 ];
 
 const router = createRouter({

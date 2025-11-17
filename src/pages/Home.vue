@@ -1,5 +1,5 @@
 <template>
-
+home
 </template>
 
 <script setup>
@@ -7,12 +7,12 @@
 import { onMounted, onUnmounted, ref, watch, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
-const emit = defineEmits(['hide-appbar', 'start-survey', 'restart-survey', 'continue-survey']);
+const emit = defineEmits(['hide-top-appbar']);
 
 
 // ----- 라이프 사이클 ----- //
 onMounted(() => {
-  emit('hide-appbar');
+  // emit('hide-top-appbar');
 });
 
 onUnmounted(() => {

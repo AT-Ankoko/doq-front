@@ -1,7 +1,6 @@
 <template>
   <v-app class="background">
 
-    <!-- 좌측 네비게이션 바 (제공해주신 스니펫 기반) -->
     <v-navigation-drawer
       v-if="showSideNav"
       rail
@@ -9,20 +8,16 @@
       color="#FFFFFF"
       class="rounded-e-xl"
     >
-      <!-- 
-        v-navigation-drawer 내부에 d-flex flex-column fill-height
-        div를 추가하여 v-spacer가 올바르게 작동하도록 합니다.
-      -->
       <div class="d-flex | flex-column | align-center | ga-3 | pa-2 | fill-height">
-        <!-- 로고 (경로: @/assets/logo.svg - 이 파일이 프로젝트에 존재해야 합니다) -->
         <v-icon class="mt-6 | mb-12">
           <v-img
             src="@/assets/logo.svg"
             width="30" height="30"
+            @click="clickNavBtn('/home')" 
+            style="cursor: pointer;"
           ></v-img>
         </v-icon>
 
-        <!-- 검색 버튼 -->
         <v-btn
           icon="mdi-magnify"
           density="comfortable"
@@ -32,7 +27,6 @@
         
         <v-spacer></v-spacer>
 
-        <!-- 설정 버튼 -->
         <v-btn
           icon="mdi-cog-outline"
           density="comfortable"
@@ -40,7 +34,6 @@
           color="#717171"
         ></v-btn>
         
-        <!-- 계정 버튼 -->
         <v-btn
           class="mt-6 | mb-6"
           icon="mdi-account-circle-outline"
@@ -51,28 +44,27 @@
       </div>
     </v-navigation-drawer>
 
-    <!-- 상단 앱 바 -->
     <v-app-bar 
       v-if="showTopNav"
       flat color="#E6E8E9" class="border-b"
     >
-      <!-- 좌측 로고 -->
-      <!-- 'src' 경로는 실제 로고 파일 위치에 맞게 수정해주세요 -->
       <v-img
         class="ml-4"
         src="@/assets/main-logo.svg"
         max-height="30"
         max-width="60"
         contain
+        @click="clickNavBtn('/home')" 
+        style="cursor: pointer;"
       ></v-img>
 
       <v-spacer></v-spacer>
 
-      <!-- 우측 메뉴 버튼 그룹 (예시) -->
       <v-btn 
         class="mr-2" 
         variant="text"
         append-icon="mdi-chevron-down"
+        @click="clickNavBtn('/about')"
       >
         About
       </v-btn>
@@ -80,6 +72,7 @@
         class="mr-2" 
         variant="text"
         append-icon="mdi-chevron-down"
+        @click="clickNavBtn('/team')"
       >
         Team
       </v-btn>
@@ -87,6 +80,7 @@
         class="mr-2" 
         variant="text"
         append-icon="mdi-chevron-down"
+        @click="clickNavBtn('/howtouse')"
       >
         How to Use
       </v-btn>
@@ -94,27 +88,25 @@
         class="mr-2" 
         variant="text"
         append-icon="mdi-chevron-down"
+        @click="clickNavBtn('/archive')"
       >
         Archive
       </v-btn>
     </v-app-bar>
 
-    <!-- 메인 컨텐츠 -->
     <v-main>
       <RouterView 
         @hide-side-appbar="hideSideNav"
-        @hide-top-abbbar="hideTopNav"
+        @hide-top-appbar="hideTopNav"
       />
     </v-main>
   </v-app>
 
-  <!-- 다이얼로그 -->
   <v-dialog v-model="dialog.dialogActive" width="auto">
     <v-card class="pa-2 | pb-3" rounded="lg">
       <v-card-title class="text-title | pl-4 | pr-4 | pt-4">
         <v-row style="justify-content: start; align-items: center;">
           <v-col class="pt-0 | pb-0 | pl-4 | pr-1" cols="auto">
-            <!-- 로고 (경로: @/assets/logo.png - 이 파일이 프로젝트에 존재해야 합니다) -->
             <v-img
               src="@/assets/logo.png"
               height="24"
@@ -140,8 +132,12 @@
 
 <script setup>
 // ----- 선언부 ----- //
-import { onMounted, onUnmounted, ref, computed, watch} from "vue";
-import { RouterView } from "vue-router"
+import { onMounted, onUnmounted, ref, watch } from "vue"; // (수정) watch 임포트
+import { RouterView, useRouter, useRoute } from "vue-router"; // (수정) useRoute 임포트
+
+// 라우터 인스턴스 가져오기
+const router = useRouter();
+const route = useRoute(); // (추가) 현재 라우트 정보 가져오기
 
 // 네비게이션 및 앱 바 표시 상태
 const showSideNav = ref(true);
@@ -156,7 +152,6 @@ const dialog = ref({
 });
 
 
-
 // ----- 라이프 사이클 ----- //
 onMounted(() => {
 
@@ -166,9 +161,26 @@ onUnmounted(() => {
 
 });
 
+// (추가) 라우트 변경 감지
+watch(
+  () => route.path, // 현재 경로(path)를 감시합니다.
+  (newPath, oldPath) => {
+    // 페이지(라우트)가 변경될 때마다 네비게이션 바를 다시 보이도록 리셋합니다.
+    showSideNav.value = true;
+    showTopNav.value = true;
+  }
+);
+
+
 // ----- 함수 정의 ----- //
 
+// (추가) 라우터 이동 함수
+function clickNavBtn(path) {
+  router.push(path);
+}
+
 // 좌측 사이드바 숨기기
+// (이 함수들은 이제 특정 페이지에서만 숨기는 용도로 정상 동작합니다)
 function hideSideNav() {
   showSideNav.value = false;
 }

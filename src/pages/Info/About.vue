@@ -1,5 +1,5 @@
 <template>
-
+어바웃
 </template>
 
 <script setup>
@@ -7,7 +7,7 @@
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
-const emit = defineEmits(['']);
+const emit = defineEmits(['hide-side-appbar']);
 
 
 // ----- 라이프 사이클 ----- //
