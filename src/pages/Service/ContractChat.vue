@@ -7,8 +7,8 @@
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
-const emit = defineEmits(['']);
-
+const emit = defineEmits(['hide-side-appbar']);
+const router = useRouter(); 
 
 // ----- 라이프 사이클 ----- //
 onMounted(() => {
