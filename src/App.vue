@@ -52,10 +52,47 @@
 
     <!-- 상단 앱 바 -->
     <v-app-bar flat color="#E6E8E9" class="border-b">
-      <v-app-bar-title>
-        <!-- 원하는 앱 타이틀을 여기에 입력하세요 -->
-        My Application
-      </v-app-bar-title>
+      <!-- 좌측 로고 -->
+      <!-- 'src' 경로는 실제 로고 파일 위치에 맞게 수정해주세요 -->
+      <v-img
+        class="ml-4"
+        src="@/assets/main-logo.svg"
+        max-height="30"
+        max-width="72"
+        contain
+      ></v-img>
+
+      <v-spacer></v-spacer>
+
+      <!-- 우측 메뉴 버튼 그룹 (예시) -->
+      <v-btn 
+        class="mr-1" 
+        variant="text"
+        append-icon="mdi-chevron-down"
+      >
+        About
+      </v-btn>
+      <v-btn 
+        class="mr-1" 
+        variant="text"
+        append-icon="mdi-chevron-down"
+      >
+        Team
+      </v-btn>
+      <v-btn 
+        class="mr-1" 
+        variant="text"
+        append-icon="mdi-chevron-down"
+      >
+        How to Use
+      </v-btn>
+      <v-btn 
+        class="mr-1" 
+        variant="text"
+        append-icon="mdi-chevron-down"
+      >
+        Archive
+      </v-btn>
     </v-app-bar>
 
     <!-- 메인 컨텐츠 -->
@@ -86,8 +123,8 @@
       <v-card-text class="text-subtitle | pl-4 | pr-4 | pt-2 | pb-3" v-html="dialog.text"></v-card-text>
       <template v-slot:actions>
           <v-row no-gutters justify="end">
-              <v-btn color="#717171" width="25%" rounded="xl" variant="outlined" @click="dialog.dialogActive = false">취소</v-btn>
-              <v-btn color="#717171" width="25%" rounded="xl" variant="flat" class="ml-2" @click="dialog.okButton">확인</v-btn>
+              <v-btn color="#FF5858" width="25%" rounded="xl" variant="outlined" @click="dialog.dialogActive = false">취소</v-btn>
+              <v-btn color="#FF5858" width="25%" rounded="xl" variant="flat" class="ml-2" @click="dialog.okButton">확인</v-btn>
           </v-row>
       </template>
     </v-card>
