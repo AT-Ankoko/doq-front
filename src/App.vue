@@ -50,9 +50,9 @@
     >
       <v-img
         class="ml-4"
-        src="@/assets/main-logo.svg"
-        max-height="30"
-        max-width="60"
+        src="@/assets/main-logo-text.svg"
+        max-height="28"
+        max-width="56"
         contain
         @click="clickNavBtn('/home')" 
         style="cursor: pointer;"
