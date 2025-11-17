@@ -41,6 +41,21 @@ const routes = [
     name: 'Team',
     component: () => import(/* webpackChunkName: "team" */ "@/pages/Info/Team.vue")
   },
+  {
+    path: '/contract-input1',
+    name: 'ContractInput1',
+    component: () => import(/* webpackChunkName: "contract-input1" */ "@/pages/Service/ContractInput1.vue")
+  },
+  {
+    path: '/contract-input2',
+    name: 'ContractInput2',
+    component: () => import(/* webpackChunkName: "contract-input2" */ "@/pages/Service/ContractInput2.vue")
+  },
+  {
+    path: '/contract-chat',
+    name: 'ContractChat',
+    component: () => import(/* webpackChunkName: "contract-chat" */ "@/pages/Service/ContractChat.vue")
+  },
 ];
 
 const router = createRouter({

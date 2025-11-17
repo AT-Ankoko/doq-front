@@ -26,7 +26,7 @@
             rounded="xl"
             size="large"
             class="pl-6 | pr-4"
-            @click="clickNavBtn('/create')" 
+            @click="clickNavBtn('/contract-input1')" 
           >
             Get Started
             <v-icon right>mdi-arrow-right</v-icon>
