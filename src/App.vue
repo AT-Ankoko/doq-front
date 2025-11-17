@@ -3,6 +3,7 @@
 
     <!-- 좌측 네비게이션 바 (제공해주신 스니펫 기반) -->
     <v-navigation-drawer
+      v-if="showSideNav"
       rail
       permanent
       color="#FFFFFF"
@@ -51,14 +52,17 @@
     </v-navigation-drawer>
 
     <!-- 상단 앱 바 -->
-    <v-app-bar flat color="#E6E8E9" class="border-b">
+    <v-app-bar 
+      v-if="showTopNav"
+      flat color="#E6E8E9" class="border-b"
+    >
       <!-- 좌측 로고 -->
       <!-- 'src' 경로는 실제 로고 파일 위치에 맞게 수정해주세요 -->
       <v-img
         class="ml-4"
         src="@/assets/main-logo.svg"
         max-height="30"
-        max-width="72"
+        max-width="60"
         contain
       ></v-img>
 
@@ -66,28 +70,28 @@
 
       <!-- 우측 메뉴 버튼 그룹 (예시) -->
       <v-btn 
-        class="mr-1" 
+        class="mr-2" 
         variant="text"
         append-icon="mdi-chevron-down"
       >
         About
       </v-btn>
       <v-btn 
-        class="mr-1" 
+        class="mr-2" 
         variant="text"
         append-icon="mdi-chevron-down"
       >
         Team
       </v-btn>
       <v-btn 
-        class="mr-1" 
+        class="mr-2" 
         variant="text"
         append-icon="mdi-chevron-down"
       >
         How to Use
       </v-btn>
       <v-btn 
-        class="mr-1" 
+        class="mr-2" 
         variant="text"
         append-icon="mdi-chevron-down"
       >
@@ -97,7 +101,10 @@
 
     <!-- 메인 컨텐츠 -->
     <v-main>
-      <RouterView />
+      <RouterView 
+        @hide-side-appbar="hideSideNav"
+        @hide-top-abbbar="hideTopNav"
+      />
     </v-main>
   </v-app>
 
@@ -136,8 +143,9 @@
 import { onMounted, onUnmounted, ref, computed, watch} from "vue";
 import { RouterView } from "vue-router"
 
-
-const sAppBar = ref(true) // 또는 false
+// 네비게이션 및 앱 바 표시 상태
+const showSideNav = ref(true);
+const showTopNav = ref(true);
 
 // 템플릿의 v-model="dialog.dialogActive"와 일치하도록 'isActive'를 'dialogActive'로 수정
 const dialog = ref({
@@ -159,6 +167,16 @@ onUnmounted(() => {
 });
 
 // ----- 함수 정의 ----- //
+
+// 좌측 사이드바 숨기기
+function hideSideNav() {
+  showSideNav.value = false;
+}
+
+// 상단 앱 바 숨기기
+function hideTopNav() {
+  showTopNav.value = false;
+}
 
 
 </script>
