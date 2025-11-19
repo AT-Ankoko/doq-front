@@ -1,253 +1,104 @@
 <template>
-  <v-container fluid class="home-page | fill-height | pa-0">
-    <div class="background-elements">
-      <img src="@/assets/hand-with-pen.png" alt="Hand with pen" class="main-illustration" />
-      <div class="circle | circle-large | circle-1"></div>
-      <div class="circle | circle-medium | circle-2"></div>
-      <div class="circle | circle-small | circle-3"></div>
-      <div class="circle | circle-medium | circle-4"></div>
-    </div>
-
-    <v-row no-gutters class="fill-height | align-center">
-      <v-col cols="12" class="d-flex | flex-column | justify-center | pa-10 | text-area">
-        <div class="doq-logo | mb-6">
-          <v-img src="@/assets/main-logo.svg" max-height="40" max-width="120" contain></v-img>
-        </div>
-        <h1 class="text-h2 | font-weight-bold | mb-4 | text-white">
+  <v-container fluid class="home-page fill-height">
+    <v-row no-gutters class="align-start pt-15 mt-10">
+      
+      <v-col cols="12" md="6" class="d-flex flex-column justify-center text-center text-md-left px-md-16 px-8">
+        <p class="text-h5 mb-8 font-weight-medium" style="color: #174DC9;">
+          3분만에 만드는 완벽한 계약서
+        </p>
+        
+        <h1 class="text-h1 font-weight-bold mb-15 text-black" style="line-height: 1.2;">
           계약서 작성,<br>지금 시작해볼까요?
         </h1>
-        <p class="text-h6 | mb-8 | text-white | text-opacity-75">
-          DoQ와 함께 몇 분 만에 공정하고 깔끔한 계약서를 만들어보세요.
-        </p>
-        <div class="d-flex | ga-4 | button-group">
+
+        <div class="d-flex ga-4 justify-center mb-8 justify-md-start">
           <v-btn
-            color="white"
+            color="#174DC9"
             variant="flat"
             rounded="xl"
-            size="large"
-            class="pl-6 | pr-4"
+            size="x-large"
+            class="px-8 font-weight-bold text-white custom-height-btn"
             @click="clickNavBtn('/contract-input1')" 
           >
-            Get Started
-            <v-icon right>mdi-arrow-right</v-icon>
+            Get started
+            <v-icon right class="ml-2">mdi-arrow-right</v-icon>
           </v-btn>
+          
           <v-btn
-            color="white"
+            color="black"
             variant="outlined"
             rounded="xl"
-            size="large"
-            class="px-6"
+            size="x-large"
+            class="px-8 font-weight-bold custom-height-btn"
             @click="clickNavBtn('/howtouse')"
           >
             How to use
           </v-btn>
         </div>
+
+        <div class="mt-16 w-100" style="max-width: 1000px;">
+           <p class="text-h6 font-weight-bold mb-8 text-black">
+             계약서 작성, 4단계면 충분해요!
+           </p>
+           
+           <div class="stepper-container">
+              <div class="stepper-line">
+                <div class="stepper-progress"></div>
+              </div>
+
+              <div class="stepper-icons">
+                <div class="step-wrapper">
+                  <div class="step"></div>
+                  <span class="step-label">역할 선택</span>
+                </div>
+                
+                <div class="step-wrapper">
+                  <div class="step"></div>
+                  <span class="step-label">정보입력</span>
+                </div>
+
+                <div class="step-wrapper">
+                  <div class="step"></div>
+                  <span class="step-label">조건설정</span>
+                </div>
+
+                <div class="step-wrapper">
+                  <div class="step"></div>
+                  <span class="step-label">서명</span>
+                </div>
+              </div>
+           </div>
+        </div>
       </v-col>
 
-      <v-col cols="12" md="5" class="d-flex | justify-end | align-center | pr-10 | stage-indicator-area">
-        <div class="stage-indicator">
-          <div class="stage-item | active">
-            <div class="dot"></div>
-            <div class="line"></div>
-            <span class="text-white">역할 선택</span>
-          </div>
-          <div class="stage-item">
-            <div class="dot"></div>
-            <div class="line"></div>
-            <span class="text-white">정보 입력</span>
-          </div>
-          <div class="stage-item">
-            <div class="dot"></div>
-            <div class="line"></div>
-            <span class="text-white">조건 설정</span>
-          </div>
-          <div class="stage-item">
-            <div class="dot"></div>
-            <div class="line"></div>
-            <span class="text-white">확인 및 서명</span>
-          </div>
-        </div>
+      <v-col cols="12" md="6" class="d-none d-md-flex align-center justify-start">
+        <v-img 
+          src="@/assets/note_icon.png" 
+          contain 
+          max-height="50vh" 
+          class="floating-image"
+          style="transform: translateX(70px);"
+        ></v-img>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
-<script setup>
-import { onMounted, onUnmounted, ref, watch, nextTick } from "vue";
-import { useRouter, useRoute } from "vue-router";
+<script>
+import { useRouter } from 'vue-router';
 
-const emit = defineEmits(['hide-side-appbar']);
-const router = useRouter(); 
+export default {
+  name: 'HomePage',
+  setup() {
+    const router = useRouter();
+    const clickNavBtn = (path) => {
+      router.push(path);
+    };
 
-
-onMounted(() => {
-  emit('hide-side-appbar');
-});
-
-onUnmounted(() => {
-
-});
-
-function clickNavBtn(path) {
-  router.push(path);
-}
-
-</script> 
-
-<style scoped>
-.home-page {
-  position: relative;
-  overflow: hidden;
-}
-
-.background-elements {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.main-illustration {
-  position: absolute;
-  width: 60%;
-  max-width: 800px;
-  height: auto;
-  bottom: 0%;
-  right: -5%;
-  transform: translateX(-40%);
-}
-
-.circle {
-  background-color: #ffffff;
-  border-radius: 50%;
-  position: absolute;
-  opacity: 0.08;
-  filter: blur(50px);
-  pointer-events: none;
-}
-
-.circle-large {
-  width: 400px;
-  height: 400px;
-}
-
-.circle-medium {
-  width: 250px;
-  height: 250px;
-}
-
-.circle-small {
-  width: 150px;
-  height: 150px;
-}
-
-.circle-1 {
-  top: 10%;
-  left: 20%;
-}
-
-.circle-2 {
-  bottom: 15%;
-  left: 10%;
-}
-
-.circle-3 {
-  top: 5%;
-  right: 25%;
-}
-
-.circle-4 {
-  bottom: 30%;
-  right: 15%;
-}
-
-.text-area {
-  z-index: 1;
-  max-width: 800px;
-  @media (min-width: 960px) {
-    padding-left: 100px !important;
-  }
-}
-
-.stage-indicator-area {
-  z-index: 1;
-}
-
-.stage-indicator {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 20px;
-  position: relative;
-}
-
-.stage-indicator .stage-item {
-  display: flex;
-  align-items: center;
-  position: relative;
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.5);
-  transition: color 0.3s ease;
-}
-
-.stage-indicator .stage-item.active {
-  color: #FFFFFF;
-}
-
-.stage-indicator .stage-item .dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.3);
-  margin-right: 15px;
-  transition: background-color 0.3s ease;
-  z-index: 2;
-}
-
-.stage-indicator .stage-item.active .dot {
-  background-color: #FFFFFF;
-}
-
-.stage-indicator .stage-item .line {
-  position: absolute;
-  left: 5.5px;
-  top: 100%;
-  height: 20px;
-  width: 1px;
-  background-color: rgba(255, 255, 255, 0.2);
-  z-index: 1;
-}
-
-.stage-indicator .stage-item:last-child .line {
-  display: none;
-}
-
-@media (max-width: 959px) {
-  .stage-indicator-area {
-    display: none !important;
-  }
-  .main-illustration {
-    width: 80%;
-    right: -20%;
-    bottom: 0%;
-  }
-  .text-area {
-    text-align: center;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-  .doq-logo {
-    display: none;
-  }
-  .button-group {
-    justify-content: center;
-  }
-}
-</style>
+    return {
+      clickNavBtn,
+    };
+  },
+};
+</script>
+<style scoped>  </style>

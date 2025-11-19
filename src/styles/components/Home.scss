@@ -1,0 +1,231 @@
+.home-page {
+  background-color: #f8f9fa;
+}
+
+.custom-height-btn {
+  min-height: 70px !important;
+  padding-top: 15px !important;
+  padding-bottom: 15px !important;
+}
+
+.v-chip {
+    height: auto !important;
+}
+
+.v-btn {
+  letter-spacing: normal !important;
+  font-size: 1rem !important;
+}
+
+.text-h2 {
+  line-height: 1.3 !important;
+}
+
+.stepper-spacing {
+  margin-top: 6rem;
+}
+
+@media (max-width: 960px) {
+  .text-h2 {
+    font-size: 2.5rem !important;
+  }
+  .text-h6 {
+    font-size: 1rem !important;
+  }
+}
+/* --- Animated Stepper Styles --- */
+.stepper-container {
+  width: 100%;
+  position: relative;
+  /* margin 등은 상위 태그에서 제어하므로 제거하거나 조정 */
+}
+
+/* 회색 배경 라인 */
+.stepper-line {
+  width: 100%;
+  height: 6px; /* 두께 살짝 얇게 조정 */
+  background: #E0E0E0;
+  border-radius: 10px;
+  position: absolute;
+  top: 15px; /* 동그라미(24px)의 중간인 12px 근처로 위치 조정 */
+  left: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* 파란색 차오르는 라인 */
+.stepper-progress {
+  position: absolute;
+  height: 100%;
+  width: 0%;
+  background: #174DC9; /* DoQ 메인 컬러 */
+  border-radius: 10px;
+  animation: fillBar 6.5s ease-in-out infinite;
+}
+
+.stepper-icons {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1; /* 라인 위에 오도록 설정 */
+}
+
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90px; /* 텍스트 줄바꿈 방지 및 정렬을 위한 폭 */
+}
+
+/* 동그라미 스텝 */
+.step {
+  width: 36px;
+  height: 36px;
+  background: #E0E0E0;
+  border-radius: 50%;
+  border: 5px solid #f8f9fa; /* 배경색과 같은 테두리를 줘서 라인과 분리된 느낌 */
+  position: relative;
+  transition: background 0.3s;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 체크마크 (v 표시) */
+.step::after {
+  content: '✓';
+  font-size: 30px;
+  color: rgb(255, 255, 255);
+  position: absolute;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* 텍스트 라벨 */
+.step-label {
+  font-size: 1.275rem;
+  font-weight: 600;
+  color: #757575;
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+
+/* --- Animations --- */
+
+/* 진행 바 애니메이션 */
+@keyframes fillBar {
+  0% { width: 0%; }
+  92% { width: 100%; }
+  100% { width: 0%; }
+}
+
+/* 각 스텝별 활성화 애니메이션 (색상 및 체크마크) */
+.step-wrapper:nth-child(1) .step { animation: stepActive1 6.5s infinite; }
+.step-wrapper:nth-child(1) .step::after { animation: checkmarkActive1 6.5s infinite; }
+
+.step-wrapper:nth-child(2) .step { animation: stepActive2 6.5s infinite; }
+.step-wrapper:nth-child(2) .step::after { animation: checkmarkActive2 6.5s infinite; }
+
+.step-wrapper:nth-child(3) .step { animation: stepActive3 6.5s infinite; }
+.step-wrapper:nth-child(3) .step::after { animation: checkmarkActive3 6.5s infinite; }
+
+.step-wrapper:nth-child(4) .step { animation: stepActive4 6.5s infinite; }
+.step-wrapper:nth-child(4) .step::after { animation: checkmarkActive4 6.5s infinite; }
+
+/* 텍스트 색상도 같이 변경되도록 애니메이션 추가 */
+.step-wrapper:nth-child(1) .step-label { animation: textActive1 6.5s infinite; }
+.step-wrapper:nth-child(2) .step-label { animation: textActive2 6.5s infinite; }
+.step-wrapper:nth-child(3) .step-label { animation: textActive3 6.5s infinite; }
+.step-wrapper:nth-child(4) .step-label { animation: textActive4 6.5s infinite; }
+
+
+/* Keyframes 정의 (DoQ 블루: #174DC9) */
+
+/* Step 1 */
+@keyframes stepActive1 {
+  0% { background: #174DC9; }
+  92% { background: #174DC9; }
+  100% { background: #E0E0E0; }
+}
+@keyframes checkmarkActive1 {
+  0% { opacity: 1; transform: scale(1); }
+  92% { opacity: 1; transform: scale(1); }
+  92.01% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+@keyframes textActive1 {
+  0% { color: #174DC9; }
+  92% { color: #174DC9; }
+  100% { color: #757575; }
+}
+
+/* Step 2 */
+@keyframes stepActive2 {
+  0% { background: #E0E0E0; }
+  33% { background: #174DC9; }
+  92% { background: #174DC9; }
+  100% { background: #E0E0E0; }
+}
+@keyframes checkmarkActive2 {
+  0% { opacity: 0; transform: scale(0.5); }
+  33% { opacity: 1; transform: scale(1); }
+  92% { opacity: 1; transform: scale(1); }
+  92.01% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+@keyframes textActive2 {
+  0% { color: #757575; }
+  33% { color: #174DC9; }
+  92% { color: #174DC9; }
+  100% { color: #757575; }
+}
+
+/* Step 3 */
+@keyframes stepActive3 {
+  0% { background: #E0E0E0; }
+  66% { background: #174DC9; }
+  92% { background: #174DC9; }
+  100% { background: #E0E0E0; }
+}
+@keyframes checkmarkActive3 {
+  0% { opacity: 0; transform: scale(0.5); }
+  66% { opacity: 1; transform: scale(1); }
+  92% { opacity: 1; transform: scale(1); }
+  92.01% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+@keyframes textActive3 {
+  0% { color: #757575; }
+  66% { color: #174DC9; }
+  92% { color: #174DC9; }
+  100% { color: #757575; }
+}
+
+/* Step 4 */
+@keyframes stepActive4 {
+  0% { background: #E0E0E0; }
+  92% { background: #174DC9; }
+  100% { background: #E0E0E0; }
+}
+@keyframes checkmarkActive4 {
+  0% { opacity: 0; transform: scale(0.5); }
+  92% { opacity: 1; transform: scale(1); } 
+}
+@keyframes textActive4 {
+  0% { color: #757575; }
+  92% { color: #174DC9; }
+  100% { color: #757575; }
+}
+/* Note Icon Floating Animation */
+@keyframes float {
+  0% { transform: translate(70px, 0px); } /* 기존 translateX 유지하면서 위아래로 움직임 */
+  50% { transform: translate(70px, -10px); } /* 위로 15px 이동 */
+  100% { transform: translate(70px, 0px); } /* 다시 시작 위치로 돌아옴 */
+}
+
+/* note_icon 이미지를 위한 스타일 */
+.floating-image {
+  animation: float 3s ease-in-out infinite; /* 3초 동안 부드럽게 무한 반복 */
+}

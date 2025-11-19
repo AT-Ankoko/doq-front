@@ -44,15 +44,14 @@
       </div>
     </v-navigation-drawer>
 
-    <v-app-bar 
-      v-if="showTopNav"
-      flat color="#E6E8E9" class="border-b"
-    >
-      <v-img
+    <v-app-bar
+          v-if="showTopNav"
+          flat color="#E6E8E9" class="border-b" height="75"
+        >      <v-img
         class="ml-4"
-        src="@/assets/main-logo-text.svg"
-        max-height="28"
-        max-width="56"
+        src="@/assets/main-logo.svg"
+        max-height="60"
+        max-width="90"
         contain
         @click="clickNavBtn('/home')" 
         style="cursor: pointer;"
@@ -60,37 +59,37 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn 
-        class="mr-2" 
-        variant="text"
-        append-icon="mdi-chevron-down"
-        @click="clickNavBtn('/about')"
-      >
-        About
+            <v-btn
+              class="mr-2"
+              variant="text"
+              append-icon="mdi-chevron-down"
+              size="large"
+              @click="clickNavBtn('/about')"
+            >        About
       </v-btn>
-      <v-btn 
-        class="mr-2" 
-        variant="text"
-        append-icon="mdi-chevron-down"
-        @click="clickNavBtn('/team')"
-      >
-        Team
+            <v-btn
+              class="mr-2"
+              variant="text"
+              append-icon="mdi-chevron-down"
+              size="large"
+              @click="clickNavBtn('/team')"
+            >        Team
       </v-btn>
-      <v-btn 
-        class="mr-2" 
-        variant="text"
-        append-icon="mdi-chevron-down"
-        @click="clickNavBtn('/howtouse')"
-      >
-        How to Use
+            <v-btn
+              class="mr-2"
+              variant="text"
+              append-icon="mdi-chevron-down"
+              size="large"
+              @click="clickNavBtn('/howtouse')"
+            >        How to Use
       </v-btn>
-      <v-btn 
-        class="mr-2" 
-        variant="text"
-        append-icon="mdi-chevron-down"
-        @click="clickNavBtn('/archive')"
-      >
-        Archive
+            <v-btn
+              class="mr-2"
+              variant="text"
+              append-icon="mdi-chevron-down"
+              size="large"
+              @click="clickNavBtn('/archive')"
+            >        Archive
       </v-btn>
     </v-app-bar>
 
@@ -140,7 +139,7 @@ const router = useRouter();
 const route = useRoute(); // (추가) 현재 라우트 정보 가져오기
 
 // 네비게이션 및 앱 바 표시 상태
-const showSideNav = ref(true);
+const showSideNav = ref(route.path !== '/home' && route.path !== '/');
 const showTopNav = ref(true);
 
 // 템플릿의 v-model="dialog.dialogActive"와 일치하도록 'isActive'를 'dialogActive'로 수정
@@ -164,9 +163,9 @@ onUnmounted(() => {
 // (추가) 라우트 변경 감지
 watch(
   () => route.path, // 현재 경로(path)를 감시합니다.
-  (newPath, oldPath) => {
-    // 페이지(라우트)가 변경될 때마다 네비게이션 바를 다시 보이도록 리셋합니다.
-    showSideNav.value = true;
+  (newPath) => {
+    // 홈 페이지('/' 또는 '/home')에서는 사이드바를 숨기고, 그 외 모든 페이지에서는 표시합니다.
+    showSideNav.value = newPath !== '/home' && newPath !== '/';
     showTopNav.value = true;
   }
 );
