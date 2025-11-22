@@ -44,12 +44,20 @@ const routes = [
   {
     path: '/contract-input1',
     name: 'ContractInput1',
-    component: () => import(/* webpackChunkName: "contract-input1" */ "@/pages/Service/ContractInput1.vue")
+    component: () => import(/* webpackChunkName: "contract-input1" */ "@/pages/Service/ContractInput1.vue"),
+    meta: { hideSidebar: true }
   },
   {
     path: '/contract-input2',
     name: 'ContractInput2',
-    component: () => import(/* webpackChunkName: "contract-input2" */ "@/pages/Service/ContractInput2.vue")
+    component: () => import(/* webpackChunkName: "contract-input2" */ "@/pages/Service/ContractInput2.vue"),
+    meta: { hideSidebar: true }
+  },
+  {
+    path: '/contract-input3',
+    name: 'ContractInput3',
+    component: () => import(/* webpackChunkName: "contract-input3" */ "@/pages/Service/ContractInput3.vue"),
+    meta: { hideSidebar: true }
   },
   {
     path: '/contract-chat',
