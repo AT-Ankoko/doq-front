@@ -19,7 +19,8 @@ const routes = [
   {
     path: '/home',
     name: 'Home',
-    component: () => import(/* webpackChunkName: "home" */ "@/pages/Home.vue")
+    component: () => import(/* webpackChunkName: "home" */ "@/pages/Home.vue"),
+    meta: { hideSidebar: true }
   },
   {
     path: '/about',

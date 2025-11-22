@@ -13,7 +13,7 @@
       </v-toolbar>
 
       <v-card-text class="flex-grow-1 overflow-y-auto bg-grey-lighten-4" ref="chatArea">
-        <div v-for="(msg, index) in messages" :key="index" class="d-flex mb-4" :class="getMessageClass(msg)">
+        <article v-for="(msg, index) in messages" :key="index" class="d-flex mb-4" :class="getMessageClass(msg)">
           
           <v-avatar v-if="msg.role === 'llm'" color="teal" size="32" class="mr-2">AI</v-avatar>
           
@@ -30,7 +30,7 @@
             </v-chip>
           </div>
 
-        </div>
+        </article>
       </v-card-text>
 
       <v-card-actions class="pa-4 bg-white">
@@ -53,19 +53,29 @@
 </template>
 
 <script setup>
+// ----- 선언부 (Imports, Props, Emits, Router) ----- //
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 
+// ----- 상태 변수 (State & Refs) ----- //
 const socket = ref(null);
 const isConnected = ref(false);
 const messages = ref([]);
 const inputText = ref('');
-const currentRole = ref('A'); // 현재 내가 연기하는 역할 (A 또는 B)
+const currentRole = ref('A');
 const chatArea = ref(null);
-
-// 랜덤 세션 ID 생성 (테스트용)
-const sessionId = 's1'; // 테스트용 하드코딩 (s1, s2, s3... 로 변경 가능)
+const sessionId = 's1';
 const WS_URL = `ws://localhost:9571/v1/session/chat?sid=${sessionId}`;
 
+// ----- 라이프 사이클 (Lifecycle Hooks) ----- //
+onMounted(() => {
+  connectWebSocket();
+});
+
+onUnmounted(() => {
+  if (socket.value) socket.value.close();
+});
+
+// ----- 함수 정의 (Methods) ----- //
 const connectWebSocket = () => {
   socket.value = new WebSocket(WS_URL);
 
@@ -79,7 +89,6 @@ const connectWebSocket = () => {
       const data = JSON.parse(event.data);
       console.log('Received:', data);
       
-      // 1. AI 응답 처리 (llm.response)
       if (data.hd?.event === 'llm.response') {
         messages.value.push({
           role: 'llm',
@@ -88,7 +97,6 @@ const connectWebSocket = () => {
         });
         scrollToBottom();
       }
-      // 2. 상태 메시지 처리 (llm.state) - 필요시 로딩 표시 등에 활용
       else if (data.hd?.event === 'llm.state') {
         console.log('State Update:', data.bd?.state?.msg);
       }
@@ -111,14 +119,12 @@ const connectWebSocket = () => {
 const sendMessage = () => {
   if (!inputText.value.trim() || !isConnected.value) return;
 
-  // 1. 내 화면에 먼저 메시지 추가
   messages.value.push({
     role: currentRole.value,
     text: inputText.value,
     timestamp: new Date()
   });
 
-  // 2. 서버로 전송
   const payload = {
     hd: {
       event: "llm.invoke",
@@ -134,15 +140,14 @@ const sendMessage = () => {
   scrollToBottom();
 };
 
-// UI 헬퍼 함수들
 const getMessageClass = (msg) => {
   return msg.role === currentRole.value ? 'justify-end' : 'justify-start';
 };
 
 const getBubbleColor = (role) => {
-  if (role === 'llm') return 'grey-lighten-3'; // AI는 회색
-  if (role === currentRole.value) return 'primary'; // 나는 파란색
-  return 'secondary'; // 상대방은 다른색
+  if (role === 'llm') return 'grey-lighten-3';
+  if (role === currentRole.value) return 'primary';
+  return 'secondary';
 };
 
 const scrollToBottom = () => {
@@ -152,12 +157,4 @@ const scrollToBottom = () => {
     }
   });
 };
-
-onMounted(() => {
-  connectWebSocket();
-});
-
-onUnmounted(() => {
-  if (socket.value) socket.value.close();
-});
 </script>

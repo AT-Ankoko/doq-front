@@ -125,28 +125,24 @@
 </template>
 
 <script setup>
-// ----- 선언부 ----- //
-import { onMounted, onUnmounted, ref, watch } from "vue"; // (수정) watch 임포트
-import { RouterView, useRouter, useRoute } from "vue-router"; // (수정) useRoute 임포트
+// ----- 선언부 (Imports, Props, Emits, Router) ----- //
+import { onMounted, onUnmounted, ref } from "vue";
+import { RouterView, useRouter, useRoute } from "vue-router";
 
-// 라우터 인스턴스 가져오기
 const router = useRouter();
-const route = useRoute(); // (추가) 현재 라우트 정보 가져오기
+const route = useRoute();
 
-// 네비게이션 및 앱 바 표시 상태
+// ----- 상태 변수 (State & Refs) ----- //
 const showSideNav = ref(true);
 const showTopNav = ref(true);
-
-// 템플릿의 v-model="dialog.dialogActive"와 일치하도록 'isActive'를 'dialogActive'로 수정
 const dialog = ref({
   title: '',
   text: '',
   dialogActive: false, 
-  okButton() {}
+  okButton: () => {}
 });
 
-
-// ----- 라이프 사이클 ----- //
+// ----- 라이프 사이클 (Lifecycle Hooks) ----- //
 onMounted(() => {
 
 });
@@ -155,35 +151,18 @@ onUnmounted(() => {
 
 });
 
-// (추가) 라우트 변경 감지
-watch(
-  () => route.path, // 현재 경로(path)를 감시합니다.
-  (newPath, oldPath) => {
-    showSideNav.value = true;
-    showTopNav.value = true;
-  }
-);
-
-
-// ----- 함수 정의 ----- //
-
-// (추가) 라우터 이동 함수
-function clickNavBtn(path) {
+// ----- 함수 정의 (Methods) ----- //
+const clickNavBtn = (path) => {
   router.push(path);
 }
 
-// 좌측 사이드바 숨기기
-// (이 함수들은 이제 특정 페이지에서만 숨기는 용도로 정상 동작합니다)
-function hideSideNav() {
+const hideSideNav = () => {
   showSideNav.value = false;
 }
 
-// 상단 앱 바 숨기기
-function hideTopNav() {
+const hideTopNav = () => {
   showTopNav.value = false;
 }
-
-
 </script>
 
 <style scoped>

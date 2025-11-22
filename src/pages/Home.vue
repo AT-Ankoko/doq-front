@@ -39,7 +39,7 @@
           </v-btn>
         </div>
 
-        <div class="mt-16 w-100" style="max-width: 1000px;">
+        <section class="mt-16 w-100" style="max-width: 1000px;">
            <p class="text-h6 font-weight-bold mb-8 text-black">
              계약서 작성, 4단계면 충분해요!
            </p>
@@ -71,7 +71,7 @@
                 </div>
               </div>
            </div>
-        </div>
+        </section>
       </v-col>
 
       <v-col cols="12" md="6" class="d-none d-md-flex align-center justify-start">
@@ -87,25 +87,26 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
+// ----- 선언부 (Imports, Props, Emits, Router) ----- //
+import { onMounted, defineEmits } from 'vue';
 import { useRouter } from 'vue-router';
 
-export default {
-  name: 'HomePage',
-  setup() {
-    const router = useRouter();
-    const clickNavBtn = (path) => {
-      router.push(path);
-    };
+const emit = defineEmits(['hide-side-appbar']);
+const router = useRouter();
 
-    return {
-      clickNavBtn,
-    };
-  },
+// ----- 라이프 사이클 (Lifecycle Hooks) ----- //
+onMounted(() => {
+  emit('hide-side-appbar');
+});
+
+// ----- 함수 정의 (Methods) ----- //
+const clickNavBtn = (path) => {
+  router.push(path);
 };
 </script>
 
-<style scopedlang="scss">
+<style scoped>
 .custom-height-btn {
   min-height: 60px !important;
   padding-top: 15px !important;

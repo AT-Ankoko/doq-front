@@ -3,66 +3,74 @@
     <v-row justify="center" align="center" class="flex-column">
       
       <v-col cols="12" class="text-center mb-10">
-        <span class="text-h6 font-weight-bold" style="color: #174DC9;">
-          STEP_01
-        </span>
-        <h2 class="text-h3 font-weight-bold mt-4 text-black">
-          어떤 역할로 계약을 진행 하시겠어요?
-        </h2>
+        <header>
+          <span class="text-h6 font-weight-bold" style="color: #174DC9;">
+            STEP_01
+          </span>
+          <h2 class="text-h3 font-weight-bold mt-4 text-black">
+            어떤 역할로 계약을 진행 하시겠어요?
+          </h2>
+        </header>
       </v-col>
 
       <v-col cols="12" md="10" lg="8">
-        <v-row justify="center" class="gap-md-4 mt-6">
-          
-          <v-col cols="12" sm="5" md="5">
-            <v-hover v-slot="{ isHovering, props }">
-              <v-card
-                v-bind="props"
-                :elevation="isHovering ? 8 : 2"
-                class="role-card py-16 cursor-pointer d-flex flex-column align-center justify-center"
-                rounded="xl"
-                @click="selectRole('client')"
-                :class="{ 'on-hover': isHovering }"
-              >
-                <div class="icon-bg mb-6">
-                   <v-img src="@/assets/Client-icon.svg" width="64" height="64"></v-img>
-                </div>
+        <section>
+          <v-row justify="center" class="gap-md-4 mt-6">
+            
+            <v-col cols="12" sm="5" md="5">
+              <article>
+                <v-hover v-slot="{ isHovering, props }">
+                  <v-card
+                    v-bind="props"
+                    :elevation="isHovering ? 8 : 2"
+                    class="role-card py-16 cursor-pointer d-flex flex-column align-center justify-center"
+                    rounded="xl"
+                    @click="selectRole('client')"
+                    :class="{ 'on-hover': isHovering }"
+                  >
+                    <div class="icon-bg mb-6">
+                      <v-img src="@/assets/Client-icon.svg" width="64" height="64"></v-img>
+                    </div>
 
-                <h3 class="text-h6 font-weight-bold mb-2" style="color: #174DC9;">
-                  CLIENT
-                </h3>
-                <p class="text-body-1 text-center font-weight-medium text-grey-darken-1">
-                  클라이언트로<br>계약을 진행할게요.
-                </p>
-              </v-card>
-            </v-hover>
-          </v-col>
+                    <h3 class="text-h6 font-weight-bold mb-2" style="color: #174DC9;">
+                      CLIENT
+                    </h3>
+                    <p class="text-body-1 text-center font-weight-medium text-grey-darken-1">
+                      클라이언트로<br>계약을 진행할게요.
+                    </p>
+                  </v-card>
+                </v-hover>
+              </article>
+            </v-col>
 
-          <v-col cols="12" sm="5" md="5">
-            <v-hover v-slot="{ isHovering, props }">
-              <v-card
-                v-bind="props"
-                :elevation="isHovering ? 8 : 2"
-                class="role-card py-16 cursor-pointer d-flex flex-column align-center justify-center"
-                rounded="xl"
-                @click="selectRole('performer')"
-                :class="{ 'on-hover': isHovering }"
-              >
-                <div class="icon-bg mb-6">
-                   <v-img src="@/assets/Performer_icon.svg" width="64" height="64"></v-img>
-                </div>
+            <v-col cols="12" sm="5" md="5">
+              <article>
+                <v-hover v-slot="{ isHovering, props }">
+                  <v-card
+                    v-bind="props"
+                    :elevation="isHovering ? 8 : 2"
+                    class="role-card py-16 cursor-pointer d-flex flex-column align-center justify-center"
+                    rounded="xl"
+                    @click="selectRole('performer')"
+                    :class="{ 'on-hover': isHovering }"
+                  >
+                    <div class="icon-bg mb-6">
+                      <v-img src="@/assets/Performer_icon.svg" width="64" height="64"></v-img>
+                    </div>
 
-                <h3 class="text-h6 font-weight-bold mb-2" style="color: #174DC9;">
-                  PERFORMER
-                </h3>
-                <p class="text-body-1 text-center font-weight-medium text-grey-darken-1">
-                  계약자로<br>계약을 진행할게요.
-                </p>
-              </v-card>
-            </v-hover>
-          </v-col>
+                    <h3 class="text-h6 font-weight-bold mb-2" style="color: #174DC9;">
+                      PERFORMER
+                    </h3>
+                    <p class="text-body-1 text-center font-weight-medium text-grey-darken-1">
+                      계약자로<br>계약을 진행할게요.
+                    </p>
+                  </v-card>
+                </v-hover>
+              </article>
+            </v-col>
 
-        </v-row>
+          </v-row>
+        </section>
       </v-col>
 
     </v-row>
@@ -70,11 +78,19 @@
 </template>
 
 <script setup>
+// ----- 선언부 (Imports, Props, Emits, Router) ----- //
+import { onMounted, defineEmits } from 'vue';
 import { useRouter } from 'vue-router';
 
+const emit = defineEmits(['hide-side-appbar']);
 const router = useRouter();
 
-// 역할을 선택했을 때 실행되는 함수
+// ----- 라이프 사이클 (Lifecycle Hooks) ----- //
+onMounted(() => {
+  emit('hide-side-appbar');
+});
+
+// ----- 함수 정의 (Methods) ----- //
 const selectRole = (role) => {
   console.log(`Selected Role: ${role}`);
   

@@ -3,115 +3,121 @@
     <v-row justify="center" align="center" class="flex-column">
       
       <v-col cols="12" class="text-center mb-12">
-        <span class="text-h6 font-weight-bold" style="color: #174DC9;">
-          STEP_02
-        </span>
-        <h2 class="text-h3 font-weight-bold mt-4 text-black">
-          계약의 기본 정보를 입력해주세요.
-        </h2>
+        <header>
+          <span class="text-h6 font-weight-bold" style="color: #174DC9;">
+            STEP_02
+          </span>
+          <h2 class="text-h3 font-weight-bold mt-4 text-black">
+            계약의 기본 정보를 입력해주세요.
+          </h2>
+        </header>
       </v-col>
 
       <v-col cols="12" md="8" lg="6">
-        <v-form ref="form">
-          <v-row>
-            <v-col cols="12" md="6" class="px-md-4">
-              <div class="d-flex align-center input-row">
-                <span class="field-label">성함 <span class="required">*</span></span>
-                <v-text-field
-                  v-model="formData.name"
-                  placeholder="성함(회사명)을 입력해주세요."
-                  variant="underlined"
-                  color="#174DC9"
-                  hide-details="auto"
-                  class="custom-input"
-                ></v-text-field>
-              </div>
-            </v-col>
-            <v-col cols="12" md="6" class="px-md-4">
-              <div class="d-flex align-center input-row">
-                <span class="field-label">연락처 <span class="required">*</span></span>
-                <v-text-field
-                  v-model="formData.contact"
-                  placeholder="연락처를 입력해주세요."
-                  variant="underlined"
-                  color="#174DC9"
-                  hide-details="auto"
-                  class="custom-input"
-                ></v-text-field>
-              </div>
-            </v-col>
-          </v-row>
+        <section>
+          <v-form ref="form">
+            <v-row>
+              <v-col cols="12" md="6" class="px-md-4">
+                <div class="d-flex align-center input-row">
+                  <span class="field-label">성함 <span class="required">*</span></span>
+                  <v-text-field
+                    v-model="formData.name"
+                    placeholder="성함(회사명)을 입력해주세요."
+                    variant="underlined"
+                    color="#174DC9"
+                    hide-details="auto"
+                    class="custom-input"
+                  ></v-text-field>
+                </div>
+              </v-col>
+              <v-col cols="12" md="6" class="px-md-4">
+                <div class="d-flex align-center input-row">
+                  <span class="field-label">연락처 <span class="required">*</span></span>
+                  <v-text-field
+                    v-model="formData.contact"
+                    placeholder="연락처를 입력해주세요."
+                    variant="underlined"
+                    color="#174DC9"
+                    hide-details="auto"
+                    class="custom-input"
+                  ></v-text-field>
+                </div>
+              </v-col>
+            </v-row>
 
-          <v-row class="mt-4">
-            <v-col cols="12" md="6" class="px-md-4">
-              <div class="d-flex align-center input-row">
-                <span class="field-label">사업자번호</span>
-                <v-text-field
-                  v-model="formData.businessNumber"
-                  placeholder="사업자번호를 입력해주세요."
-                  variant="underlined"
-                  color="#174DC9"
-                  hide-details="auto"
-                  class="custom-input"
-                ></v-text-field>
-              </div>
-            </v-col>
-            <v-col cols="12" md="6" class="px-md-4">
-              <div class="d-flex align-center input-row">
-                <span class="field-label">계약체결일</span>
-                <v-text-field
-                  v-model="formData.contractDate"
-                  type="date"
-                  placeholder="계약체결일을 입력해주세요."
-                  variant="underlined"
-                  color="#174DC9"
-                  hide-details="auto"
-                  class="custom-input"
-                ></v-text-field>
-              </div>
-            </v-col>
-          </v-row>
+            <v-row class="mt-4">
+              <v-col cols="12" md="6" class="px-md-4">
+                <div class="d-flex align-center input-row">
+                  <span class="field-label">사업자번호</span>
+                  <v-text-field
+                    v-model="formData.businessNumber"
+                    placeholder="사업자번호를 입력해주세요."
+                    variant="underlined"
+                    color="#174DC9"
+                    hide-details="auto"
+                    class="custom-input"
+                  ></v-text-field>
+                </div>
+              </v-col>
+              <v-col cols="12" md="6" class="px-md-4">
+                <div class="d-flex align-center input-row">
+                  <span class="field-label">계약체결일</span>
+                  <v-text-field
+                    v-model="formData.contractDate"
+                    type="date"
+                    placeholder="계약체결일을 입력해주세요."
+                    variant="underlined"
+                    color="#174DC9"
+                    hide-details="auto"
+                    class="custom-input"
+                  ></v-text-field>
+                </div>
+              </v-col>
+            </v-row>
 
-          <v-row class="mt-4">
-            <v-col cols="12" class="px-md-4">
-              <div class="d-flex align-center input-row">
-                <span class="field-label" style="min-width: 80px;">주소</span>
-                <v-text-field
-                  v-model="formData.address"
-                  placeholder="주소를 입력해주세요"
-                  variant="underlined"
-                  color="#174DC9"
-                  hide-details="auto"
-                  class="custom-input"
-                ></v-text-field>
-              </div>
-            </v-col>
-          </v-row>
-        </v-form>
+            <v-row class="mt-4">
+              <v-col cols="12" class="px-md-4">
+                <div class="d-flex align-center input-row">
+                  <span class="field-label" style="min-width: 80px;">주소</span>
+                  <v-text-field
+                    v-model="formData.address"
+                    placeholder="주소를 입력해주세요"
+                    variant="underlined"
+                    color="#174DC9"
+                    hide-details="auto"
+                    class="custom-input"
+                  ></v-text-field>
+                </div>
+              </v-col>
+            </v-row>
+          </v-form>
+        </section>
       </v-col>
 
       <v-col cols="12" class="text-center mt-12 d-flex justify-center ga-4">
-        <v-btn
-          color="#174DC9"
-          rounded="xl"
-          size="x-large"
-          class="px-10 py-4 font-weight-bold"
-          style="height: 60px; font-size: 1.1rem;"
-          @click="goToNextStep"
-        >
-          상대 정보 입력하기 +
-        </v-btn>
-        <v-btn
-          :disabled="!isFormValid"
-          color="primary"
-          rounded="xl"
-          size="x-large"
-          class="px-10 py-4 font-weight-bold"
-          style="height: 60px; font-size: 1.1rem;"
-          @click="complete"
-        >
-          작성 완료
-        </v-btn>
+        <footer>
+          <v-btn
+            color="#174DC9"
+            rounded="xl"
+            size="x-large"
+            class="px-10 py-4 font-weight-bold"
+            style="height: 60px; font-size: 1.1rem;"
+            @click="goToNextStep"
+          >
+            상대 정보 입력하기 +
+          </v-btn>
+          <v-btn
+            :disabled="!isFormValid"
+            color="primary"
+            rounded="xl"
+            size="x-large"
+            class="px-10 py-4 font-weight-bold"
+            style="height: 60px; font-size: 1.1rem;"
+            @click="complete"
+          >
+            작성 완료
+          </v-btn>
+        </footer>
       </v-col>
 
       <v-col cols="12" class="text-center mt-8 text-grey-darken-1">
@@ -128,53 +134,58 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
+// ----- 선언부 (Imports, Props, Emits, Router) ----- //
+import { ref, reactive, computed, onMounted, defineEmits } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+const emit = defineEmits(['hide-side-appbar']);
 const route = useRoute();
 const router = useRouter();
 
-// Step 1에서 넘겨받은 role 정보 (client 또는 performer)
+// ----- 상태 변수 (State & Refs) ----- //
 const currentRole = ref(''); 
-
-// 폼 데이터 저장소
 const formData = reactive({
   name: '',
   contact: '',
   businessNumber: '',
-  contractDate: new Date().toISOString().substr(0, 10), // 오늘 날짜 기본값
+  contractDate: new Date().toISOString().substr(0, 10),
   address: ''
 });
 
+// ----- 컴퓨티드 (Computed) ----- //
 const isFormValid = computed(() => {
   return formData.name.trim() !== '' && formData.contact.trim() !== '';
 });
 
-// role에 따라 화면에 보여줄 텍스트 계산
 const roleLabel = computed(() => {
   return currentRole.value === 'client' ? '클라이언트' : '계약자';
 });
 
-// 컴포넌트가 마운트될 때 쿼리 파라미터 확인
+// ----- 라이프 사이클 (Lifecycle Hooks) ----- //
 onMounted(() => {
-  currentRole.value = route.query.role || 'performer'; // 기본값은 performer
+  currentRole.value = route.query.role || 'performer';
+  emit('hide-side-appbar');
 });
 
+// ----- 함수 정의 (Methods) ----- //
 const goToNextStep = () => {
   console.log('입력된 데이터:', formData);
   // TODO: 여기서 입력한 데이터를 저장소(Pinia 등)에 저장해야 AI에게 전달 가능
   
-  // 다음 단계(계약 종류 선택)로 이동
-  // 역할 정보와 현재 입력한 정보를 계속 들고 가야 함
   router.push({ 
-    path: '/contract-type-select', // 다음 페이지 경로(예시)
+    path: '/contract-type-select',
     query: { role: currentRole.value } 
   });
 };
 
 const complete = () => {
-  console.log('Form submitted:', formData);
-  // 작성 완료 로직
+  const payload = {
+    ...formData,
+    contact: formData.contact.replace(/-/g, ''),
+    businessNumber: formData.businessNumber.replace(/-/g, ''),
+  };
+  console.log('Form submitted:', payload);
+  
   router.push({ 
     path: '/contract-input3',
     query: { role: currentRole.value } 
