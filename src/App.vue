@@ -1,5 +1,5 @@
 <template>
-  <v-app class="background">
+  <v-app>
 
     <v-navigation-drawer
       v-if="showSideNav"

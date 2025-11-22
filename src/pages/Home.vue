@@ -106,10 +106,6 @@ export default {
 </script>
 
 <style scopedlang="scss">
-.home-page {
-  background-color:#F4F8FD;
-}
-
 .custom-height-btn {
   min-height: 60px !important;
   padding-top: 15px !important;
