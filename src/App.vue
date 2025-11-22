@@ -19,40 +19,34 @@
         </v-icon>
 
         <v-btn
+          density="comfortable" variant="tonal" color="#92A8FE"
           icon="mdi-magnify"
-          density="comfortable"
-          variant="tonal"
-          color="#717171"
         ></v-btn>
         
         <v-spacer></v-spacer>
 
         <v-btn
+          density="comfortable" variant="tonal" color="#92A8FE"
           icon="mdi-cog-outline"
-          density="comfortable"
-          variant="tonal"
-          color="#717171"
         ></v-btn>
         
         <v-btn
           class="mt-6 | mb-6"
+          density="comfortable" variant="tonal" color="#92A8FE"
           icon="mdi-account-circle-outline"
-          density="comfortable"
-          variant="tonal"
-          color="#717171"
         ></v-btn>
       </div>
     </v-navigation-drawer>
 
     <v-app-bar 
       v-if="showTopNav"
-      flat color="#F4F8FD" class="border-b"
+      flat
     >
       <v-img
         class="ml-4"
-        src="@/assets/main-logo.svg"
-        max-height="40"
-        max-width="70"
+        src="@/assets/main-logo-text.svg"
+        max-height="24"
+        max-width="48"
         contain
         @click="clickNavBtn('/home')" 
         style="cursor: pointer;"
@@ -60,42 +54,45 @@
 
       <v-spacer></v-spacer>
 
-            <v-btn
-              class="mr-2"
-              variant="text"
-              append-icon="mdi-chevron-down"
-              size="large"
-              @click="clickNavBtn('/about')"
-            >        About
+      <v-btn 
+        class="mr-2 | nav-text-btn" 
+        variant="text"
+        append-icon="mdi-chevron-down"
+        @click="clickNavBtn('/about')"
+      >
+        About
       </v-btn>
-            <v-btn
-              class="mr-2"
-              variant="text"
-              append-icon="mdi-chevron-down"
-              size="large"
-              @click="clickNavBtn('/team')"
-            >        Team
+      <v-btn 
+        class="mr-2 | nav-text-btn" 
+        variant="text"
+        append-icon="mdi-chevron-down"
+        @click="clickNavBtn('/team')"
+      >
+        Team
       </v-btn>
-            <v-btn
-              class="mr-2"
-              variant="text"
-              append-icon="mdi-chevron-down"
-              size="large"
-              @click="clickNavBtn('/howtouse')"
-            >        How to Use
+      <v-btn 
+        class="mr-2 | nav-text-btn" 
+        variant="text"
+        append-icon="mdi-chevron-down"
+        @click="clickNavBtn('/howtouse')"
+      >
+        How to Use
       </v-btn>
-            <v-btn
-              class="mr-2"
-              variant="text"
-              append-icon="mdi-chevron-down"
-              size="large"
-              @click="clickNavBtn('/archive')"
-            >        Archive
+      <v-btn 
+        class="mr-2 | nav-text-btn" 
+        variant="text"
+        append-icon="mdi-chevron-down"
+        @click="clickNavBtn('/archive')"
+      >
+        Archive
       </v-btn>
     </v-app-bar>
 
     <v-main>
-      <RouterView />
+      <RouterView 
+        @hide-side-appbar="hideSideNav"
+        @hide-top-appbar="hideTopNav"
+      />
     </v-main>
   </v-app>
 
@@ -137,7 +134,7 @@ const router = useRouter();
 const route = useRoute(); // (추가) 현재 라우트 정보 가져오기
 
 // 네비게이션 및 앱 바 표시 상태
-const showSideNav = ref(false);
+const showSideNav = ref(true);
 const showTopNav = ref(true);
 
 // 템플릿의 v-model="dialog.dialogActive"와 일치하도록 'isActive'를 'dialogActive'로 수정
@@ -160,13 +157,11 @@ onUnmounted(() => {
 
 // (추가) 라우트 변경 감지
 watch(
-  () => route.fullPath,
-  (newPath) => {
-    // meta 필드를 확인하여 사이드바 표시 여부 결정
-    showSideNav.value = !route.meta.hideSidebar && newPath !== '/home' && newPath !== '/';
+  () => route.path, // 현재 경로(path)를 감시합니다.
+  (newPath, oldPath) => {
+    showSideNav.value = true;
     showTopNav.value = true;
-  },
-  { immediate: true } // 컴포넌트 마운트 시 즉시 실행
+  }
 );
 
 
@@ -176,24 +171,29 @@ watch(
 function clickNavBtn(path) {
   router.push(path);
 }
+
+// 좌측 사이드바 숨기기
+// (이 함수들은 이제 특정 페이지에서만 숨기는 용도로 정상 동작합니다)
+function hideSideNav() {
+  showSideNav.value = false;
+}
+
+// 상단 앱 바 숨기기
+function hideTopNav() {
+  showTopNav.value = false;
+}
+
+
 </script>
 
 <style scoped>
 
-.margin-top-16 {
-  margin-top: 16px;
-}
-
-.padding-32 {
-  padding: 32px;
-}
-
-.padding-top-56 {
-  padding-top: 56px;
-}
-
-.padding-bottom-16 {
-  padding-bottom: 16px;
+:deep(.nav-text-btn .v-btn__content) {
+  font-family: "Actor";
+  font-weight: 400;
+  font-size: 14px;
+  color: #000000;
+  text-transform: none
 }
 
 </style>
