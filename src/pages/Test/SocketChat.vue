@@ -63,7 +63,7 @@ const currentRole = ref('A'); // 현재 내가 연기하는 역할 (A 또는 B)
 const chatArea = ref(null);
 
 // 랜덤 세션 ID 생성 (테스트용)
-const sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+const sessionId = 's1'; // 테스트용 하드코딩 (s1, s2, s3... 로 변경 가능)
 const WS_URL = `ws://localhost:9571/v1/session/chat?sid=${sessionId}`;
 
 const connectWebSocket = () => {
