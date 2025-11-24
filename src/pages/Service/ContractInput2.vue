@@ -40,6 +40,7 @@
                     color="#174DC9"
                     hide-details="auto"
                     class="custom-input"
+                    @input="formatPhoneNumber"
                   ></v-text-field>
                 </div>
               </v-col>
@@ -56,6 +57,7 @@
                     color="#174DC9"
                     hide-details="auto"
                     class="custom-input"
+                    @input="formatBusinessNumber"
                   ></v-text-field>
                 </div>
               </v-col>
@@ -94,8 +96,8 @@
         </section>
       </v-col>
 
-      <v-col cols="12" class="text-center mt-12 d-flex justify-center ga-4">
-        <footer>
+      <v-col cols="12" class="text-center mt-12 d-flex justify-center">
+        <footer class="d-flex ga-4">
           <v-btn
             color="#174DC9"
             rounded="xl"
@@ -138,7 +140,7 @@
 import { ref, reactive, computed, onMounted, defineEmits } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-const emit = defineEmits(['hide-side-appbar']);
+const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 const route = useRoute();
 const router = useRouter();
 
@@ -164,8 +166,55 @@ const roleLabel = computed(() => {
 // ----- 라이프 사이클 (Lifecycle Hooks) ----- //
 onMounted(() => {
   currentRole.value = route.query.role || 'performer';
-  emit('hide-side-appbar');
+  emit('set-side-nav', false);
+  emit('set-top-nav', true);
 });
+
+// ----- 포맷팅 함수 (Formatting Functions) ----- //
+const formatPhoneNumber = () => {
+  let value = formData.contact.replace(/\D/g, '');
+  const len = value.length;
+  let result = '';
+
+  if (value.startsWith('02')) {
+    value = value.slice(0, 10);
+    if (len < 3) {
+      result = value;
+    } else if (len < 6) {
+      result = `${value.slice(0, 2)}-${value.slice(2)}`;
+    } else if (len < 10) {
+      result = `${value.slice(0, 2)}-${value.slice(2, 5)}-${value.slice(5)}`;
+    } else {
+      result = `${value.slice(0, 2)}-${value.slice(2, 6)}-${value.slice(6)}`;
+    }
+  } else {
+    value = value.slice(0, 11);
+    if (len < 4) {
+      result = value;
+    } else if (len < 8) {
+      result = `${value.slice(0, 3)}-${value.slice(3)}`;
+    } else {
+      result = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7)}`;
+    }
+  }
+  formData.contact = result;
+};
+
+const formatBusinessNumber = () => {
+  let value = formData.businessNumber.replace(/\D/g, '');
+  value = value.slice(0, 10);
+  const len = value.length;
+  let result = '';
+  
+  if (len < 4) {
+    result = value;
+  } else if (len < 6) {
+    result = `${value.slice(0, 3)}-${value.slice(3)}`;
+  } else {
+    result = `${value.slice(0, 3)}-${value.slice(3, 5)}-${value.slice(5)}`;
+  }
+  formData.businessNumber = result;
+};
 
 // ----- 함수 정의 (Methods) ----- //
 const goToNextStep = () => {

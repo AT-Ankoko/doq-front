@@ -7,7 +7,7 @@
 import { onMounted, onUnmounted, ref, watch, defineEmits } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
-const emit = defineEmits(['hide-top-appbar']);
+const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 const router = useRouter();
 const route = useRoute();
 
@@ -15,7 +15,8 @@ const route = useRoute();
 
 // ----- 라이프 사이클 (Lifecycle Hooks) ----- //
 onMounted(() => {
-  emit('hide-top-appbar');
+  emit('set-top-nav', false);
+  emit('set-side-nav', true);
 });
 
 onUnmounted(() => {

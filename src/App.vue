@@ -90,8 +90,8 @@
 
     <v-main>
       <RouterView 
-        @hide-side-appbar="hideSideNav"
-        @hide-top-appbar="hideTopNav"
+        @set-side-nav="setSideNav"
+        @set-top-nav="setTopNav"
       />
     </v-main>
   </v-app>
@@ -156,12 +156,12 @@ const clickNavBtn = (path) => {
   router.push(path);
 }
 
-const hideSideNav = () => {
-  showSideNav.value = false;
+const setSideNav = (value) => {
+  showSideNav.value = value;
 }
 
-const hideTopNav = () => {
-  showTopNav.value = false;
+const setTopNav = (value) => {
+  showTopNav.value = value;
 }
 </script>
 

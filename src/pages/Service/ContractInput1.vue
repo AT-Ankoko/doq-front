@@ -82,12 +82,13 @@
 import { onMounted, defineEmits } from 'vue';
 import { useRouter } from 'vue-router';
 
-const emit = defineEmits(['hide-side-appbar']);
+const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 const router = useRouter();
 
 // ----- 라이프 사이클 (Lifecycle Hooks) ----- //
 onMounted(() => {
-  emit('hide-side-appbar');
+  emit('set-side-nav', false);
+  emit('set-top-nav', true);
 });
 
 // ----- 함수 정의 (Methods) ----- //
