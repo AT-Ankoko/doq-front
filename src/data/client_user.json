@@ -1,0 +1,14 @@
+{
+  "userId": "demo-client-1",
+  "userName": "주식회사 도큐사인 (갑)",
+  "userEmail": "client.doqusign@example.com",
+  "profileImageUrl": "/assets/client-profile.png",
+  "role": "client",
+  "contact": "02-1234-5678",
+  "businessNumber": "123-45-67890",
+  "contractDate": "2025-11-29",
+  "address": "서울특별시 강남구 테헤란로 123",
+  "contractIds": [
+    "demo-contract-001"
+  ]
+}
