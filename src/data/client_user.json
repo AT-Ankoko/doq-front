@@ -1,8 +1,6 @@
 {
   "userId": "demo-client-1",
   "userName": "주식회사 도큐사인 (갑)",
-  "userEmail": "client.doqusign@example.com",
-  "profileImageUrl": "/assets/client-profile.png",
   "role": "client",
   "contact": "02-1234-5678",
   "businessNumber": "123-45-67890",

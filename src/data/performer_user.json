@@ -1,8 +1,6 @@
 {
   "userId": "demo-performer-1",
   "userName": "박실무 변호사 (을)",
-  "userEmail": "performer.lawyer@example.com",
-  "profileImageUrl": "/assets/performer-profile.png",
   "role": "performer",
   "contact": "010-9876-5432",
   "businessNumber": null,
