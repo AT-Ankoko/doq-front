@@ -3,10 +3,12 @@
     <v-card class="w-100 h-100 d-flex flex-column" rounded="xl">
       <v-toolbar color="white" density="compact" class="px-4 border-b">
         <v-btn-toggle v-model="currentRole" mandatory density="compact" color="primary">
-          <v-btn value="A">User A</v-btn>
-          <v-btn value="B">User B</v-btn>
+          <v-btn value="갑">User A (갑)</v-btn>
+          <v-btn value="을">User B (을)</v-btn>
         </v-btn-toggle>
+        
         <v-spacer></v-spacer>
+        
         <v-chip size="small" :color="isConnected ? 'green' : 'red'" class="font-weight-bold">
           {{ isConnected ? '연결됨' : '연결 끊김' }}
         </v-chip>
@@ -53,20 +55,29 @@
 </template>
 
 <script setup>
-// ----- 선언부 (Imports, Props, Emits, Router) ----- //
-import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 
-// ----- 상태 변수 (State & Refs) ----- //
+// ----- 상태 변수 ----- //
 const socket = ref(null);
 const isConnected = ref(false);
 const messages = ref([]);
 const inputText = ref('');
-const currentRole = ref('A');
 const chatArea = ref(null);
-const sessionId = 's1';
+
+// [수정] 초기 역할을 '갑'으로 설정 (버튼 value와 일치)
+const currentRole = ref('갑');
+
+// [수정] 요청하신 세션 ID 및 계약 정보 설정
+const sessionId = 'test123';
 const WS_URL = `ws://localhost:9571/v1/session/chat?sid=${sessionId}`;
 
-// ----- 라이프 사이클 (Lifecycle Hooks) ----- //
+// 고정된 사용자 정보 (실제 앱에서는 로그인 정보 등에서 가져옴)
+const userInfo = {
+  name: "김철수",
+  contractDate: "2025-12-01"
+};
+
+// ----- 라이프 사이클 ----- //
 onMounted(() => {
   connectWebSocket();
 });
@@ -75,7 +86,7 @@ onUnmounted(() => {
   if (socket.value) socket.value.close();
 });
 
-// ----- 함수 정의 (Methods) ----- //
+// ----- 함수 정의 ----- //
 const connectWebSocket = () => {
   socket.value = new WebSocket(WS_URL);
 
@@ -89,6 +100,7 @@ const connectWebSocket = () => {
       const data = JSON.parse(event.data);
       console.log('Received:', data);
       
+      // 서버 응답 처리
       if (data.hd?.event === 'llm.response') {
         messages.value.push({
           role: 'llm',
@@ -119,23 +131,33 @@ const connectWebSocket = () => {
 const sendMessage = () => {
   if (!inputText.value.trim() || !isConnected.value) return;
 
+  // 화면에 내 메시지 표시
   messages.value.push({
     role: currentRole.value,
     text: inputText.value,
     timestamp: new Date()
   });
 
+  // [수정] 요청하신 JSON 패킷 구조에 맞춰 Payload 구성
   const payload = {
     hd: {
+      sid: sessionId,                     // "test123"
       event: "llm.invoke",
-      role: currentRole.value
+      role: currentRole.value,            // "갑" (또는 "을")
+      asker: userInfo.name,               // "김철수"
+      user_name: userInfo.name,           // "김철수"
+      user_role: currentRole.value,       // "갑"
+      contract_date: userInfo.contractDate // "2025-12-01"
     },
     bd: {
       text: inputText.value
     }
   };
 
+  // 웹소켓 전송
   socket.value.send(JSON.stringify(payload));
+  
+  // 입력창 초기화 및 스크롤
   inputText.value = '';
   scrollToBottom();
 };
