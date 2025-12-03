@@ -62,10 +62,12 @@
 // ----- 선언부 (Imports, Props, Emits, Router) ----- //
 import { reactive, onMounted, defineEmits } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useStorageWithExpiry } from '@/common/useStorageWithExpiry';
 
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 const router = useRouter();
 const route = useRoute();
+const { setItem, getItem } = useStorageWithExpiry();
 
 // ----- 상태 변수 (State & Refs) ----- //
 const currentRole = route.query.role || 'client';
@@ -105,7 +107,14 @@ const selectType = (type) => {
     return;
   }
   
-  console.log(`Selected Project Type: ${type.id}`);
+  // 만료 시간이 있는 스토리지에서 전체 계약 데이터 불러오기
+  const allData = getItem('contractData') || {};
+  // projectType 업데이트
+  allData.projectType = type.id;
+  // 5분 (300,000ms) TTL로 데이터 다시 저장
+  setItem('contractData', allData, 300000);
+
+  console.log(`Saved Project Type: ${type.id}`);
   
   router.push({
     path: '/contract-chat',

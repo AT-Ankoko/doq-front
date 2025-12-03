@@ -137,12 +137,15 @@
 
 <script setup>
 // ----- 선언부 (Imports, Props, Emits, Router) ----- //
-import { ref, reactive, computed, onMounted, defineEmits } from 'vue';
+import { ref, reactive, computed, onMounted, defineEmits, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+
+import { useStorageWithExpiry } from '@/common/useStorageWithExpiry';
 
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 const route = useRoute();
 const router = useRouter();
+const { setItem, getItem } = useStorageWithExpiry();
 
 // ----- 상태 변수 (State & Refs) ----- //
 const currentRole = ref(''); 
@@ -168,7 +171,23 @@ onMounted(() => {
   currentRole.value = route.query.role || 'performer';
   emit('set-side-nav', false);
   emit('set-top-nav', true);
+
+  // 만료 시간이 있는 스토리지에서 전체 계약 데이터 불러오기
+  const savedData = getItem('contractData');
+  
+  // 현재 역할에 맞는 데이터가 있다면 formData에 채우기
+  if (savedData && savedData[currentRole.value]) {
+    Object.assign(formData, savedData[currentRole.value]);
+  }
 });
+
+// formData 변경 시 localStorage에 5분 만료시간으로 자동 저장
+watch(formData, (newData) => {
+  const allData = getItem('contractData') || {};
+  allData[currentRole.value] = newData;
+  // 5분 (300,000ms) TTL로 데이터 저장
+  setItem('contractData', allData, 300000); 
+}, { deep: true });
 
 // ----- 포맷팅 함수 (Formatting Functions) ----- //
 const formatPhoneNumber = () => {
