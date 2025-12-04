@@ -65,19 +65,21 @@ const inputText = ref('');
 const chatArea = ref(null);
 const currentRole = ref('갑');
 
-const sessionId = 'test0987';
+const sessionId = 'test12345678';
 const WS_URL = `ws://localhost:9571/v1/session/chat?sid=${sessionId}`;
 
 // [수정] 역할별 사용자 정보 매핑
-// '을'을 선택하면 자동으로 '이영희' 정보가 전송됩니다.
+// '갑' = client(의뢰인), '을' = provider(용역자)
 const userProfiles = {
   '갑': {
     name: "김철수",
-    contractDate: "2025-12-01"
+    role: "client",
+    contractDate: "2025-12-04"
   },
   '을': {
     name: "이영희",
-    contractDate: "2025-12-01"
+    role: "provider",
+    contractDate: "2025-12-04"
   }
 };
 
@@ -141,19 +143,16 @@ const sendMessage = () => {
     timestamp: new Date()
   });
 
-  // [수정] 현재 선택된 역할(currentRole)에 맞는 프로필 가져오기
+  // 현재 선택된 역할(currentRole)에 맞는 프로필 가져오기
   const currentUser = userProfiles[currentRole.value];
 
-  // Payload 구성
+  // Payload 구성 - 가이드 기준
   const payload = {
     hd: {
       sid: sessionId,
       event: "llm.invoke",
-      role: currentRole.value,            // "갑" or "을"
-      asker: currentUser.name,            // "김철수" or "이영희"
-      user_name: currentUser.name,        // "김철수" or "이영희"
-      user_role: currentRole.value,       // "갑" or "을"
-      contract_date: currentUser.contractDate
+      role: currentUser.role,              // "client" or "provider"
+      user_name: currentUser.name          // "김철수" or "이영희"
     },
     bd: {
       text: inputText.value
