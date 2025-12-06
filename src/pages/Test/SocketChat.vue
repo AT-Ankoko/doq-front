@@ -126,9 +126,11 @@ const chatArea = ref(null);
 const currentRole = ref('갑');
 const contractDraft = ref('');
 const currentStep = ref('');
+const sessionId = ref('');
+const isLoading = ref(false);
 
-const sessionId = 'test12345678';
-const WS_URL = `ws://localhost:9571/v1/session/chat?sid=${sessionId}`;
+const API_URL = 'http://localhost:9571/v1/session/connect';
+const WS_BASE_URL = 'ws://localhost:9571/v1/session/chat';
 
 // 단계별 라벨 매핑
 const stepLabels = {
@@ -150,18 +152,18 @@ const userProfiles = {
   '갑': {
     name: "김철수",
     role: "client",
-    contractDate: "2025-12-04"
+    contractDate: "2025-12-07"
   },
   '을': {
     name: "이영희",
     role: "provider",
-    contractDate: "2025-12-04"
+    contractDate: "2025-12-07"
   }
 };
 
 // ----- 라이프 사이클 ----- //
 onMounted(() => {
-  connectWebSocket();
+  initializeSession();
 });
 
 onUnmounted(() => {
@@ -169,18 +171,72 @@ onUnmounted(() => {
 });
 
 // ----- 함수 정의 ----- //
+
+/**
+ * REST API를 통해 세션 생성
+ * POST /v1/session/connect
+ * 요청: userId, client_name, provider_name, contract_date
+ * 응답: sid
+ */
+const initializeSession = async () => {
+  isLoading.value = true;
+  try {
+    const payload = {
+      userId: 'user123',
+      client_name: userProfiles['갑'].name,
+      provider_name: userProfiles['을'].name,
+      contract_date: userProfiles['갑'].contractDate
+    };
+
+    console.log('세션 생성 요청:', payload);
+
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 오류: ${response.status}`);
+    }
+
+    const data = await response.json();
+    sessionId.value = data.sid;
+
+    console.log('세션 ID 획득:', sessionId.value);
+
+    // 세션 ID를 받은 후 WebSocket 연결
+    connectWebSocket();
+  } catch (error) {
+    console.error('세션 생성 실패:', error);
+    alert(`세션 생성 실패: ${error.message}`);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const connectWebSocket = () => {
-  socket.value = new WebSocket(WS_URL);
+  if (!sessionId.value) {
+    console.error('sessionId가 없습니다');
+    return;
+  }
+
+  const wsUrl = `${WS_BASE_URL}?sid=${sessionId.value}`;
+  console.log('WebSocket 연결 시도:', wsUrl);
+
+  socket.value = new WebSocket(wsUrl);
 
   socket.value.onopen = () => {
-    console.log('WebSocket Connected:', sessionId);
+    console.log('WebSocket 연결 성공:', sessionId.value);
     isConnected.value = true;
   };
 
   socket.value.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
-      console.log('Received:', data);
+      console.log('수신 메시지:', data);
       
       if (data.hd?.event === 'llm.response') {
         // 메시지 추가
@@ -202,42 +258,50 @@ const connectWebSocket = () => {
 
         scrollToBottom();
       }
-      else if (data.hd?.event === 'llm.state') {
-        console.log('State Update:', data.bd?.state?.msg);
-      }
-
     } catch (e) {
-      console.error('JSON Parse Error:', e);
+      console.error('JSON 파싱 오류:', e);
     }
   };
 
   socket.value.onclose = () => {
-    console.log('WebSocket Disconnected');
+    console.log('WebSocket 연결 종료');
     isConnected.value = false;
   };
 
   socket.value.onerror = (error) => {
-    console.error('WebSocket Error:', error);
+    console.error('WebSocket 오류:', error);
+    alert('WebSocket 연결 오류가 발생했습니다');
   };
 };
 
 const sendMessage = () => {
-  if (!inputText.value.trim() || !isConnected.value) return;
+  if (!inputText.value.trim() || !isConnected.value) {
+    console.warn('메시지 전송 조건 불만족:', {
+      inputText: inputText.value.trim(),
+      isConnected: isConnected.value
+    });
+    return;
+  }
+
+  // 현재 선택된 역할(currentRole)에 맞는 프로필 가져오기
+  const currentUser = userProfiles[currentRole.value];
+  
+  if (!currentUser) {
+    console.error('사용자 프로필을 찾을 수 없습니다:', currentRole.value);
+    return;
+  }
 
   // 화면 표시용 메시지 추가
   messages.value.push({
-    role: currentRole.value,
+    role: currentUser.name,
     text: inputText.value,
     timestamp: new Date()
   });
 
-  // 현재 선택된 역할(currentRole)에 맞는 프로필 가져오기
-  const currentUser = userProfiles[currentRole.value];
-
   // Payload 구성 - 가이드 기준
   const payload = {
     hd: {
-      sid: sessionId,
+      sid: sessionId.value,
       event: "llm.invoke",
       role: currentUser.role,              // "client" or "provider"
       user_name: currentUser.name          // "김철수" or "이영희"
@@ -247,18 +311,27 @@ const sendMessage = () => {
     }
   };
 
-  socket.value.send(JSON.stringify(payload));
-  inputText.value = '';
-  scrollToBottom();
+  console.log('메시지 전송:', payload);
+  try {
+    socket.value.send(JSON.stringify(payload));
+    inputText.value = '';
+    scrollToBottom();
+  } catch (error) {
+    console.error('메시지 전송 실패:', error);
+    alert('메시지 전송에 실패했습니다. WebSocket 연결을 확인하세요.');
+  }
 };
 
 const getMessageClass = (msg) => {
-  return msg.role === currentRole.value ? 'justify-end' : 'justify-start';
+  // msg.role이 사용자 이름인 경우 처리
+  const currentUserName = userProfiles[currentRole.value]?.name;
+  return msg.role === currentUserName || msg.role === currentRole.value ? 'justify-end' : 'justify-start';
 };
 
 const getBubbleColor = (role) => {
   if (role === 'llm') return 'grey-lighten-3';
-  if (role === currentRole.value) return 'primary';
+  const currentUserName = userProfiles[currentRole.value]?.name;
+  if (role === currentUserName || role === currentRole.value) return 'primary';
   return 'secondary';
 };
 
@@ -281,7 +354,7 @@ const downloadContractDraft = () => {
     const element = document.createElement('a');
     const file = new Blob([contractDraft.value], { type: 'text/plain;charset=utf-8' });
     element.href = URL.createObjectURL(file);
-    element.download = `contract_${sessionId}_${new Date().toISOString().slice(0,10)}.txt`;
+    element.download = `contract_${sessionId.value}_${new Date().toISOString().slice(0,10)}.txt`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
