@@ -106,7 +106,8 @@
             style="height: 60px; font-size: 1.1rem;"
             @click="goToNextStep"
           >
-            상대 정보 입력하기 +
+            <v-icon v-if="isOtherRoleFilled" class="mr-2">mdi-check-circle</v-icon>
+            {{ nextRoleLabel }} 정보 입력하기 +
           </v-btn>
           <v-btn
             :disabled="!isFormValid"
@@ -166,28 +167,48 @@ const roleLabel = computed(() => {
   return currentRole.value === 'client' ? '클라이언트' : '계약자';
 });
 
-// ----- 라이프 사이클 (Lifecycle Hooks) ----- //
-onMounted(() => {
-  currentRole.value = route.query.role || 'performer';
-  emit('set-side-nav', false);
-  emit('set-top-nav', true);
-
-  // 만료 시간이 있는 스토리지에서 전체 계약 데이터 불러오기
-  const savedData = getItem('contractData');
-  
-  // 현재 역할에 맞는 데이터가 있다면 formData에 채우기
-  if (savedData && savedData[currentRole.value]) {
-    Object.assign(formData, savedData[currentRole.value]);
-  }
+const nextRoleLabel = computed(() => {
+  return currentRole.value === 'client' ? '계약자' : '클라이언트';
 });
 
-// formData 변경 시 localStorage에 5분 만료시간으로 자동 저장
-watch(formData, (newData) => {
-  const allData = getItem('contractData') || {};
-  allData[currentRole.value] = newData;
-  // 5분 (300,000ms) TTL로 데이터 저장
-  setItem('contractData', allData, 300000); 
-}, { deep: true });
+const isOtherRoleFilled = computed(() => {
+  const savedData = getItem('contractData');
+  const otherRole = currentRole.value === 'client' ? 'performer' : 'client';
+  return savedData && savedData[otherRole] && savedData[otherRole].name;
+});
+
+// ----- 라이프 사이클 (Lifecycle Hooks) ----- //
+const loadDataForRole = (role) => {
+  currentRole.value = role || 'performer';
+  
+  // localStorage에서 전체 데이터 불러오기
+  const savedData = getItem('contractData');
+  
+  // 현재 역할에 해당하는 데이터가 있으면 formData에 채우기
+  if (savedData && savedData[currentRole.value]) {
+    Object.assign(formData, savedData[currentRole.value]);
+  } else {
+    // 데이터가 없으면 formData 초기화
+    Object.assign(formData, {
+      name: '',
+      contact: '',
+      businessNumber: '',
+      contractDate: new Date().toISOString().substr(0, 10),
+      address: ''
+    });
+  }
+};
+
+onMounted(() => {
+  emit('set-side-nav', false);
+  emit('set-top-nav', true);
+  loadDataForRole(route.query.role);
+});
+
+// 역할 전환 시 onMounted가 재실행되지 않으므로 route.query.role을 감시(watch)
+watch(() => route.query.role, (newRole) => {
+  loadDataForRole(newRole);
+});
 
 // ----- 포맷팅 함수 (Formatting Functions) ----- //
 const formatPhoneNumber = () => {
@@ -237,22 +258,37 @@ const formatBusinessNumber = () => {
 
 // ----- 함수 정의 (Methods) ----- //
 const goToNextStep = () => {
-  console.log('입력된 데이터:', formData);
-  // TODO: 여기서 입력한 데이터를 저장소(Pinia 등)에 저장해야 AI에게 전달 가능
+  // 1. 현재 입력한 데이터 저장 (기존 로직 유지)
+  const allData = getItem('contractData') || {};
+  allData[currentRole.value] = {
+    ...formData,
+    contact: formData.contact.replace(/-/g, ''),
+    businessNumber: formData.businessNumber.replace(/-/g, '')
+  };
+  setItem('contractData', allData, 300000);
   
+  // 2. 역할 전환 (client ↔ performer)
+  const nextRole = currentRole.value === 'client' ? 'performer' : 'client';
+  
+  // 3. 전환된 역할로 현재 페이지 재로드
   router.push({ 
-    path: '/contract-type-select',
-    query: { role: currentRole.value } 
+    path: '/contract-input2',  // 같은 페이지
+    query: { role: nextRole }
   });
 };
 
 const complete = () => {
-  const payload = {
+  // 1. 현재 데이터 저장
+  const allData = getItem('contractData') || {};
+  allData[currentRole.value] = {
     ...formData,
     contact: formData.contact.replace(/-/g, ''),
-    businessNumber: formData.businessNumber.replace(/-/g, ''),
+    businessNumber: formData.businessNumber.replace(/-/g, '')
   };
-  console.log('Form submitted:', payload);
+  setItem('contractData', allData, 300000);
+  
+  // 2. 다음 단계로 이동
+  console.log('데이터 입력 완료:', allData);
   
   router.push({ 
     path: '/contract-input3',
