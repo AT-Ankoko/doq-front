@@ -6,8 +6,8 @@
         <v-card class="w-100 h-100 d-flex flex-column" rounded="xl">
           <v-toolbar color="white" density="compact" class="px-4 border-b">
             <v-btn-toggle v-model="currentRole" mandatory density="compact" color="primary">
-              <v-btn value="갑">김철수 (갑)</v-btn>
-              <v-btn value="을">이영희 (을)</v-btn>
+              <v-btn value="갑">고예경 (갑)</v-btn>
+              <v-btn value="을">김영지 (을)</v-btn>
             </v-btn-toggle>
             
             <v-spacer></v-spacer>
@@ -70,6 +70,20 @@
             </v-chip>
           </v-toolbar>
 
+          <!-- 진행률바 -->
+          <div class="px-4 pt-3 pb-2">
+            <div class="d-flex align-center justify-between mb-2">
+              <span class="text-caption font-weight-bold">진행률</span>
+              <span class="text-caption text-grey">{{ progressPercentage }}%</span>
+            </div>
+            <v-progress-linear 
+              :value="progressPercentage" 
+              color="primary" 
+              height="8"
+              rounded
+            ></v-progress-linear>
+          </div>
+
           <v-card-text class="flex-grow-1 overflow-y-auto pa-6">
             <div v-if="contractDraft" class="contract-content">
               <div style="white-space: pre-wrap; font-family: 'Courier New', monospace; line-height: 1.6;">
@@ -128,6 +142,8 @@ const contractDraft = ref('');
 const currentStep = ref('');
 const sessionId = ref('');
 const isLoading = ref(false);
+const progressPercentage = ref(0);
+const progressStatus = ref('대기 중...');
 
 const API_URL = 'http://localhost:9571/v1/session/connect';
 const WS_BASE_URL = 'ws://localhost:9571/v1/session/chat';
@@ -150,12 +166,12 @@ const stepLabels = {
 // '갑' = client(의뢰인), '을' = provider(용역자)
 const userProfiles = {
   '갑': {
-    name: "김철수",
+    name: "고예경",
     role: "client",
     contractDate: "2025-12-07"
   },
   '을': {
-    name: "이영희",
+    name: "김영지",
     role: "provider",
     contractDate: "2025-12-07"
   }
@@ -256,6 +272,12 @@ const connectWebSocket = () => {
           currentStep.value = data.hd.step;
         }
 
+        // 진행률 업데이트
+        if (data.bd?.progress_percentage !== undefined) {
+          progressPercentage.value = data.bd.progress_percentage;
+          console.log('진행률 업데이트:', progressPercentage.value);
+        }
+
         scrollToBottom();
       }
     } catch (e) {
@@ -304,7 +326,7 @@ const sendMessage = () => {
       sid: sessionId.value,
       event: "llm.invoke",
       role: currentUser.role,              // "client" or "provider"
-      user_name: currentUser.name          // "김철수" or "이영희"
+      user_name: currentUser.name          // "고예경" or "김영지"
     },
     bd: {
       text: inputText.value
