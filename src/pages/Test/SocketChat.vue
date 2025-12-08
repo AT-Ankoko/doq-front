@@ -6,7 +6,7 @@
   >
     <v-row
       class="h-100"
-      style="flex: 1 1 auto; height: 100%; min-height: 0; margin: 0; gap: 16px; overflow: hidden; flex-wrap: nowrap;"
+      style="flex: 1 1 auto; height: 100%; min-height: 0; margin: 0; gap: 12px; overflow: hidden; flex-wrap: nowrap;"
     >
       <!-- 왼쪽: 채팅 영역 -->
       <v-col
@@ -129,6 +129,77 @@
             ></v-progress-linear>
           </div>
 
+          <!-- Meta 정보 패널 -->
+          <v-expand-transition>
+            <div v-if="metaInfo && showMetaPanel" class="px-4 pb-2">
+              <v-card variant="tonal" color="grey-lighten-3" class="pa-3" rounded="lg">
+                <div class="d-flex align-center justify-between mb-2">
+                  <span class="text-caption font-weight-bold">
+                    <v-icon size="14" class="mr-1">mdi-information-outline</v-icon>
+                    AI 분석 정보
+                  </span>
+                  <v-btn icon="mdi-close" size="x-small" variant="text" @click="showMetaPanel = false"></v-btn>
+                </div>
+                
+                <!-- step_advance 정보 -->
+                <div v-if="metaInfo.step_advance" class="mb-2">
+                  <div class="d-flex align-center mb-1">
+                    <v-icon 
+                      size="14" 
+                      :color="metaInfo.step_advance.advance ? 'success' : 'warning'"
+                      class="mr-1"
+                    >
+                      {{ metaInfo.step_advance.advance ? 'mdi-check-circle' : 'mdi-clock-outline' }}
+                    </v-icon>
+                    <span class="text-caption font-weight-medium">
+                      {{ metaInfo.step_advance.advance ? '단계 진행됨' : '단계 대기 중' }}
+                    </span>
+                    <v-chip 
+                      v-if="metaInfo.step_advance.source" 
+                      size="x-small" 
+                      class="ml-2"
+                      color="blue-grey"
+                      variant="flat"
+                    >
+                      {{ metaInfo.step_advance.source }}
+                    </v-chip>
+                  </div>
+                  <p v-if="metaInfo.step_advance.reason" class="text-caption text-grey-darken-1 ma-0" style="line-height: 1.4;">
+                    {{ metaInfo.step_advance.reason }}
+                  </p>
+                </div>
+
+                <!-- question_answered 정보 -->
+                <div v-if="metaInfo.question_answered !== undefined" class="d-flex align-center">
+                  <v-icon 
+                    size="14" 
+                    :color="metaInfo.question_answered ? 'success' : 'grey'"
+                    class="mr-1"
+                  >
+                    {{ metaInfo.question_answered ? 'mdi-check' : 'mdi-help-circle-outline' }}
+                  </v-icon>
+                  <span class="text-caption">
+                    질문 응답: {{ metaInfo.question_answered ? '완료' : '미완료' }}
+                  </span>
+                </div>
+              </v-card>
+            </div>
+          </v-expand-transition>
+
+          <!-- Meta 패널 토글 버튼 (닫혀있을 때) -->
+          <div v-if="metaInfo && !showMetaPanel" class="px-4 pb-2">
+            <v-btn 
+              size="x-small" 
+              variant="text" 
+              color="grey" 
+              @click="showMetaPanel = true"
+              class="text-caption"
+            >
+              <v-icon size="14" class="mr-1">mdi-information-outline</v-icon>
+              AI 분석 정보 보기
+            </v-btn>
+          </div>
+
           <!-- 계약서 내용 스크롤 영역 -->
           <v-card-text
             class="flex-grow-1 overflow-y-auto pa-6"
@@ -197,6 +268,8 @@ const sessionId = ref('');
 const isLoading = ref(false);
 const progressPercentage = ref(0);
 const progressStatus = ref('대기 중...');
+const metaInfo = ref(null);
+const showMetaPanel = ref(true);
 
 // markdown 렌더링 (경량 변환)
 const escapeHtml = (str = '') =>
@@ -363,6 +436,12 @@ const connectWebSocket = () => {
         if (data.bd?.progress_percentage !== undefined) {
           progressPercentage.value = data.bd.progress_percentage;
           console.log('진행률 업데이트:', progressPercentage.value);
+        }
+
+        // meta 정보 업데이트
+        if (data.bd?.meta) {
+          metaInfo.value = data.bd.meta;
+          console.log('메타 정보 업데이트:', metaInfo.value);
         }
 
         scrollToBottom();
