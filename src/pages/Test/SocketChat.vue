@@ -1,261 +1,353 @@
 <template>
   <v-container
-    class="pa-1"
+    class="pa-4"
     fluid
-    style="height: 100vh; display: flex; box-sizing: border-box; overflow: hidden;"
+    style="height: 100vh; display: flex; box-sizing: border-box; overflow: hidden; background-color: #F4F4F4;"
   >
     <v-row
+      tag="main"
       class="h-100"
-      style="flex: 1 1 auto; height: 100%; min-height: 0; margin: 0; gap: 12px; overflow: hidden; flex-wrap: nowrap;"
+      style="
+        flex: 1 1 auto;
+        height: 100%;
+        min-height: 0;
+        margin: 0;
+        overflow: hidden;
+        flex-wrap: nowrap;
+      "
     >
-      <!-- 왼쪽: 채팅 영역 -->
-      <v-col
-        cols="12"
-        md="6"
-        class="d-flex flex-column"
-        style="min-height: 0; height: 100%; overflow: hidden;"
-      >
-        <v-card
-          class="w-100 h-100 d-flex flex-column"
-          rounded="xl"
-          style="min-height: 0; overflow: hidden;"
-        >
-          <v-toolbar color="white" density="compact" class="px-4 border-b">
-            <span class="font-weight-bold">채팅</span>
-            <v-spacer></v-spacer>
-            <v-chip size="small" :color="isConnected ? 'green' : 'red'" class="font-weight-bold">
-              {{ isConnected ? '연결됨' : '연결 끊김' }}
-            </v-chip>
-          </v-toolbar>
-
-          <!-- 채팅 내용 스크롤 영역 -->
-          <v-card-text
-            ref="chatArea"
-            class="flex-grow-1 overflow-y-auto bg-grey-lighten-4"
-            style="min-height: 0;"
-          >
-            <article
-              v-for="(msg, index) in messages"
-              :key="index"
-              class="d-flex mb-4"
-              :class="getMessageClass(msg)"
-            >
-              <v-avatar v-if="msg.role === 'llm'" color="teal" size="32" class="mr-2">
-                AI
-              </v-avatar>
-
-              <div
-                class="d-flex flex-column"
-                :class="msg.role === currentRole ? 'align-end' : 'align-start'"
+                  <v-col
+                    cols="12"
+                    md="6"
+                    class="d-flex flex-column pa-0"
+                    style="min-height: 0; height: 100%; overflow: hidden"
+                  >              <section
+                aria-label="AI 채팅 인터페이스"
+                class="d-flex flex-column w-100 h-100 bg-white rounded-xl border"
+                style="overflow: hidden"
               >
-                <span class="text-caption text-grey mb-1 px-1">{{ msg.role }}</span>
-
-                <v-chip
-                  :color="getBubbleColor(msg.role)"
-                  class="px-4 py-2 h-auto"
-                  style="white-space: pre-wrap; max-width: 300px;"
-                  label
+                <header
+                  class="px-6 py-4 border-b bg-white d-flex align-center flex-shrink-0"
                 >
-                  {{ msg.text }}
-                </v-chip>
-              </div>
-            </article>
-          </v-card-text>
-
-          <!-- 입력 영역(높이 고정) -->
-          <v-card-actions class="pa-4 bg-white">
-            <div class="d-flex flex-column w-100" style="gap: 8px;">
-              <div class="d-flex align-center" style="gap: 8px;">
-                <v-btn-toggle v-model="currentRole" mandatory density="compact" color="primary">
-                  <v-btn value="갑">고예경 (갑)</v-btn>
-                  <v-btn value="을">김영지 (을)</v-btn>
-                </v-btn-toggle>
-                <v-chip size="small" :color="isConnected ? 'green' : 'red'" class="font-weight-bold">
-                  {{ isConnected ? '연결됨' : '연결 끊김' }}
-                </v-chip>
-              </div>
-              <v-text-field
-                v-model="inputText"
-                placeholder="메시지를 입력하세요..."
-                variant="outlined"
-                hide-details
-                density="compact"
-                rounded="pill"
-                @keyup.enter="sendMessage"
+                  <v-btn-toggle
+                    v-model="currentRole"
+                    mandatory
+                    density="compact"
+                    color="primary"
+                    variant="flat"
+                    class="rounded-pill border"
+                    divided
+                  >
+                    <v-btn value="갑" class="px-4 font-weight-bold" size="small"
+                      >고예경 (갑)</v-btn
+                    >
+                    <v-btn value="을" class="px-4 font-weight-bold" size="small"
+                      >김영지 (을)</v-btn
+                    >
+                  </v-btn-toggle>
+      
+                  <v-spacer></v-spacer>
+      
+                  <v-chip
+                    size="small"
+                    :color="isConnected ? 'grey-lighten-2' : 'red-lighten-4'"
+                    :text-color="isConnected ? 'grey-darken-3' : 'red'"
+                    variant="flat"
+                    class="font-weight-bold"
+                  >
+                    <v-icon
+                      start
+                      size="small"
+                      :color="isConnected ? 'green' : 'red'"
+                      >mdi-circle-medium</v-icon
+                    >
+                    {{ isConnected ? '연결됨' : '연결 끊김' }}
+                  </v-chip>
+                </header>
+      
+                <div
+                  ref="chatArea"
+                  role="log"
+                  aria-live="polite"
+                  class="flex-grow-1 overflow-y-auto bg-white px-6 py-4"
+                  style="min-height: 0"
+                >
+                  <div
+                    v-if="messages.length === 0"
+                    class="d-flex justify-center mt-10"
+                  >
+                    <span class="text-grey-lighten-1 text-caption"
+                      >대화를 시작해보세요.</span
+                    >
+                  </div>
+      
+                              <template v-for="(msg, index) in messages" :key="index">
+                                <article
+                                  v-if="msg.role === 'llm'"
+                                  class="d-flex flex-column align-start mb-6"
+                                >
+                                  <div class="d-flex align-center mb-1">
+                                    <span
+                                      class="font-weight-bold text-caption text-grey-darken-2 pl-1"
+                                      >AI DoQ</span
+                                    >
+                                  </div>
+                                  <div
+                                    class="pa-4 rounded-lg rounded-tl-0 text-body-2 text-grey-darken-3"
+                                    style="
+                                      max-width: 85%;
+                                      white-space: pre-wrap;
+                                      line-height: 1.6;
+                                      background-color: #E8E8E8;
+                                    "
+                                  >
+                                    {{ msg.text }}
+                                  </div>
+                                </article>
+                  
+                                <article
+                                  v-else-if="msg.role === userProfiles[currentRole].name"
+                                  class="d-flex flex-column align-end mb-4"
+                                >
+                                  <div
+                                    class="pa-3 px-4 bg-primary rounded-lg rounded-tr-0 text-white text-body-2 elevation-1"
+                                    style="
+                                      max-width: 80%;
+                                      white-space: pre-wrap;
+                                      line-height: 1.6;
+                                    "
+                                  >
+                                    {{ msg.text }}
+                                  </div>
+                                </article>
+                  
+                                <article
+                                  v-else
+                                  class="d-flex flex-column align-start mb-4"
+                                >
+                                  <div class="d-flex align-center mb-1">
+                                    <span
+                                      class="font-weight-bold text-caption text-primary pl-1"
+                                    >
+                                      {{ msg.role }}
+                                    </span>
+                                  </div>
+                                  <div
+                                    class="pa-3 px-4 rounded-lg rounded-tl-0 text-grey-darken-3 text-body-2"
+                                    style="
+                                      max-width: 85%;
+                                      white-space: pre-wrap;
+                                      line-height: 1.6;
+                                      background-color: #E3F2FD; /* 아주 연한 하늘색 */
+                                      border: 1px solid #BBDEFB;
+                                    "
+                                  >
+                                    {{ msg.text }}
+                                  </div>
+                                </article>
+                              </template>                </div>
+      
+                <footer class="pa-4 bg-white border-t flex-shrink-0">
+                  <v-text-field
+                    v-model="inputText"
+                    placeholder="메시지를 입력하세요..."
+                    variant="outlined"
+                    hide-details
+                    density="comfortable"
+                    rounded="pill"
+                    bg-color="white"
+                    color="primary"
+                    aria-label="메시지 입력"
+                    @keyup.enter="sendMessage"
+                  >
+                    <template #append-inner>
+                      <v-btn
+                        icon="mdi-send"
+                        color="primary"
+                        variant="text"
+                        density="compact"
+                        aria-label="전송"
+                        :disabled="!inputText.trim()"
+                        @click="sendMessage"
+                      ></v-btn>
+                    </template>
+                  </v-text-field>
+                </footer>
+              </section>
+            </v-col>
+      
+                              <v-col
+      
+                                cols="12"
+      
+                                md="6"
+      
+                                class="d-flex flex-column pa-0 pl-6"
+      
+                                style="min-height: 0; height: 100%; overflow: hidden"
+      
+                              >
+      
+                                <section
+      
+                                  aria-label="계약서 초안 미리보기"
+                class="d-flex flex-column w-100 h-100 bg-white rounded-xl border"
+                style="overflow: hidden"
               >
-                <template #append-inner>
-                  <v-btn icon="mdi-send" color="primary" variant="text" @click="sendMessage"></v-btn>
-                </template>
-              </v-text-field>
-            </div>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-
-      <!-- 오른쪽: 계약서 초안 영역 -->
-      <v-col
-        cols="12"
-        md="6"
-        class="d-flex flex-column"
-        style="min-height: 0; height: 100%; overflow: hidden;"
-      >
-        <v-card
-          class="w-100 h-100 d-flex flex-column"
-          rounded="xl"
-          style="min-height: 0; overflow: hidden;"
-        >
-          <v-toolbar color="white" density="compact" class="px-4 border-b">
-            <v-icon class="mr-2">mdi-file-document</v-icon>
-            <span class="font-weight-bold">계약서 초안</span>
-
-            <v-spacer></v-spacer>
-
-            <v-chip size="small" :color="currentStep ? 'blue' : 'grey'">
-              {{ getStepLabel(currentStep) }}
-            </v-chip>
-          </v-toolbar>
-
-          <!-- 진행률바 -->
-          <div class="px-4 pt-3 pb-2">
-            <div class="d-flex align-center justify-between mb-2">
-              <span class="text-caption font-weight-bold">진행률</span>
-              <span class="text-caption text-grey">{{ progressPercentage }}%</span>
-            </div>
-            <v-progress-linear
-              :value="progressPercentage"
-              color="primary"
-              height="8"
-              rounded
-            ></v-progress-linear>
-          </div>
-
-          <!-- Meta 정보 패널 -->
-          <v-expand-transition>
-            <div v-if="metaInfo && showMetaPanel" class="px-4 pb-2">
-              <v-card variant="tonal" color="grey-lighten-3" class="pa-3" rounded="lg">
-                <div class="d-flex align-center justify-between mb-2">
-                  <span class="text-caption font-weight-bold">
-                    <v-icon size="14" class="mr-1">mdi-information-outline</v-icon>
-                    AI 분석 정보
-                  </span>
-                  <v-btn icon="mdi-close" size="x-small" variant="text" @click="showMetaPanel = false"></v-btn>
-                </div>
-                
-                <!-- step_advance 정보 -->
-                <div v-if="metaInfo.step_advance" class="mb-2">
-                  <div class="d-flex align-center mb-1">
-                    <v-icon 
-                      size="14" 
-                      :color="metaInfo.step_advance.advance ? 'success' : 'warning'"
-                      class="mr-1"
-                    >
-                      {{ metaInfo.step_advance.advance ? 'mdi-check-circle' : 'mdi-clock-outline' }}
-                    </v-icon>
-                    <span class="text-caption font-weight-medium">
-                      {{ metaInfo.step_advance.advance ? '단계 진행됨' : '단계 대기 중' }}
-                    </span>
-                    <v-chip 
-                      v-if="metaInfo.step_advance.source" 
-                      size="x-small" 
-                      class="ml-2"
-                      color="blue-grey"
+                <header class="px-6 pt-5 pb-2 bg-white flex-shrink-0">
+                  <div class="d-flex align-center justify-space-between mb-4">
+                    <div class="d-flex align-center">
+                      <v-icon color="primary" class="mr-2"
+                        >mdi-file-document-outline</v-icon
+                      >
+                      <h2
+                        class="font-weight-bold text-h6 text-grey-darken-3 mb-0"
+                      >
+                        계약서 초안
+                      </h2>
+                    </div>
+                    <v-chip
+                      size="small"
                       variant="flat"
+                      color="grey-lighten-3"
+                      class="text-caption font-weight-medium"
                     >
-                      {{ metaInfo.step_advance.source }}
+                      {{ getStepLabel(currentStep) }}
                     </v-chip>
                   </div>
-                  <p v-if="metaInfo.step_advance.reason" class="text-caption text-grey-darken-1 ma-0" style="line-height: 1.4;">
-                    {{ metaInfo.step_advance.reason }}
-                  </p>
-                </div>
-
-                <!-- question_answered 정보 -->
-                <div v-if="metaInfo.question_answered !== undefined" class="d-flex align-center">
-                  <v-icon 
-                    size="14" 
-                    :color="metaInfo.question_answered ? 'success' : 'grey'"
-                    class="mr-1"
+      
+                  <div class="mb-2" aria-hidden="true">
+                    <div class="d-flex justify-space-between mb-1">
+                      <span class="text-caption font-weight-bold text-primary"
+                        >진행률</span
+                      >
+                      <span class="text-caption font-weight-bold text-primary"
+                        >{{ progressPercentage }}%</span
+                      >
+                    </div>
+                    <v-progress-linear
+                      :model-value="progressPercentage"
+                      color="primary"
+                      height="6"
+                      rounded
+                      bg-color="grey-lighten-3"
+                    ></v-progress-linear>
+                  </div>
+                </header>
+      
+                <v-divider></v-divider>
+      
+                <v-expand-transition>
+                  <aside
+                    v-if="metaInfo && showMetaPanel"
+                    class="bg-blue-grey-lighten-5 px-6 py-3 border-b flex-shrink-0"
+                    aria-label="AI 분석 정보"
                   >
-                    {{ metaInfo.question_answered ? 'mdi-check' : 'mdi-help-circle-outline' }}
-                  </v-icon>
-                  <span class="text-caption">
-                    질문 응답: {{ metaInfo.question_answered ? '완료' : '미완료' }}
-                  </span>
-                </div>
-              </v-card>
-            </div>
-          </v-expand-transition>
-
-          <!-- Meta 패널 토글 버튼 (닫혀있을 때) -->
-          <div v-if="metaInfo && !showMetaPanel" class="px-4 pb-2">
-            <v-btn 
-              size="x-small" 
-              variant="text" 
-              color="grey" 
-              @click="showMetaPanel = true"
-              class="text-caption"
-            >
-              <v-icon size="14" class="mr-1">mdi-information-outline</v-icon>
-              AI 분석 정보 보기
-            </v-btn>
-          </div>
-
-          <!-- 계약서 내용 스크롤 영역 -->
-          <v-card-text
-            class="flex-grow-1 overflow-y-auto pa-6"
-            style="min-height: 0;"
-          >
-            <div
-              v-if="contractDraft"
-              class="contract-content"
-              style="line-height: 1.6;"
-            >
-              <div v-html="renderedContract"></div>
-            </div>
-            <div v-else class="d-flex align-center justify-center h-100">
-              <v-card-text class="text-center text-grey">
-                <v-icon size="48" class="mb-2">mdi-file-document-outline</v-icon>
-                <p class="mb-0">계약서 초안이 표시됩니다.</p>
-                <p class="text-caption">메시지를 입력하면 실시간으로 업데이트됩니다.</p>
-              </v-card-text>
-            </div>
-          </v-card-text>
-
-          <v-card-actions class="pa-4 bg-white border-t">
-            <v-btn
-              color="primary"
-              variant="outlined"
-              size="small"
-              @click="copyContractDraft"
-              :disabled="!contractDraft"
-            >
-              <v-icon class="mr-2">mdi-content-copy</v-icon>
-              복사
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="success"
-              variant="outlined"
-              size="small"
-              @click="downloadContractDraft"
-              :disabled="!contractDraft"
-            >
-              <v-icon class="mr-2">mdi-download</v-icon>
-              다운로드
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
+                    <div class="d-flex align-center justify-space-between">
+                      <span class="text-caption font-weight-bold text-blue-grey">
+                        <v-icon size="small" class="mr-1">mdi-robot-outline</v-icon>
+                        AI 분석 상태
+                      </span>
+                      <v-btn
+                        icon="mdi-close"
+                        size="x-small"
+                        variant="text"
+                        density="compact"
+                        aria-label="정보 닫기"
+                        @click="showMetaPanel = false"
+                      ></v-btn>
+                    </div>
+                    <div
+                      v-if="metaInfo.step_advance"
+                      class="mt-1 d-flex align-center"
+                    >
+                      <span class="text-caption text-grey-darken-1 mr-2"
+                        >단계 진행:</span
+                      >
+                      <v-icon
+                        size="14"
+                        :color="metaInfo.step_advance.advance ? 'green' : 'orange'"
+                        class="mr-1"
+                      >
+                        {{
+                          metaInfo.step_advance.advance
+                            ? 'mdi-check-circle'
+                            : 'mdi-clock'
+                        }}
+                      </v-icon>
+                      <span class="text-caption">{{
+                        metaInfo.step_advance.reason || '-'
+                      }}</span>
+                    </div>
+                  </aside>
+                </v-expand-transition>
+      
+                <article
+                  class="flex-grow-1 overflow-y-auto pa-8 bg-white"
+                  style="min-height: 0"
+                  aria-label="계약서 내용"
+                >
+                  <div
+                    v-if="contractDraft"
+                    class="contract-content text-body-2 text-grey-darken-3"
+                    style="line-height: 1.8; font-family: 'Noto Sans KR', sans-serif"
+                  >
+                    <div v-html="renderedContract"></div>
+                  </div>
+      
+                  <div
+                    v-else
+                    class="d-flex flex-column align-center justify-center h-100 opacity-60"
+                  >
+                    <v-icon size="48" color="grey-lighten-1" class="mb-2"
+                        >mdi-file-hidden</v-icon
+                    >
+                    <p class="text-grey mb-1">작성된 계약서 내용이 없습니다.</p>
+                    <p class="text-caption text-grey-lighten-1">
+                      왼쪽 채팅을 통해 계약 내용을 논의해주세요.
+                    </p>
+                  </div>
+                </article>
+      
+                <footer
+                  class="px-6 py-4 bg-white border-t flex-shrink-0 d-flex"
+                >
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    variant="outlined"
+                    color="grey-darken-1"
+                    size="small"
+                    class="mr-2 rounded-pill px-4"
+                    :disabled="!contractDraft"
+                    @click="copyContractDraft"
+                  >
+                    <v-icon start size="small">mdi-content-copy</v-icon> 복사
+                  </v-btn>
+                  <v-btn
+                    color="primary"
+                    variant="flat"
+                    size="small"
+                    class="rounded-pill px-4"
+                    :disabled="!contractDraft"
+                    @click="downloadContractDraft"
+                  >
+                    <v-icon start size="small">mdi-download</v-icon> 다운로드
+                  </v-btn>
+                </footer>
+              </section>
+            </v-col>    </v-row>
   </v-container>
 </template>
 
 <script setup>
+// ----- 선언부 (Imports, Props, Emits, Router) ----- //
 import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
+import { MockWebSocket } from '@/services/ws/mockSocket.js';
 
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 
-// ----- 상태 변수 ----- //
+// ----- 상태 변수 (State & Refs) ----- //
+const USE_MOCK = true; // true: 가짜 서버, false: 진짜 서버
 const socket = ref(null);
 const isConnected = ref(false);
 const messages = ref([]);
@@ -271,41 +363,9 @@ const progressStatus = ref('대기 중...');
 const metaInfo = ref(null);
 const showMetaPanel = ref(true);
 
-// markdown 렌더링 (경량 변환)
-const escapeHtml = (str = '') =>
-  str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-
-const renderMarkdown = (md = '') => {
-  let html = escapeHtml(md);
-  // 헤더
-  html = html.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
-  html = html.replace(/^##\s+(.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^#\s+(.+)$/gm, '<h2>$1</h2>');
-  // 볼드/이탤릭
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-  // 리스트
-  html = html.replace(/^(?:-\s+.+\n?)+/gm, (block) => {
-    const items = block
-      .trim()
-      .split(/\n/)
-      .map((li) => li.replace(/^-\s+/, ''));
-    return `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
-  });
-  // 줄바꿈
-  html = html.replace(/\n/g, '<br />');
-  return html;
-};
-
-const renderedContract = computed(() => renderMarkdown(contractDraft.value));
-
 const API_URL = 'http://localhost:9571/v1/session/connect';
 const WS_BASE_URL = 'ws://localhost:9571/v1/session/chat';
 
-// 단계별 라벨 매핑
 const stepLabels = {
   introduction: '소개 및 초기 정보 수집',
   work_scope: '작업 범위/내용',
@@ -316,26 +376,25 @@ const stepLabels = {
   confidentiality: '기밀 유지',
   conflict_resolution: '갈등 중재',
   finalization: '최종 확인',
-  completed: '계약 완료'
+  completed: '계약 완료',
 };
 
-// 역할별 사용자 정보 매핑
-// '갑' = client(의뢰인), '을' = provider(용역자)
 const userProfiles = {
   갑: {
     name: '고예경',
     role: 'client',
-    contractDate: '2025-12-07'
+    contractDate: '2025-12-07',
   },
   을: {
     name: '김영지',
     role: 'provider',
-    contractDate: '2025-12-07'
-  }
+    contractDate: '2025-12-07',
+  },
 };
 
+const renderedContract = computed(() => renderMarkdown(contractDraft.value));
 
-// ----- 라이프 사이클 ----- //
+// ----- 라이프 사이클 (Lifecycle Hooks) ----- //
 onMounted(() => {
   initializeSession();
   emit('set-top-nav', false);
@@ -346,32 +405,55 @@ onUnmounted(() => {
   if (socket.value) socket.value.close();
 });
 
-// ----- 함수 정의 ----- //
+// ----- 함수 정의 (Methods) ----- //
+const escapeHtml = (str = '') =>
+  str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
-/**
- * REST API를 통해 세션 생성
- * POST /v1/session/connect
- * 요청: userId, client_name, provider_name, contract_date
- * 응답: sid
- */
+const renderMarkdown = (md = '') => {
+  let html = escapeHtml(md);
+  html = html.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
+  html = html.replace(/^##\s+(.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^#\s+(.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  html = html.replace(/^(?:-\s+.+\n?)+/gm, (block) => {
+    const items = block
+      .trim()
+      .split(/\n/)
+      .map((li) => li.replace(/^-\s+/, ''));
+    return `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+  });
+  html = html.replace(/\n/g, '<br />');
+  return html;
+};
+
 const initializeSession = async () => {
   isLoading.value = true;
   try {
+    if (USE_MOCK) {
+      console.log('[Mock] API 호출을 건너뛰고 가짜 세션을 초기화합니다.');
+      sessionId.value = 'mock-session-id-12345';
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      connectWebSocket();
+      return;
+    }
+
     const payload = {
       userId: 'user123',
       client_name: userProfiles['갑'].name,
       provider_name: userProfiles['을'].name,
-      contract_date: userProfiles['갑'].contractDate
+      contract_date: userProfiles['갑'].contractDate,
     };
 
     console.log('세션 생성 요청:', payload);
 
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -382,8 +464,6 @@ const initializeSession = async () => {
     sessionId.value = data.sid;
 
     console.log('세션 ID 획득:', sessionId.value);
-
-    // 세션 ID를 받은 후 WebSocket 연결
     connectWebSocket();
   } catch (error) {
     console.error('세션 생성 실패:', error);
@@ -395,14 +475,18 @@ const initializeSession = async () => {
 
 const connectWebSocket = () => {
   if (!sessionId.value) {
-    console.error('sessionId가 없습니다');
+    console.error('sessionId가 없어 WebSocket에 연결할 수 없습니다.');
     return;
   }
 
   const wsUrl = `${WS_BASE_URL}?sid=${sessionId.value}`;
   console.log('WebSocket 연결 시도:', wsUrl);
 
-  socket.value = new WebSocket(wsUrl);
+  if (USE_MOCK) {
+    socket.value = new MockWebSocket(wsUrl);
+  } else {
+    socket.value = new WebSocket(wsUrl);
+  }
 
   socket.value.onopen = () => {
     console.log('WebSocket 연결 성공:', sessionId.value);
@@ -415,32 +499,28 @@ const connectWebSocket = () => {
       console.log('수신 메시지:', data);
 
       if (data.hd?.event === 'llm.response') {
-        // 메시지 추가
         messages.value.push({
           role: 'llm',
           text: data.bd?.text || '응답 없음',
-          timestamp: new Date()
+          timestamp: new Date(),
         });
 
-        // 계약서 초안 업데이트
         if (data.bd?.contract_draft) {
           contractDraft.value = data.bd.contract_draft;
         }
 
-        // 현재 진행 단계 업데이트
         if (data.hd?.step) {
           currentStep.value = data.hd.step;
         }
 
-        // 진행률 업데이트
         if (data.bd?.progress_percentage !== undefined) {
           progressPercentage.value = data.bd.progress_percentage;
           console.log('진행률 업데이트:', progressPercentage.value);
         }
 
-        // meta 정보 업데이트
         if (data.bd?.meta) {
           metaInfo.value = data.bd.meta;
+          showMetaPanel.value = true;
           console.log('메타 정보 업데이트:', metaInfo.value);
         }
 
@@ -466,12 +546,11 @@ const sendMessage = () => {
   if (!inputText.value.trim() || !isConnected.value) {
     console.warn('메시지 전송 조건 불만족:', {
       inputText: inputText.value.trim(),
-      isConnected: isConnected.value
+      isConnected: isConnected.value,
     });
     return;
   }
 
-  // 현재 선택된 역할(currentRole)에 맞는 프로필 가져오기
   const currentUser = userProfiles[currentRole.value];
 
   if (!currentUser) {
@@ -479,24 +558,23 @@ const sendMessage = () => {
     return;
   }
 
-  // 화면 표시용 메시지 추가
+  // Use the name for display purposes to match the logic in the template
   messages.value.push({
-    role: currentUser.name,
+    role: currentUser.name, // Display name
     text: inputText.value,
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 
-  // Payload 구성
   const payload = {
     hd: {
       sid: sessionId.value,
       event: 'llm.invoke',
-      role: currentUser.role, // "client" or "provider"
-      user_name: currentUser.name // "고예경" or "김영지"
+      role: currentUser.role,
+      user_name: currentUser.name,
     },
     bd: {
-      text: inputText.value
-    }
+      text: inputText.value,
+    },
   };
 
   console.log('메시지 전송:', payload);
@@ -512,16 +590,13 @@ const sendMessage = () => {
 
 const getMessageClass = (msg) => {
   const currentUserName = userProfiles[currentRole.value]?.name;
-  return msg.role === currentUserName || msg.role === currentRole.value
-    ? 'justify-end'
-    : 'justify-start';
+  return msg.role === currentUserName ? 'justify-end' : 'justify-start';
 };
 
 const getBubbleColor = (role) => {
   if (role === 'llm') return 'grey-lighten-3';
   const currentUserName = userProfiles[currentRole.value]?.name;
-  if (role === currentUserName || role === currentRole.value) return 'primary';
-  return 'secondary';
+  return role === currentUserName ? 'primary' : 'secondary';
 };
 
 const getStepLabel = (step) => {
@@ -532,7 +607,7 @@ const copyContractDraft = () => {
   if (contractDraft.value) {
     navigator.clipboard
       .writeText(contractDraft.value)
-      .then(() => {
+            .then(() => {
         alert('계약서 초안이 클립보드에 복사되었습니다.');
       })
       .catch(() => {
@@ -544,7 +619,9 @@ const copyContractDraft = () => {
 const downloadContractDraft = () => {
   if (contractDraft.value) {
     const element = document.createElement('a');
-    const file = new Blob([contractDraft.value], { type: 'text/plain;charset=utf-8' });
+    const file = new Blob([contractDraft.value], {
+      type: 'text/plain;charset=utf-8',
+    });
     element.href = URL.createObjectURL(file);
     element.download = `contract_${sessionId.value}_${new Date()
       .toISOString()
@@ -558,6 +635,7 @@ const downloadContractDraft = () => {
 const scrollToBottom = () => {
   nextTick(() => {
     if (chatArea.value) {
+      // The ref might be the component instance or the element itself.
       const el = chatArea.value.$el ?? chatArea.value;
       el.scrollTop = el.scrollHeight;
     }
