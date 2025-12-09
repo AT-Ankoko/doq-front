@@ -347,7 +347,7 @@ import { MockWebSocket } from '@/services/ws/mockSocket.js';
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 
 // ----- 상태 변수 (State & Refs) ----- //
-const USE_MOCK = true; // true: 가짜 서버, false: 진짜 서버
+const USE_MOCK = false; // true: 가짜 서버, false: 진짜 서버
 const socket = ref(null);
 const isConnected = ref(false);
 const messages = ref([]);
