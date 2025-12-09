@@ -14,7 +14,7 @@
         margin: 0;
         overflow: hidden; 
         flex-wrap: nowrap;
-        gap: 32px; 
+        gap: 24px; 
       "
     >
       <div
@@ -23,8 +23,8 @@
       >
         <section
           aria-label="AI 채팅 인터페이스"
-          class="d-flex flex-column w-100 h-100 rounded-xl elevation-4 ma-2"
-          style="overflow: hidden; background-color: #FFFFFF;"
+          class="d-flex flex-column w-100 h-100 rounded-xl elevation-0 border ma-2"
+          style="overflow: hidden; background-color: #FFFFFF; border-color: #E0E0E0 !important;"
         >
           <header
             class="px-6 py-4 d-flex align-center flex-shrink-0"
@@ -34,24 +34,24 @@
               v-model="currentRole"
               mandatory
               variant="flat"
-              class="bg-transparent mt-1"
+              class="bg-transparent mt-4" 
               style="gap: 8px;" 
               selected-class="bg-primary text-white elevation-2"
             >
               <v-btn
                 value="갑"
-                class="px-5 rounded-pill text-body-1 font-weight-bold bg-grey-lighten-4 text-grey-darken-1"
+                class="px-4 rounded-pill text-body-2 font-weight-bold bg-grey-lighten-4 text-grey-darken-1"
                 size="large"
-                height="36"
+                height="24"
                 style="border: none;"
               >
                 고예경 (갑)
               </v-btn>
               <v-btn
                 value="을"
-                class="px-5 rounded-pill text-body-1 font-weight-bold bg-grey-lighten-4 text-grey-darken-1"
+                class="px-4 rounded-pill text-body-2 font-weight-bold bg-grey-lighten-4 text-grey-darken-1"
                 size="large"
-                height="36"
+                height="24"
                 style="border: none;"
               >
                 김영지 (을)
@@ -191,8 +191,8 @@
       >
         <section
           aria-label="계약서 초안 미리보기"
-          class="d-flex flex-column w-100 h-100 rounded-xl elevation-4 ma-2"
-          style="overflow: hidden; background-color: #FFFFFF;"
+          class="d-flex flex-column w-100 h-100 rounded-xl elevation-0 border ma-2"
+          style="overflow: hidden; background-color: #FFFFFF; border-color: #E0E0E0 !important;"
         >
           <header class="px-6 pt-5 pb-2 flex-shrink-0" style="background-color: #FFFFFF; z-index: 1;">
             <div class="d-flex align-center justify-space-between mb-4">
@@ -324,8 +324,8 @@
               variant="outlined"
               color="grey-darken-1"
               size="large"
-              height="36"
-              class="mr-2 rounded-pill px-6"
+              height="30"
+              class="mr-2 rounded-pill px-4"
               :disabled="!contractDraft"
               @click="copyContractDraft"
             >
@@ -335,8 +335,8 @@
               color="primary"
               variant="flat"
               size="large"
-              height="36"
-              class="rounded-pill px-6"
+              height="30"
+              class="rounded-pill px-4"
               :disabled="!contractDraft"
               @click="downloadContractDraft"
             >
@@ -376,172 +376,172 @@ const API_URL = 'http://localhost:9571/v1/session/connect';
 const WS_BASE_URL = 'ws://localhost:9571/v1/session/chat';
 
 const stepLabels = {
-  introduction: '소개 및 초기 정보 수집',
-  work_scope: '작업 범위/내용',
-  work_period: '작업 기간',
-  budget: '대금/지급 조건',
-  revisions: '수정 정책',
-  copyright: '저작권 귀속',
-  confidentiality: '기밀 유지',
-  conflict_resolution: '갈등 중재',
-  finalization: '최종 확인',
-  completed: '계약 완료',
+  introduction: '소개 및 초기 정보 수집',
+  work_scope: '작업 범위/내용',
+  work_period: '작업 기간',
+  budget: '대금/지급 조건',
+  revisions: '수정 정책',
+  copyright: '저작권 귀속',
+  confidentiality: '기밀 유지',
+  conflict_resolution: '갈등 중재',
+  finalization: '최종 확인',
+  completed: '계약 완료',
 };
 
 const userProfiles = {
-  갑: { name: '고예경', role: 'client', contractDate: '2025-12-07' },
-  을: { name: '김영지', role: 'provider', contractDate: '2025-12-07' },
+  갑: { name: '고예경', role: 'client', contractDate: '2025-12-07' },
+  을: { name: '김영지', role: 'provider', contractDate: '2025-12-07' },
 };
 
 const escapeHtml = (str = '') =>
-  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 const renderMarkdown = (md = '') => {
-  let html = escapeHtml(md);
-  html = html.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
-  html = html.replace(/^##\s+(.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^#\s+(.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-  html = html.replace(/^(?:-\s+.+\n?)+/gm, (block) => {
-    const items = block.trim().split(/\n/).map((li) => li.replace(/^-\s+/, ''));
-    return `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
-  });
-  html = html.replace(/\n/g, '<br />');
-  return html;
+  let html = escapeHtml(md);
+  html = html.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
+  html = html.replace(/^##\s+(.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^#\s+(.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  html = html.replace(/^(?:-\s+.+\n?)+/gm, (block) => {
+    const items = block.trim().split(/\n/).map((li) => li.replace(/^-\s+/, ''));
+    return `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+  });
+  html = html.replace(/\n/g, '<br />');
+  return html;
 };
 
 const renderedContract = computed(() => renderMarkdown(contractDraft.value));
 
 onMounted(() => {
-  initializeSession();
-  emit('set-top-nav', false);
-  emit('set-side-nav', true);
+  initializeSession();
+  emit('set-top-nav', false);
+  emit('set-side-nav', true);
 });
 
 onUnmounted(() => {
-  if (socket.value) socket.value.close();
+  if (socket.value) socket.value.close();
 });
 
 const initializeSession = async () => {
-  isLoading.value = true;
-  try {
-    if (USE_MOCK) {
-      sessionId.value = 'mock-session-id-12345';
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      connectWebSocket();
-      return;
-    }
-    const payload = {
-      userId: 'user123',
-      client_name: userProfiles['갑'].name,
-      provider_name: userProfiles['을'].name,
-      contract_date: userProfiles['갑'].contractDate,
-    };
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) throw new Error(`API 오류: ${response.status}`);
-    const data = await response.json();
-    sessionId.value = data.sid;
-    connectWebSocket();
-  } catch (error) {
-    console.error(error);
-  } finally {
-    isLoading.value = false;
-  }
+  isLoading.value = true;
+  try {
+    if (USE_MOCK) {
+      sessionId.value = 'mock-session-id-12345';
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      connectWebSocket();
+      return;
+    }
+    const payload = {
+      userId: 'user123',
+      client_name: userProfiles['갑'].name,
+      provider_name: userProfiles['을'].name,
+      contract_date: userProfiles['갑'].contractDate,
+    };
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) throw new Error(`API 오류: ${response.status}`);
+    const data = await response.json();
+    sessionId.value = data.sid;
+    connectWebSocket();
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const connectWebSocket = () => {
-  if (!sessionId.value) return;
-  const wsUrl = `${WS_BASE_URL}?sid=${sessionId.value}`;
-  
-  if (USE_MOCK) socket.value = new MockWebSocket(wsUrl);
-  else socket.value = new WebSocket(wsUrl);
+  if (!sessionId.value) return;
+  const wsUrl = `${WS_BASE_URL}?sid=${sessionId.value}`;
+  
+  if (USE_MOCK) socket.value = new MockWebSocket(wsUrl);
+  else socket.value = new WebSocket(wsUrl);
 
-  socket.value.onopen = () => { isConnected.value = true; };
-  socket.value.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      if (data.hd?.event === 'llm.response') {
-        messages.value.push({
-          role: 'llm',
-          text: data.bd?.text || '응답 없음',
-          timestamp: new Date(),
-        });
-        if (data.bd?.contract_draft) contractDraft.value = data.bd.contract_draft;
-        if (data.hd?.step) currentStep.value = data.hd.step;
-        if (data.bd?.progress_percentage !== undefined) progressPercentage.value = data.bd.progress_percentage;
-        if (data.bd?.meta) {
-          metaInfo.value = data.bd.meta;
-          showMetaPanel.value = true;
-        }
-        scrollToBottom();
-      }
-    } catch (e) { console.error(e); }
-  };
-  socket.value.onclose = () => { isConnected.value = false; };
+  socket.value.onopen = () => { isConnected.value = true; };
+  socket.value.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.hd?.event === 'llm.response') {
+        messages.value.push({
+          role: 'llm',
+          text: data.bd?.text || '응답 없음',
+          timestamp: new Date(),
+        });
+        if (data.bd?.contract_draft) contractDraft.value = data.bd.contract_draft;
+        if (data.hd?.step) currentStep.value = data.hd.step;
+        if (data.bd?.progress_percentage !== undefined) progressPercentage.value = data.bd.progress_percentage;
+        if (data.bd?.meta) {
+          metaInfo.value = data.bd.meta;
+          showMetaPanel.value = true;
+        }
+        scrollToBottom();
+      }
+    } catch (e) { console.error(e); }
+  };
+  socket.value.onclose = () => { isConnected.value = false; };
 };
 
 const sendMessage = () => {
-  if (!inputText.value.trim() || !isConnected.value) return;
-  const currentUser = userProfiles[currentRole.value];
-  if (!currentUser) return;
+  if (!inputText.value.trim() || !isConnected.value) return;
+  const currentUser = userProfiles[currentRole.value];
+  if (!currentUser) return;
 
-  messages.value.push({
-    role: currentUser.name,
-    text: inputText.value,
-    timestamp: new Date(),
-  });
+  messages.value.push({
+    role: currentUser.name,
+    text: inputText.value,
+    timestamp: new Date(),
+  });
 
-  const payload = {
-    hd: {
-      sid: sessionId.value,
-      event: 'llm.invoke',
-      role: currentUser.role,
-      user_name: currentUser.name,
-    },
-    bd: { text: inputText.value },
-  };
+  const payload = {
+    hd: {
+      sid: sessionId.value,
+      event: 'llm.invoke',
+      role: currentUser.role,
+      user_name: currentUser.name,
+    },
+    bd: { text: inputText.value },
+  };
 
-  try {
-    socket.value.send(JSON.stringify(payload));
-    inputText.value = '';
-    scrollToBottom();
-  } catch (error) { console.error(error); }
+  try {
+    socket.value.send(JSON.stringify(payload));
+    inputText.value = '';
+    scrollToBottom();
+  } catch (error) { console.error(error); }
 };
 
 const getStepLabel = (step) => stepLabels[step] || '대기 중...';
 
 const copyContractDraft = () => {
-  if (contractDraft.value) {
-    navigator.clipboard.writeText(contractDraft.value)
-      .then(() => alert('복사되었습니다.'))
-      .catch(() => alert('실패했습니다.'));
-  }
+  if (contractDraft.value) {
+    navigator.clipboard.writeText(contractDraft.value)
+      .then(() => alert('복사되었습니다.'))
+      .catch(() => alert('실패했습니다.'));
+  }
 };
 
 const downloadContractDraft = () => {
-  if (contractDraft.value) {
-    const element = document.createElement('a');
-    const file = new Blob([contractDraft.value], { type: 'text/plain;charset=utf-8' });
-    element.href = URL.createObjectURL(file);
-    element.download = `contract.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  }
+  if (contractDraft.value) {
+    const element = document.createElement('a');
+    const file = new Blob([contractDraft.value], { type: 'text/plain;charset=utf-8' });
+    element.href = URL.createObjectURL(file);
+    element.download = `contract.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  }
 };
 
 const scrollToBottom = () => {
-  nextTick(() => {
-    if (chatArea.value) {
-      const el = chatArea.value.$el ?? chatArea.value;
-      el.scrollTop = el.scrollHeight;
-    }
-  });
+  nextTick(() => {
+    if (chatArea.value) {
+      const el = chatArea.value.$el ?? chatArea.value;
+      el.scrollTop = el.scrollHeight;
+    }
+  });
 };
 </script>
 
