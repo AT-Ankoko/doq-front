@@ -14,7 +14,7 @@
         margin: 0;
         overflow: hidden; 
         flex-wrap: nowrap;
-        gap: 24px; 
+        gap: 20px; 
       "
     >
       <div
@@ -34,8 +34,8 @@
               v-model="currentRole"
               mandatory
               variant="flat"
-              class="bg-transparent mt-4" 
-              style="gap: 8px;" 
+              class="bg-transparent"
+              style="gap: 8px; height: auto;" 
               selected-class="bg-primary text-white elevation-2"
             >
               <v-btn
@@ -66,10 +66,11 @@
               :text-color="isConnected ? 'grey-darken-3' : 'red'"
               variant="flat"
               class="font-weight-bold"
+              style="height: 24px;" 
             >
               <v-icon
                 start
-                size="small"
+                size="x-small"
                 :color="isConnected ? 'green' : 'red'"
                 >mdi-circle-medium</v-icon
               >
@@ -156,14 +157,14 @@
 
           <footer 
             class="px-6 py-4 flex-shrink-0 d-flex align-center" 
-            style="background-color: #FFFFFF; height: 88px; z-index: 1;"
+            style="background-color: #FFFFFF; height: 72px; z-index: 1;"
           >
             <v-text-field
               v-model="inputText"
               placeholder="메시지를 입력하세요..."
               variant="outlined"
               hide-details
-              density="default" 
+              density="compact" 
               rounded="pill"
               bg-color="white"
               color="primary"
@@ -176,6 +177,7 @@
                   color="primary"
                   variant="text"
                   aria-label="전송"
+                  size="small"
                   :disabled="!inputText.trim()"
                   @click="sendMessage"
                 ></v-btn>
@@ -317,26 +319,27 @@
 
           <footer
             class="px-6 py-4 flex-shrink-0 d-flex align-center"
-            style="background-color: #FFFFFF; height: 88px; z-index: 1;"
+            style="background-color: #FFFFFF; height: 72px; z-index: 1;"
           >
             <v-spacer></v-spacer>
             <v-btn
-              variant="outlined"
-              color="grey-darken-1"
+              variant="flat" 
+              class="px-4 rounded-pill text-body-2 font-weight-bold bg-grey-lighten-4 text-grey-darken-1 mr-2"
               size="large"
-              height="30"
-              class="mr-2 rounded-pill px-4"
+              height="24"
+              style="border: none;"
               :disabled="!contractDraft"
               @click="copyContractDraft"
             >
               <v-icon start size="small">mdi-content-copy</v-icon> 복사
             </v-btn>
+            
             <v-btn
-              color="primary"
               variant="flat"
+              class="px-4 rounded-pill text-body-2 font-weight-bold bg-primary text-white"
               size="large"
-              height="30"
-              class="rounded-pill px-4"
+              height="24"
+              style="border: none;"
               :disabled="!contractDraft"
               @click="downloadContractDraft"
             >
@@ -350,7 +353,7 @@
 </template>
 
 <script setup>
-// 기존 스크립트 로직 유지 (변경 없음)
+// 기존 스크립트 그대로 유지
 import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
 import { MockWebSocket } from '@/services/ws/mockSocket.js';
 
