@@ -16,326 +16,329 @@
         flex-wrap: nowrap;
       "
     >
-                  <v-col
-                    cols="12"
-                    md="6"
-                    class="d-flex flex-column pa-0"
-                    style="min-height: 0; height: 100%; overflow: hidden"
-                  >              <section
-                aria-label="AI 채팅 인터페이스"
-                class="d-flex flex-column w-100 h-100 bg-white rounded-xl border"
-                style="overflow: hidden"
+      <v-col
+        cols="12"
+        md="6"
+        class="d-flex flex-column pa-0"
+        style="min-height: 0; height: 100%; overflow: hidden"
+      >
+        <section
+          aria-label="AI 채팅 인터페이스"
+          class="d-flex flex-column w-100 h-100 bg-white rounded-xl"
+          style="overflow: hidden"
+        >
+          <header
+            class="px-6 py-4 bg-white d-flex align-center flex-shrink-0"
+          >
+            <v-btn-toggle
+              v-model="currentRole"
+              mandatory
+              density="compact"
+              class="rounded-pill bg-grey-lighten-4"
+            >
+              <v-btn
+                value="갑"
+                class="px-4 font-weight-bold"
+                size="small"
+                variant="text"
+                selected-class="bg-primary text-white"
+                >고예경 (갑)</v-btn
               >
-                <header
-                  class="px-6 py-4 border-b bg-white d-flex align-center flex-shrink-0"
-                >
-                  <v-btn-toggle
-                    v-model="currentRole"
-                    mandatory
-                    density="compact"
-                    color="primary"
-                    variant="flat"
-                    class="rounded-pill border"
-                    divided
+              <v-btn
+                value="을"
+                class="px-4 font-weight-bold"
+                size="small"
+                variant="text"
+                selected-class="bg-primary text-white"
+                >김영지 (을)</v-btn
+              >
+            </v-btn-toggle>
+
+            <v-spacer></v-spacer>
+
+            <v-chip
+              size="small"
+              :color="isConnected ? 'grey-lighten-2' : 'red-lighten-4'"
+              :text-color="isConnected ? 'grey-darken-3' : 'red'"
+              variant="flat"
+              class="font-weight-bold"
+            >
+              <v-icon
+                start
+                size="small"
+                :color="isConnected ? 'green' : 'red'"
+                >mdi-circle-medium</v-icon
+              >
+              {{ isConnected ? '연결됨' : '연결 끊김' }}
+            </v-chip>
+          </header>
+
+          <div
+            ref="chatArea"
+            role="log"
+            aria-live="polite"
+            class="flex-grow-1 overflow-y-auto bg-white px-6 py-4"
+            style="min-height: 0"
+          >
+            <div
+              v-if="messages.length === 0"
+              class="d-flex justify-center mt-10"
+            >
+              <span class="text-grey-lighten-1 text-caption"
+                >대화를 시작해보세요.</span
+              >
+            </div>
+
+            <template v-for="(msg, index) in messages" :key="index">
+              <article
+                v-if="msg.role === 'llm'"
+                class="d-flex flex-column align-start mb-6"
+              >
+                <div class="d-flex align-center mb-1">
+                  <span
+                    class="font-weight-bold text-caption text-grey-darken-2 pl-1"
+                    >AI DoQ</span
                   >
-                    <v-btn value="갑" class="px-4 font-weight-bold" size="small"
-                      >고예경 (갑)</v-btn
-                    >
-                    <v-btn value="을" class="px-4 font-weight-bold" size="small"
-                      >김영지 (을)</v-btn
-                    >
-                  </v-btn-toggle>
-      
-                  <v-spacer></v-spacer>
-      
-                  <v-chip
-                    size="small"
-                    :color="isConnected ? 'grey-lighten-2' : 'red-lighten-4'"
-                    :text-color="isConnected ? 'grey-darken-3' : 'red'"
-                    variant="flat"
-                    class="font-weight-bold"
-                  >
-                    <v-icon
-                      start
-                      size="small"
-                      :color="isConnected ? 'green' : 'red'"
-                      >mdi-circle-medium</v-icon
-                    >
-                    {{ isConnected ? '연결됨' : '연결 끊김' }}
-                  </v-chip>
-                </header>
-      
+                </div>
                 <div
-                  ref="chatArea"
-                  role="log"
-                  aria-live="polite"
-                  class="flex-grow-1 overflow-y-auto bg-white px-6 py-4"
-                  style="min-height: 0"
+                  class="pa-4 rounded-lg rounded-tl-0 text-body-2 text-grey-darken-3"
+                  style="
+                    max-width: 85%;
+                    white-space: pre-wrap;
+                    line-height: 1.6;
+                    background-color: #e8e8e8;
+                  "
                 >
-                  <div
-                    v-if="messages.length === 0"
-                    class="d-flex justify-center mt-10"
-                  >
-                    <span class="text-grey-lighten-1 text-caption"
-                      >대화를 시작해보세요.</span
-                    >
-                  </div>
-      
-                              <template v-for="(msg, index) in messages" :key="index">
-                                <article
-                                  v-if="msg.role === 'llm'"
-                                  class="d-flex flex-column align-start mb-6"
-                                >
-                                  <div class="d-flex align-center mb-1">
-                                    <span
-                                      class="font-weight-bold text-caption text-grey-darken-2 pl-1"
-                                      >AI DoQ</span
-                                    >
-                                  </div>
-                                  <div
-                                    class="pa-4 rounded-lg rounded-tl-0 text-body-2 text-grey-darken-3"
-                                    style="
-                                      max-width: 85%;
-                                      white-space: pre-wrap;
-                                      line-height: 1.6;
-                                      background-color: #E8E8E8;
-                                    "
-                                  >
-                                    {{ msg.text }}
-                                  </div>
-                                </article>
-                  
-                                <article
-                                  v-else-if="msg.role === userProfiles[currentRole].name"
-                                  class="d-flex flex-column align-end mb-4"
-                                >
-                                  <div
-                                    class="pa-3 px-4 bg-primary rounded-lg rounded-tr-0 text-white text-body-2 elevation-1"
-                                    style="
-                                      max-width: 80%;
-                                      white-space: pre-wrap;
-                                      line-height: 1.6;
-                                    "
-                                  >
-                                    {{ msg.text }}
-                                  </div>
-                                </article>
-                  
-                                <article
-                                  v-else
-                                  class="d-flex flex-column align-start mb-4"
-                                >
-                                  <div class="d-flex align-center mb-1">
-                                    <span
-                                      class="font-weight-bold text-caption text-primary pl-1"
-                                    >
-                                      {{ msg.role }}
-                                    </span>
-                                  </div>
-                                  <div
-                                    class="pa-3 px-4 rounded-lg rounded-tl-0 text-grey-darken-3 text-body-2"
-                                    style="
-                                      max-width: 85%;
-                                      white-space: pre-wrap;
-                                      line-height: 1.6;
-                                      background-color: #E3F2FD; /* 아주 연한 하늘색 */
-                                      border: 1px solid #BBDEFB;
-                                    "
-                                  >
-                                    {{ msg.text }}
-                                  </div>
-                                </article>
-                              </template>                </div>
-      
-                <footer class="pa-4 bg-white border-t flex-shrink-0">
-                  <v-text-field
-                    v-model="inputText"
-                    placeholder="메시지를 입력하세요..."
-                    variant="outlined"
-                    hide-details
-                    density="comfortable"
-                    rounded="pill"
-                    bg-color="white"
-                    color="primary"
-                    aria-label="메시지 입력"
-                    @keyup.enter="sendMessage"
-                  >
-                    <template #append-inner>
-                      <v-btn
-                        icon="mdi-send"
-                        color="primary"
-                        variant="text"
-                        density="compact"
-                        aria-label="전송"
-                        :disabled="!inputText.trim()"
-                        @click="sendMessage"
-                      ></v-btn>
-                    </template>
-                  </v-text-field>
-                </footer>
-              </section>
-            </v-col>
-      
-                              <v-col
-      
-                                cols="12"
-      
-                                md="6"
-      
-                                class="d-flex flex-column pa-0 pl-6"
-      
-                                style="min-height: 0; height: 100%; overflow: hidden"
-      
-                              >
-      
-                                <section
-      
-                                  aria-label="계약서 초안 미리보기"
-                class="d-flex flex-column w-100 h-100 bg-white rounded-xl border"
-                style="overflow: hidden"
+                  {{ msg.text }}
+                </div>
+              </article>
+
+              <article
+                v-else-if="msg.role === userProfiles[currentRole].name"
+                class="d-flex flex-column align-end mb-4"
               >
-                <header class="px-6 pt-5 pb-2 bg-white flex-shrink-0">
-                  <div class="d-flex align-center justify-space-between mb-4">
-                    <div class="d-flex align-center">
-                      <v-icon color="primary" class="mr-2"
-                        >mdi-file-document-outline</v-icon
-                      >
-                      <h2
-                        class="font-weight-bold text-h6 text-grey-darken-3 mb-0"
-                      >
-                        계약서 초안
-                      </h2>
-                    </div>
-                    <v-chip
-                      size="small"
-                      variant="flat"
-                      color="grey-lighten-3"
-                      class="text-caption font-weight-medium"
-                    >
-                      {{ getStepLabel(currentStep) }}
-                    </v-chip>
-                  </div>
-      
-                  <div class="mb-2" aria-hidden="true">
-                    <div class="d-flex justify-space-between mb-1">
-                      <span class="text-caption font-weight-bold text-primary"
-                        >진행률</span
-                      >
-                      <span class="text-caption font-weight-bold text-primary"
-                        >{{ progressPercentage }}%</span
-                      >
-                    </div>
-                    <v-progress-linear
-                      :model-value="progressPercentage"
-                      color="primary"
-                      height="6"
-                      rounded
-                      bg-color="grey-lighten-3"
-                    ></v-progress-linear>
-                  </div>
-                </header>
-      
-                <v-divider></v-divider>
-      
-                <v-expand-transition>
-                  <aside
-                    v-if="metaInfo && showMetaPanel"
-                    class="bg-blue-grey-lighten-5 px-6 py-3 border-b flex-shrink-0"
-                    aria-label="AI 분석 정보"
-                  >
-                    <div class="d-flex align-center justify-space-between">
-                      <span class="text-caption font-weight-bold text-blue-grey">
-                        <v-icon size="small" class="mr-1">mdi-robot-outline</v-icon>
-                        AI 분석 상태
-                      </span>
-                      <v-btn
-                        icon="mdi-close"
-                        size="x-small"
-                        variant="text"
-                        density="compact"
-                        aria-label="정보 닫기"
-                        @click="showMetaPanel = false"
-                      ></v-btn>
-                    </div>
-                    <div
-                      v-if="metaInfo.step_advance"
-                      class="mt-1 d-flex align-center"
-                    >
-                      <span class="text-caption text-grey-darken-1 mr-2"
-                        >단계 진행:</span
-                      >
-                      <v-icon
-                        size="14"
-                        :color="metaInfo.step_advance.advance ? 'green' : 'orange'"
-                        class="mr-1"
-                      >
-                        {{
-                          metaInfo.step_advance.advance
-                            ? 'mdi-check-circle'
-                            : 'mdi-clock'
-                        }}
-                      </v-icon>
-                      <span class="text-caption">{{
-                        metaInfo.step_advance.reason || '-'
-                      }}</span>
-                    </div>
-                  </aside>
-                </v-expand-transition>
-      
-                <article
-                  class="flex-grow-1 overflow-y-auto pa-8 bg-white"
-                  style="min-height: 0"
-                  aria-label="계약서 내용"
+                <div
+                  class="pa-3 px-4 bg-primary rounded-lg rounded-tr-0 text-white text-body-2"
+                  style="
+                    max-width: 80%;
+                    white-space: pre-wrap;
+                    line-height: 1.6;
+                  "
                 >
-                  <div
-                    v-if="contractDraft"
-                    class="contract-content text-body-2 text-grey-darken-3"
-                    style="line-height: 1.8; font-family: 'Noto Sans KR', sans-serif"
+                  {{ msg.text }}
+                </div>
+              </article>
+
+              <article
+                v-else
+                class="d-flex flex-column align-start mb-4"
+              >
+                <div class="d-flex align-center mb-1">
+                  <span
+                    class="font-weight-bold text-caption text-primary pl-1"
                   >
-                    <div v-html="renderedContract"></div>
-                  </div>
-      
-                  <div
-                    v-else
-                    class="d-flex flex-column align-center justify-center h-100 opacity-60"
-                  >
-                    <v-icon size="48" color="grey-lighten-1" class="mb-2"
-                        >mdi-file-hidden</v-icon
-                    >
-                    <p class="text-grey mb-1">작성된 계약서 내용이 없습니다.</p>
-                    <p class="text-caption text-grey-lighten-1">
-                      왼쪽 채팅을 통해 계약 내용을 논의해주세요.
-                    </p>
-                  </div>
-                </article>
-      
-                <footer
-                  class="px-6 py-4 bg-white border-t flex-shrink-0 d-flex"
+                    {{ msg.role }}
+                  </span>
+                </div>
+                <div
+                  class="pa-3 px-4 rounded-lg rounded-tl-0 text-grey-darken-3 text-body-2"
+                  style="
+                    max-width: 85%;
+                    white-space: pre-wrap;
+                    line-height: 1.6;
+                    background-color: #e3f2fd; /* 아주 연한 하늘색 */
+                  "
                 >
-                  <v-spacer></v-spacer>
-                  <v-btn
-                    variant="outlined"
-                    color="grey-darken-1"
-                    size="small"
-                    class="mr-2 rounded-pill px-4"
-                    :disabled="!contractDraft"
-                    @click="copyContractDraft"
+                  {{ msg.text }}
+                </div>
+              </article>
+            </template>
+          </div>
+
+          <footer class="pa-4 bg-white flex-shrink-0">
+            <v-text-field
+              v-model="inputText"
+              placeholder="메시지를 입력하세요..."
+              variant="outlined"
+              hide-details
+              density="comfortable"
+              rounded="pill"
+              bg-color="white"
+              color="primary"
+              aria-label="메시지 입력"
+              @keyup.enter="sendMessage"
+            >
+              <template #append-inner>
+                <v-btn
+                  icon="mdi-send"
+                  color="primary"
+                  variant="text"
+                  density="compact"
+                  aria-label="전송"
+                  :disabled="!inputText.trim()"
+                  @click="sendMessage"
+                ></v-btn>
+              </template>
+            </v-text-field>
+          </footer>
+        </section>
+      </v-col>
+
+      <v-col
+        cols="12"
+        md="6"
+        class="d-flex flex-column pa-0"
+        style="min-height: 0; height: 100%; overflow: hidden"
+      >
+        <section
+          aria-label="계약서 초안 미리보기"
+          class="d-flex flex-column w-100 h-100 bg-white rounded-xl border"
+          style="overflow: hidden"
+        >
+          <header class="px-6 pt-5 pb-2 bg-white flex-shrink-0">
+            <div class="d-flex align-center justify-space-between mb-4">
+              <div class="d-flex align-center">
+                <v-icon color="primary" class="mr-2"
+                  >mdi-file-document-outline</v-icon
+                >
+                <h2
+                  class="font-weight-bold text-h6 text-grey-darken-3 mb-0"
+                >
+                  계약서 초안
+                </h2>
+              </div>
+              <v-chip
+                size="small"
+                variant="flat"
+                color="grey-lighten-3"
+                class="text-caption font-weight-medium"
+              >
+                {{ getStepLabel(currentStep) }}
+              </v-chip>
+            </div>
+
+            <div class="mb-2" aria-hidden="true">
+              <div class="d-flex justify-space-between mb-1">
+                <span class="text-caption font-weight-bold text-primary"
+                  >진행률</span
+                >
+                <span class="text-caption font-weight-bold text-primary"
+                  >{{ progressPercentage }}%</span
+                >
+              </div>
+              <v-progress-linear
+                :model-value="progressPercentage"
+                color="primary"
+                height="6"
+                rounded
+                bg-color="grey-lighten-3"
+              ></v-progress-linear>
+            </div>
+          </header>
+
+          <v-divider></v-divider>
+
+          <aside
+            v-if="metaInfo"
+            class="bg-blue-grey-lighten-5 px-6 py-3 border-b flex-shrink-0"
+            aria-label="AI 분석 정보"
+          >
+            <div
+              class="d-flex align-center justify-space-between"
+              style="cursor: pointer"
+              @click="showMetaPanel = !showMetaPanel"
+            >
+              <span class="text-caption font-weight-bold text-blue-grey">
+                <v-icon size="small" class="mr-1">mdi-robot-outline</v-icon>
+                AI 분석 상태
+              </span>
+              <v-icon>{{
+                showMetaPanel ? 'mdi-chevron-up' : 'mdi-chevron-down'
+              }}</v-icon>
+            </div>
+            <v-expand-transition>
+              <div v-show="showMetaPanel">
+                <div
+                  v-if="metaInfo.step_advance"
+                  class="mt-2 d-flex align-center"
+                >
+                  <span class="text-caption text-grey-darken-1 mr-2"
+                    >단계 진행:</span
                   >
-                    <v-icon start size="small">mdi-content-copy</v-icon> 복사
-                  </v-btn>
-                  <v-btn
-                    color="primary"
-                    variant="flat"
-                    size="small"
-                    class="rounded-pill px-4"
-                    :disabled="!contractDraft"
-                    @click="downloadContractDraft"
+                  <v-icon
+                    size="14"
+                    :color="metaInfo.step_advance.advance ? 'green' : 'orange'"
+                    class="mr-1"
                   >
-                    <v-icon start size="small">mdi-download</v-icon> 다운로드
-                  </v-btn>
-                </footer>
-              </section>
-            </v-col>    </v-row>
+                    {{
+                      metaInfo.step_advance.advance
+                        ? 'mdi-check-circle'
+                        : 'mdi-clock'
+                    }}
+                  </v-icon>
+                  <span class="text-caption">{{
+                    metaInfo.step_advance.reason || '-'
+                  }}</span>
+                </div>
+              </div>
+            </v-expand-transition>
+          </aside>
+
+          <article
+            class="flex-grow-1 overflow-y-auto pa-8 bg-white"
+            style="min-height: 0"
+            aria-label="계약서 내용"
+          >
+            <div
+              v-if="contractDraft"
+              class="contract-content text-body-2 text-grey-darken-3"
+              style="line-height: 1.8; font-family: 'Noto Sans KR', sans-serif"
+            >
+              <div v-html="renderedContract"></div>
+            </div>
+
+            <div
+              v-else
+              class="d-flex flex-column align-center justify-center h-100 opacity-60"
+            >
+              <v-icon size="48" color="grey-lighten-1" class="mb-2"
+                >mdi-file-hidden</v-icon
+              >
+              <p class="text-grey mb-1">작성된 계약서 내용이 없습니다.</p>
+              <p class="text-caption text-grey-lighten-1">
+                왼쪽 채팅을 통해 계약 내용을 논의해주세요.
+              </p>
+            </div>
+          </article>
+
+          <footer
+            class="px-6 py-4 bg-white border-t flex-shrink-0 d-flex"
+          >
+            <v-spacer></v-spacer>
+            <v-btn
+              variant="outlined"
+              color="grey-darken-1"
+              size="small"
+              class="mr-2 rounded-pill px-4"
+              :disabled="!contractDraft"
+              @click="copyContractDraft"
+            >
+              <v-icon start size="small">mdi-content-copy</v-icon> 복사
+            </v-btn>
+            <v-btn
+              color="primary"
+              variant="flat"
+              size="small"
+              class="rounded-pill px-4"
+              :disabled="!contractDraft"
+              @click="downloadContractDraft"
+            >
+              <v-icon start size="small">mdi-download</v-icon> 다운로드
+            </v-btn>
+          </footer>
+        </section>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
