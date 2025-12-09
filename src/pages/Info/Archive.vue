@@ -37,9 +37,18 @@
           item-value="sid"
           :items-per-page="10"
         >
-          <!-- 세션 ID -->
-          <template #item.sid="{ item }">
-            <span class="font-weight-medium text-primary">{{ item.sid }}</span>
+          <!-- 제목 -->
+          <template #item.title="{ item }">
+            <div class="d-flex flex-column">
+              <span 
+                class="font-weight-medium text-primary cursor-pointer" 
+                style="text-decoration: underline; text-underline-offset: 2px;"
+                @click="viewSession(item.sid)"
+              >
+                {{ getSessionTitle(item) }}
+              </span>
+              <span class="text-caption text-grey">{{ truncateSid(item.sid) }}</span>
+            </div>
           </template>
 
           <!-- 사용자 이름 -->
@@ -122,7 +131,7 @@ const API_BASE_URL = 'http://localhost:9571';
 
 // 테이블 헤더
 const tableHeaders = [
-  { title: '세션 ID', key: 'sid', sortable: true },
+  { title: '제목', key: 'title', sortable: true },
   { title: '사용자', key: 'user_name', sortable: true },
   { title: '현재 단계', key: 'current_step', sortable: true },
   { title: '진행률', key: 'progress', sortable: true },
@@ -205,6 +214,30 @@ const getStepColor = (step) => {
   return colors[step] || 'grey';
 };
 
+// 세션 제목 생성
+const getSessionTitle = (item) => {
+  // 1. category가 있으면 해당 값 사용 (가장 정확한 계약명)
+  if (item.category && item.category !== '{{category}}') {
+    return item.category.includes('용역') ? item.category : `${item.category} 용역`;
+  }
+  
+  // 2. work_scope가 있으면 사용
+  if (item.work_scope && item.work_scope !== '{{category}}') {
+    return item.work_scope;
+  }
+  
+  // 3. 기본값: 사용자 이름 + 계약서
+  const userName = item.user_name || '익명';
+  return `${userName}님의 계약서`;
+};
+
+// 세션 ID 축약
+const truncateSid = (sid) => {
+  if (!sid) return '-';
+  if (sid.length <= 12) return sid;
+  return sid.substring(0, 12) + '...';
+};
+
 // 날짜 포맷팅
 const formatDate = (dateString) => {
   if (!dateString) return '-';
@@ -230,5 +263,13 @@ const formatDate = (dateString) => {
 
 .gap-4 {
   gap: 16px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-pointer:hover {
+  opacity: 0.8;
 }
 </style>
