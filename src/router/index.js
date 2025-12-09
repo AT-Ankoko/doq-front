@@ -33,6 +33,11 @@ const routes = [
     component: () => import(/* webpackChunkName: "archive" */ "@/pages/Info/Archive.vue")
   },
   {
+    path: '/archive/:sid',
+    name: 'ArchiveDetail',
+    component: () => import(/* webpackChunkName: "archive-detail" */ "@/pages/Info/ArchiveDetail.vue")
+  },
+  {
     path: '/howtouse',
     name: 'HowToUse',
     component: () => import(/* webpackChunkName: "howtouse" */ "@/pages/Info/HowToUse.vue")
