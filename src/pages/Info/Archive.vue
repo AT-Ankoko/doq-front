@@ -216,9 +216,18 @@ const getStepColor = (step) => {
 
 // 세션 제목 생성
 const getSessionTitle = (item) => {
-  // 사용자 이름 + 계약 상태 조합
+  // 1. category가 있으면 해당 값 사용 (가장 정확한 계약명)
+  if (item.category && item.category !== '{{category}}') {
+    return item.category.includes('용역') ? item.category : `${item.category} 용역`;
+  }
+  
+  // 2. work_scope가 있으면 사용
+  if (item.work_scope && item.work_scope !== '{{category}}') {
+    return item.work_scope;
+  }
+  
+  // 3. 기본값: 사용자 이름 + 계약서
   const userName = item.user_name || '익명';
-  const step = getStepLabel(item.current_step);
   return `${userName}님의 계약서`;
 };
 
