@@ -4,7 +4,7 @@
     <div class="d-flex align-center mb-6">
       <v-btn icon="mdi-arrow-left" variant="text" @click="goBack" class="mr-2"></v-btn>
       <div>
-        <h1 class="text-h5 font-weight-bold mb-1">세션 상세 정보</h1>
+        <h1 class="text-h5 font-weight-bold mb-1">{{ contractName || '세션 상세 정보' }}</h1>
         <p class="text-body-2 text-grey ma-0">{{ sessionId }}</p>
       </div>
       <v-spacer></v-spacer>
@@ -412,6 +412,37 @@ const lastContractDraft = computed(() => {
     const draft = history[i]?.message?.bd?.contract_draft;
     if (draft) return draft;
   }
+  return null;
+});
+
+// 계약명 추출
+const contractName = computed(() => {
+  const history = sessionData.value?.chat_history;
+  if (!history || history.length === 0) return null;
+  
+  // 1. contract_draft에서 계약명 추출 시도 ("계약명: XXX" 또는 "# 용역계약서 (계약명: XXX)" 패턴)
+  for (const chat of history) {
+    const draft = chat?.message?.bd?.contract_draft;
+    if (draft) {
+      // "(계약명: XXX)" 패턴 매칭
+      const match = draft.match(/\(계약명:\s*([^)]+)\)/);
+      if (match) return match[1].trim();
+      
+      // "계약명: XXX" 패턴 매칭
+      const match2 = draft.match(/계약명:\s*(.+?)(?:\n|$)/);
+      if (match2) return match2[1].trim();
+    }
+  }
+  
+  // 2. 첫 번째 client 메시지에서 용역 내용 추출
+  const firstClientInput = sessionData.value?.state?.role_inputs?.client?.[0];
+  if (firstClientInput?.text) {
+    const text = firstClientInput.text;
+    // "~~ 맡기고 싶습니다", "~~ 의뢰합니다" 등의 패턴에서 추출
+    if (text.length < 50) return text;
+    return text.substring(0, 30) + '...';
+  }
+  
   return null;
 });
 
