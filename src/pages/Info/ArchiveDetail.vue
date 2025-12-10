@@ -58,12 +58,6 @@
             </div>
             <v-row>
               <v-col cols="6" md="4">
-                <span class="text-caption text-grey mb-2 d-block">역할</span>
-                <v-chip size="small" color="grey-darken-3" variant="flat" label class="font-weight-medium">
-                  {{ sessionData.state?.user_info?.role === 'client' ? '의뢰인' : '용역자' }}
-                </v-chip>
-              </v-col>
-              <v-col cols="6" md="4">
                 <span class="text-caption text-grey mb-2 d-block">시작일</span>
                 <p class="text-caption text-grey-darken-3 ma-0 font-weight-medium">{{ formatDate(sessionData.state?.created_at) }}</p>
               </v-col>
@@ -158,59 +152,6 @@
               데이터 없음
             </div>
           </v-card-text>
-        </v-card>
-
-        <v-card rounded="xl" elevation="0" class="d-flex flex-column" style="background-color: #FFFFFF">
-          <div class="d-flex align-center px-6 py-4 border-b mb-2">
-            <v-icon color="primary" class="mr-2">mdi-history</v-icon>
-            <span class="text-h6 font-weight-bold text-grey-darken-3">역할별 입력 내역</span>
-          </div>
-
-          <div class="pa-4 flex-grow-1 d-flex flex-column">
-            <div class="d-flex pa-1 rounded-lg mb-4" style="background-color: #FAFAFA">
-              <v-btn
-                flex="1"
-                class="flex-grow-1"
-                :variant="roleTab === 'client' ? 'flat' : 'text'"
-                :color="roleTab === 'client' ? 'primary' : 'grey-darken-1'"
-                size="small"
-                rounded="md"
-                @click="roleTab = 'client'"
-              >
-                의뢰인(갑) <span class="ml-1 text-caption opacity-70">{{ sessionData.state?.role_inputs?.client?.length || 0 }}</span>
-              </v-btn>
-              <v-btn
-                flex="1"
-                class="flex-grow-1"
-                :variant="roleTab === 'provider' ? 'flat' : 'text'"
-                :color="roleTab === 'provider' ? 'primary' : 'grey-darken-1'"
-                size="small"
-                rounded="md"
-                @click="roleTab = 'provider'"
-              >
-                용역자(을) <span class="ml-1 text-caption opacity-70">{{ sessionData.state?.role_inputs?.provider?.length || 0 }}</span>
-              </v-btn>
-            </div>
-
-            <div class="overflow-y-auto" style="max-height: 285px; min-height: 285px;">
-              <template v-if="currentRoleInputs.length > 0">
-                <div 
-                  v-for="(input, index) in currentRoleInputs" 
-                  :key="index"
-                  class="mb-3 pa-3 rounded-lg"
-                  style="background-color: #FAFAFA"
-                >
-                  <div class="d-flex justify-space-between mb-1">
-                    <span class="text-caption font-weight-bold text-grey-darken-2">{{ formatDateSimple(input.timestamp) }}</span>
-                  </div>
-                  <p class="text-body-2 ma-0 text-grey-darken-3">{{ input.text }}</p>
-                </div>
-              </template>
-              <div v-else class="text-center text-grey py-8 rounded-lg" style="background-color: #FAFAFA">
-                입력 내역이 없습니다
-              </div>
-            </div>
-          </div>
         </v-card>
 
         <v-btn
