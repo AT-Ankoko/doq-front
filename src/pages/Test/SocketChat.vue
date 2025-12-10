@@ -441,7 +441,7 @@ import { MockWebSocket } from '@/services/ws/mockSocket.js';
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 
 // ----- 상태 변수 ----- //
-const USE_MOCK = false; 
+const USE_MOCK = false; // 모의 WebSocket | 사용 중:true / 가짜 웹소켓: false
 const socket = ref(null);
 const isConnected = ref(false);
 const messages = ref([]);

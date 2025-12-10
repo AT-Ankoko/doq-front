@@ -1,292 +1,229 @@
 <template>
-  <v-container class="pa-6" fluid>
-    <!-- 헤더 -->
-    <div class="d-flex align-center mb-6">
-      <v-btn icon="mdi-arrow-left" variant="text" @click="goBack" class="mr-2"></v-btn>
-      <div>
-        <h1 class="text-h5 font-weight-bold mb-1">{{ contractName || '세션 상세 정보' }}</h1>
-        <p class="text-body-2 text-grey ma-0">{{ sessionId }}</p>
+  <v-container class="pa-6" fluid style="min-height: 100vh; background-color: #F2F7FB;">
+    <v-card rounded="xl" elevation="0" class="mb-4 pa-4" style="background-color: #FFFFFF;">
+      <div class="d-flex align-center">
+        <v-btn icon="mdi-chevron-left" variant="text" @click="goBack" class="mr-2" color="grey-darken-2"></v-btn>
+        <div>
+          <h1 class="text-h5 font-weight-bold text-grey-darken-3 mb-1">
+            {{ contractName || '세션 상세 정보' }}
+          </h1>
+          <p class="text-caption text-grey ma-0">{{ sessionId }}</p>
+        </div>
+        <v-spacer></v-spacer>
+        <v-btn 
+          color="primary" 
+          variant="flat" 
+          class="font-weight-bold"
+          rounded="lg"
+          @click="fetchSessionDetail"
+          :loading="isLoading"
+        >
+          <v-icon class="mr-1" size="18">mdi-refresh</v-icon>
+          새로고침
+        </v-btn>
       </div>
-      <v-spacer></v-spacer>
-      <v-btn 
-        color="primary" 
-        variant="outlined" 
-        @click="fetchSessionDetail"
-        :loading="isLoading"
-        size="small"
-      >
-        <v-icon class="mr-1" size="18">mdi-refresh</v-icon>
-        새로고침
-      </v-btn>
-    </div>
+    </v-card>
 
-    <!-- 로딩 상태 -->
     <v-progress-linear v-if="isLoading" indeterminate color="primary" class="mb-4"></v-progress-linear>
-
-    <!-- 에러 메시지 -->
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4" closable @click:close="errorMessage = ''">
       {{ errorMessage }}
     </v-alert>
 
-    <v-row v-if="sessionData" class="h-100" style="min-height: calc(100vh - 200px);">
-      <!-- 왼쪽: 세션 정보 + 채팅 내역 -->
-      <v-col cols="12" md="6" class="d-flex flex-column" style="height: 100%;">
-        <!-- 세션 상태 카드 -->
-        <v-card rounded="xl" class="mb-4">
-          <v-toolbar color="white" density="compact" class="px-4 border-b">
-            <v-icon class="mr-2" size="20">mdi-information-outline</v-icon>
-            <span class="font-weight-bold">세션 정보</span>
-            <v-spacer></v-spacer>
-            <v-chip size="small" :color="getStepColor(sessionData.state?.current_step)">
+    <v-row v-if="sessionData" class="match-height">
+      <v-col cols="12" md="8" class="d-flex flex-column gap-4">
+        
+        <v-card rounded="xl" elevation="0" class="mb-4" style="background-color: #FFFFFF">
+          <div class="d-flex align-center justify-space-between px-6 py-4 border-b">
+            <div class="d-flex align-center">
+              <v-icon color="primary" class="mr-2">mdi-account-details-outline</v-icon>
+              <span class="text-h6 font-weight-bold text-grey-darken-3">세션 정보</span>
+            </div>
+            <v-chip color="grey-darken-3" size="small" label variant="flat" class="font-weight-bold">
               {{ getStepLabel(sessionData.state?.current_step) }}
             </v-chip>
-          </v-toolbar>
-
-          <v-card-text class="pa-4">
-            <!-- 진행률 -->
-            <div class="mb-4">
-              <div class="d-flex align-center justify-between mb-2">
-                <span class="text-caption font-weight-bold">진행률</span>
-                <span class="text-caption text-grey">{{ sessionData.state?.progress_percentage || 0 }}%</span>
+          </div>
+          <v-card-text class="pa-6">
+            <div class="mb-6">
+              <div class="d-flex justify-space-between mb-2">
+                <span class="text-caption font-weight-bold text-grey-darken-1">진행률</span>
+                <span class="text-caption font-weight-bold text-primary">{{ sessionData.state?.progress_percentage || 0 }}%</span>
               </div>
               <v-progress-linear
                 :model-value="sessionData.state?.progress_percentage || 0"
                 color="primary"
                 height="8"
                 rounded
+                bg-color="grey-lighten-3"
               ></v-progress-linear>
             </div>
-
-            <!-- 기본 정보 그리드 -->
-            <v-row dense>
-              <v-col cols="6">
-                <div class="info-item">
-                  <span class="text-caption text-grey">사용자</span>
-                  <p class="font-weight-medium ma-0">{{ sessionData.state?.user_info?.user_name || '-' }}</p>
-                </div>
+            <v-row>
+              <v-col cols="6" md="3">
+                <span class="text-caption text-grey mb-1 d-block">시작자</span>
+                <p class="text-body-2 font-weight-bold text-grey-darken-3 ma-0">{{ sessionData.state?.user_info?.user_name || '-' }}</p>
               </v-col>
-              <v-col cols="6">
-                <div class="info-item">
-                  <span class="text-caption text-grey">역할</span>
-                  <v-chip size="x-small" :color="sessionData.state?.user_info?.role === 'client' ? 'blue' : 'orange'" variant="flat">
-                    {{ sessionData.state?.user_info?.role === 'client' ? '의뢰인(갑)' : '용역자(을)' }}
-                  </v-chip>
-                </div>
+              <v-col cols="6" md="3">
+                <span class="text-caption text-grey mb-1 d-block">역할</span>
+                <v-chip size="small" color="grey-darken-3" variant="flat" label class="font-weight-medium">
+                  {{ sessionData.state?.user_info?.role === 'client' ? '의뢰인' : '용역자' }}
+                </v-chip>
               </v-col>
-              <v-col cols="6">
-                <div class="info-item">
-                  <span class="text-caption text-grey">생성일</span>
-                  <p class="text-body-2 ma-0">{{ formatDate(sessionData.state?.created_at) }}</p>
-                </div>
+              <v-col cols="6" md="3">
+                <span class="text-caption text-grey mb-1 d-block">시작일</span>
+                <p class="text-caption text-grey-darken-3 ma-0 font-weight-medium">{{ formatDate(sessionData.state?.created_at) }}</p>
               </v-col>
-              <v-col cols="6">
-                <div class="info-item">
-                  <span class="text-caption text-grey">수정일</span>
-                  <p class="text-body-2 ma-0">{{ formatDate(sessionData.state?.updated_at) }}</p>
-                </div>
+              <v-col cols="6" md="3">
+                <span class="text-caption text-grey mb-1 d-block">수정일</span>
+                <p class="text-caption text-grey-darken-3 ma-0 font-weight-medium">{{ formatDate(sessionData.state?.updated_at) }}</p>
               </v-col>
             </v-row>
-
-            <!-- 단계 히스토리 -->
-            <div class="mt-4" v-if="sessionData.state?.step_history?.length > 0">
-              <span class="text-caption text-grey d-block mb-2">진행 단계</span>
-              <div class="d-flex flex-wrap" style="gap: 6px;">
-                <v-chip 
-                  v-for="(step, index) in sessionData.state.step_history" 
-                  :key="index"
-                  size="x-small"
-                  :color="getStepColor(step)"
-                  variant="flat"
-                >
-                  {{ getStepLabel(step) }}
-                </v-chip>
-              </div>
-            </div>
           </v-card-text>
         </v-card>
 
-        <!-- 채팅 내역 카드 -->
-        <v-card rounded="xl" class="flex-grow-1 d-flex flex-column" style="min-height: 400px; max-height: 600px;">
-          <v-toolbar color="white" density="compact" class="px-4 border-b">
-            <v-icon class="mr-2" size="20">mdi-chat-outline</v-icon>
-            <span class="font-weight-bold">채팅 내역</span>
-            <v-spacer></v-spacer>
-            <v-chip size="x-small" color="grey" variant="flat">
-              {{ sessionData.chat_history?.length || 0 }}개 메시지
-            </v-chip>
-          </v-toolbar>
+        <v-card rounded="xl" elevation="0" class="d-flex flex-column" style="min-height: 400px; max-height: 600px; background-color: #FFFFFF">
+          <div class="d-flex align-center px-6 py-4 border-b">
+            <v-icon color="primary" class="mr-2">mdi-message-text-outline</v-icon>
+            <span class="text-h6 font-weight-bold text-grey-darken-3">채팅 내역</span>
+          </div>
 
-          <v-card-text class="flex-grow-1 overflow-y-auto pa-4 bg-grey-lighten-4" style="min-height: 0;">
+          <v-card-text class="flex-grow-1 overflow-y-auto pa-6 bg-grey-lighten-5" style="min-height: 0;">
             <div v-if="sessionData.chat_history?.length > 0">
-              <article
-                v-for="(chat, index) in sessionData.chat_history"
-                :key="chat.id || index"
-                class="d-flex mb-4"
-                :class="getChatAlignment(chat.participant)"
-              >
-                <!-- AI 아바타 -->
-                <v-avatar 
-                  v-if="chat.participant === 'assistant'" 
-                  color="teal" 
-                  size="32" 
-                  class="mr-2"
-                >
-                  <span class="text-caption font-weight-bold">AI</span>
-                </v-avatar>
-
-                <div
-                  class="d-flex flex-column"
-                  :class="chat.participant !== 'assistant' ? 'align-end' : 'align-start'"
-                  style="max-width: 80%;"
-                >
-                  <!-- 발신자 정보 -->
-                  <div class="d-flex align-center mb-1" style="gap: 6px;">
-                    <v-chip 
-                      size="x-small" 
-                      :color="getParticipantColor(chat.participant)"
-                      variant="flat"
-                    >
-                      {{ getParticipantLabel(chat) }}
-                    </v-chip>
-                    <span class="text-caption text-grey">
-                      {{ chat.message?.hd?.step ? getStepLabel(chat.message.hd.step) : '' }}
-                    </span>
+              <template v-for="(chat, index) in sessionData.chat_history" :key="chat.id || index">
+                
+                <!-- AI 메시지 -->
+                <article v-if="chat.participant === 'assistant'" class="d-flex flex-column align-start mb-6">
+                  <div class="d-flex align-center mb-1">
+                    <span class="font-weight-bold text-caption text-grey-darken-2 pl-1">AI DoQ</span>
+                    <span class="text-caption text-grey ml-2">{{ formatDateSimple(chat.created_at) }}</span>
                   </div>
-
-                  <!-- 메시지 버블 -->
-                  <v-card
-                    :color="getBubbleColor(chat.participant)"
-                    class="pa-3"
-                    rounded="lg"
-                    flat
+                  <div 
+                    class="pa-4 rounded-lg rounded-tl-0 text-body-2 text-grey-darken-3 elevation-0"
+                    style="max-width: 85%; white-space: pre-wrap; line-height: 1.6; background-color: #E8E8E8;"
                   >
-                    <p class="text-body-2 ma-0" style="white-space: pre-wrap; line-height: 1.6;">
-                      {{ getChatText(chat) }}
-                    </p>
-                  </v-card>
-                </div>
-              </article>
+                    {{ getChatText(chat) }}
+                  </div>
+                </article>
+
+                <!-- 사용자 메시지 (시작자) -->
+                <article v-else-if="isUserMessage(chat.participant)" class="d-flex flex-column align-end mb-6">
+                  <div class="d-flex align-center mb-1">
+                    <span class="text-caption text-grey mr-2">{{ formatDateSimple(chat.created_at) }}</span>
+                  </div>
+                  <div 
+                    class="pa-4 bg-primary rounded-lg rounded-tr-0 text-white text-body-2 elevation-0"
+                    style="max-width: 80%; white-space: pre-wrap; line-height: 1.6;"
+                  >
+                    {{ getChatText(chat) }}
+                  </div>
+                </article>
+
+                <!-- 상대방 메시지 -->
+                <article v-else class="d-flex flex-column align-start mb-6">
+                  <div class="d-flex align-center mb-1">
+                    <span class="font-weight-bold text-caption text-primary pl-1">{{ getParticipantLabel(chat) }}</span>
+                    <span class="text-caption text-grey ml-2">{{ formatDateSimple(chat.created_at) }}</span>
+                  </div>
+                  <div 
+                    class="pa-4 rounded-lg rounded-tl-0 text-grey-darken-3 text-body-2 elevation-0"
+                    style="max-width: 85%; white-space: pre-wrap; line-height: 1.6; background-color: #E3F2FD;"
+                  >
+                    {{ getChatText(chat) }}
+                  </div>
+                </article>
+
+              </template>
             </div>
-            <div v-else class="d-flex align-center justify-center h-100">
-              <div class="text-center text-grey">
-                <v-icon size="48" class="mb-2">mdi-chat-remove-outline</v-icon>
-                <p class="mb-0">채팅 내역이 없습니다.</p>
-              </div>
+            <div v-else class="d-flex align-center justify-center h-100 text-grey">
+              내역 없음
             </div>
           </v-card-text>
         </v-card>
       </v-col>
 
-      <!-- 오른쪽: 수집된 데이터 + 역할별 입력 -->
-      <v-col cols="12" md="6" class="d-flex flex-column" style="height: 100%;">
-        <!-- 수집된 데이터 카드 -->
-        <v-card rounded="xl" class="mb-4">
-          <v-toolbar color="white" density="compact" class="px-4 border-b">
-            <v-icon class="mr-2" size="20">mdi-database-outline</v-icon>
-            <span class="font-weight-bold">수집된 계약 데이터</span>
-          </v-toolbar>
-
+      <v-col cols="12" md="4" class="d-flex flex-column gap-4">
+        
+        <v-card rounded="xl" elevation="0" style="background-color: #FFFFFF">
+          <div class="d-flex align-center px-6 py-4 border-b">
+            <v-icon color="primary" class="mr-2">mdi-file-document-check-outline</v-icon>
+            <span class="text-h6 font-weight-bold text-grey-darken-3">수집된 계약 데이터</span>
+          </div>
           <v-card-text class="pa-4">
-            <v-row dense v-if="sessionData.state?.collected_data">
-              <v-col 
-                cols="6" 
-                v-for="(value, key) in filteredCollectedData" 
-                :key="key"
-              >
-                <div class="info-item">
-                  <span class="text-caption text-grey">{{ getDataLabel(key) }}</span>
-                  <p class="text-body-2 ma-0" :class="value ? '' : 'text-grey-lighten-1'">
+            <v-row dense>
+              <v-col cols="6" v-for="(value, key) in filteredCollectedData" :key="key">
+                <div class="pa-3 rounded-lg h-100" style="background-color: #FAFAFA">
+                  <span class="text-caption text-grey font-weight-bold d-block mb-1">{{ getDataLabel(key) }}</span>
+                  <p class="text-body-2 font-weight-bold text-grey-darken-3 ma-0 text-truncate">
                     {{ formatDataValue(value) }}
                   </p>
                 </div>
               </v-col>
             </v-row>
-            <div v-else class="text-center text-grey pa-4">
-              수집된 데이터가 없습니다.
+            <div v-if="!sessionData.state?.collected_data" class="text-center pa-4 text-grey">
+              데이터 없음
             </div>
           </v-card-text>
         </v-card>
 
-        <!-- 역할별 입력 내역 -->
-        <v-card rounded="xl" class="flex-grow-1 d-flex flex-column" style="min-height: 300px; max-height: 500px;">
-          <v-toolbar color="white" density="compact" class="px-4 border-b">
-            <v-icon class="mr-2" size="20">mdi-account-group-outline</v-icon>
-            <span class="font-weight-bold">역할별 입력 내역</span>
-          </v-toolbar>
+        <v-card rounded="xl" elevation="0" class="d-flex flex-column" style="background-color: #FFFFFF">
+          <div class="d-flex align-center px-6 py-4 border-b mb-2">
+            <v-icon color="primary" class="mr-2">mdi-history</v-icon>
+            <span class="text-h6 font-weight-bold text-grey-darken-3">역할별 입력 내역</span>
+          </div>
 
-          <v-card-text class="pa-0 flex-grow-1 overflow-hidden" style="min-height: 0;">
-            <v-tabs v-model="roleTab" bg-color="grey-lighten-4" density="compact">
-              <v-tab value="client">
-                <v-icon size="16" class="mr-1">mdi-account</v-icon>
-                의뢰인(갑)
-                <v-chip size="x-small" class="ml-2" color="blue" variant="flat">
-                  {{ sessionData.state?.role_inputs?.client?.length || 0 }}
-                </v-chip>
-              </v-tab>
-              <v-tab value="provider">
-                <v-icon size="16" class="mr-1">mdi-account-tie</v-icon>
-                용역자(을)
-                <v-chip size="x-small" class="ml-2" color="orange" variant="flat">
-                  {{ sessionData.state?.role_inputs?.provider?.length || 0 }}
-                </v-chip>
-              </v-tab>
-            </v-tabs>
+          <div class="pa-4 flex-grow-1 d-flex flex-column">
+            <div class="d-flex pa-1 rounded-lg mb-4" style="background-color: #FAFAFA">
+              <v-btn
+                flex="1"
+                class="flex-grow-1"
+                :variant="roleTab === 'client' ? 'flat' : 'text'"
+                :color="roleTab === 'client' ? 'primary' : 'grey-darken-1'"
+                size="small"
+                rounded="md"
+                @click="roleTab = 'client'"
+              >
+                의뢰인(갑) <span class="ml-1 text-caption opacity-70">{{ sessionData.state?.role_inputs?.client?.length || 0 }}</span>
+              </v-btn>
+              <v-btn
+                flex="1"
+                class="flex-grow-1"
+                :variant="roleTab === 'provider' ? 'flat' : 'text'"
+                :color="roleTab === 'provider' ? 'primary' : 'grey-darken-1'"
+                size="small"
+                rounded="md"
+                @click="roleTab = 'provider'"
+              >
+                용역자(을) <span class="ml-1 text-caption opacity-70">{{ sessionData.state?.role_inputs?.provider?.length || 0 }}</span>
+              </v-btn>
+            </div>
 
-            <v-tabs-window v-model="roleTab" class="h-100">
-              <v-tabs-window-item value="client" class="h-100 overflow-y-auto pa-3">
-                <div v-if="sessionData.state?.role_inputs?.client?.length > 0">
-                  <div 
-                    v-for="(input, index) in sessionData.state.role_inputs.client" 
-                    :key="index"
-                    class="mb-3 pa-3 bg-blue-lighten-5 rounded-lg"
-                  >
-                    <div class="d-flex align-center justify-between mb-1">
-                      <v-chip size="x-small" :color="getStepColor(input.step)" variant="flat">
-                        {{ getStepLabel(input.step) }}
-                      </v-chip>
-                      <span class="text-caption text-grey">{{ formatDate(input.timestamp) }}</span>
-                    </div>
-                    <p class="text-body-2 ma-0" style="line-height: 1.5;">{{ input.text }}</p>
+            <div class="overflow-y-auto" style="max-height: 453px; min-height: 453px;">
+              <template v-if="currentRoleInputs.length > 0">
+                <div 
+                  v-for="(input, index) in currentRoleInputs" 
+                  :key="index"
+                  class="mb-3 pa-3 rounded-lg"
+                  style="background-color: #FAFAFA"
+                >
+                  <div class="d-flex justify-space-between mb-1">
+                    <span class="text-caption font-weight-bold text-grey-darken-2">{{ formatDateSimple(input.timestamp) }}</span>
                   </div>
+                  <p class="text-body-2 ma-0 text-grey-darken-3">{{ input.text }}</p>
                 </div>
-                <div v-else class="text-center text-grey pa-4">
-                  입력 내역이 없습니다.
-                </div>
-              </v-tabs-window-item>
-
-              <v-tabs-window-item value="provider" class="h-100 overflow-y-auto pa-3">
-                <div v-if="sessionData.state?.role_inputs?.provider?.length > 0">
-                  <div 
-                    v-for="(input, index) in sessionData.state.role_inputs.provider" 
-                    :key="index"
-                    class="mb-3 pa-3 bg-orange-lighten-5 rounded-lg"
-                  >
-                    <div class="d-flex align-center justify-between mb-1">
-                      <v-chip size="x-small" :color="getStepColor(input.step)" variant="flat">
-                        {{ getStepLabel(input.step) }}
-                      </v-chip>
-                      <span class="text-caption text-grey">{{ formatDate(input.timestamp) }}</span>
-                    </div>
-                    <p class="text-body-2 ma-0" style="line-height: 1.5;">{{ input.text }}</p>
-                  </div>
-                </div>
-                <div v-else class="text-center text-grey pa-4">
-                  입력 내역이 없습니다.
-                </div>
-              </v-tabs-window-item>
-            </v-tabs-window>
-          </v-card-text>
+              </template>
+              <div v-else class="text-center text-grey py-8 rounded-lg" style="background-color: #FAFAFA">
+                입력 내역이 없습니다
+              </div>
+            </div>
+          </div>
         </v-card>
 
-        <!-- 계약서 초안 보기 버튼 -->
         <v-btn
-          v-if="lastContractDraft"
           color="primary"
           variant="flat"
-          block
-          class="mt-4"
           rounded="lg"
+          height="48"
+          class="font-weight-bold"
           @click="showContractDialog = true"
+          :disabled="!lastContractDraft"
         >
           <v-icon class="mr-2">mdi-file-document-outline</v-icon>
           계약서 초안 보기
@@ -294,16 +231,8 @@
       </v-col>
     </v-row>
 
-    <!-- 데이터 없음 -->
-    <div v-if="!isLoading && !sessionData" class="text-center pa-8">
-      <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-file-document-remove-outline</v-icon>
-      <p class="text-h6 text-grey mb-2">세션 정보를 찾을 수 없습니다</p>
-      <v-btn color="primary" variant="outlined" @click="goBack">목록으로 돌아가기</v-btn>
-    </div>
-
-    <!-- 계약서 초안 다이얼로그 -->
     <v-dialog v-model="showContractDialog" max-width="800" scrollable>
-      <v-card rounded="xl">
+      <v-card rounded="xl" style="background-color: #FFFFFF">
         <v-card-title class="d-flex align-center pa-4 border-b">
           <v-icon class="mr-2">mdi-file-document</v-icon>
           계약서 초안
@@ -312,7 +241,11 @@
         </v-card-title>
         
         <v-card-text class="pa-6" style="max-height: 70vh; overflow-y: auto;">
-          <div class="contract-content" v-html="renderedContractDraft"></div>
+          <div 
+            class="contract-content mx-auto" 
+            style="max-width: 680px;" 
+            v-html="renderedContractDraft"
+          ></div>
         </v-card-text>
 
         <v-card-actions class="pa-4 border-t">
@@ -329,14 +262,16 @@
 </template>
 
 <script setup>
+// ----- 선언부 (Imports, Props, Emits, Router) ----- //
 import { onMounted, ref, computed, defineEmits } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
+
 const router = useRouter();
 const route = useRoute();
 
-// ----- 상태 변수 ----- //
+// ----- 상태 변수 (State & Refs) ----- //
 const isLoading = ref(false);
 const errorMessage = ref('');
 const sessionData = ref(null);
@@ -346,7 +281,6 @@ const showContractDialog = ref(false);
 
 const API_BASE_URL = 'http://localhost:9571';
 
-// 단계별 라벨 매핑
 const stepLabels = {
   introduction: '소개',
   work_scope: '작업 범위',
@@ -360,7 +294,6 @@ const stepLabels = {
   completed: '완료'
 };
 
-// 데이터 필드 라벨 매핑
 const dataLabels = {
   client_name: '의뢰인 이름',
   client_company: '의뢰인 회사',
@@ -378,36 +311,25 @@ const dataLabels = {
   special_conditions: '특별 조건'
 };
 
-// ----- 라이프 사이클 ----- //
+// ----- 라이프 사이클 (Lifecycle Hooks) ----- //
 onMounted(() => {
   emit('set-side-nav', false);
   emit('set-top-nav', true);
-  
   sessionId.value = route.params.sid;
-  if (sessionId.value) {
-    fetchSessionDetail();
-  } else {
-    errorMessage.value = '세션 ID가 없습니다.';
-  }
+  if (sessionId.value) fetchSessionDetail();
+  else errorMessage.value = '세션 ID가 없습니다.';
 });
 
-// ----- Computed ----- //
-
-// 수집된 데이터 필터링 (null이 아닌 값만)
+// ----- 함수 정의 (Methods) ----- //
 const filteredCollectedData = computed(() => {
   const data = sessionData.value?.state?.collected_data;
   if (!data) return {};
-  return Object.fromEntries(
-    Object.entries(data).filter(([_, value]) => value !== null)
-  );
+  return Object.fromEntries(Object.entries(data).filter(([_, value]) => value !== null));
 });
 
-// 마지막 계약서 초안 추출
 const lastContractDraft = computed(() => {
   const history = sessionData.value?.chat_history;
-  if (!history || history.length === 0) return null;
-  
-  // 채팅 내역을 역순으로 순회하며 contract_draft가 있는 메시지 찾기
+  if (!history) return null;
   for (let i = history.length - 1; i >= 0; i--) {
     const draft = history[i]?.message?.bd?.contract_draft;
     if (draft) return draft;
@@ -415,251 +337,76 @@ const lastContractDraft = computed(() => {
   return null;
 });
 
-// 계약명 추출
 const contractName = computed(() => {
-  // 1. collected_data.category에서 계약명 우선 추출 (가장 정확한 값)
   const category = sessionData.value?.state?.collected_data?.category;
   if (category && category !== '{{category}}') {
-    // "용역" 접미사가 없으면 추가
     return category.includes('용역') ? category : `${category} 용역`;
   }
-  
-  // 2. contract_draft에서 계약명 추출 시도 ("계약명: XXX" 또는 "# 용역계약서 (계약명: XXX)" 패턴)
-  const history = sessionData.value?.chat_history;
-  if (history && history.length > 0) {
-    for (const chat of history) {
-      const draft = chat?.message?.bd?.contract_draft;
-      if (draft) {
-        // "(계약명: XXX)" 패턴 매칭 - {{category}} 템플릿 변수는 제외
-        const match = draft.match(/\(계약명:\s*([^)]+)\)/);
-        if (match && !match[1].includes('{{')) return match[1].trim();
-        
-        // "계약명: XXX" 패턴 매칭
-        const match2 = draft.match(/계약명:\s*(.+?)(?:\n|$)/);
-        if (match2 && !match2[1].includes('{{')) return match2[1].trim();
-      }
-    }
-  }
-  
-  // 3. 첫 번째 client 메시지에서 용역 내용 추출
-  const firstClientInput = sessionData.value?.state?.role_inputs?.client?.[0];
-  if (firstClientInput?.text) {
-    const text = firstClientInput.text;
-    // "~~ 맡기고 싶습니다", "~~ 의뢰합니다" 등의 패턴에서 추출
-    if (text.length < 50) return text;
-    return text.substring(0, 30) + '...';
-  }
-  
-  return null;
+  const name = sessionData.value?.state?.user_info?.user_name;
+  return name ? `${name}님의 계약서` : '계약서 상세';
 });
 
-// Markdown 렌더링
-const renderedContractDraft = computed(() => {
-  return renderMarkdown(lastContractDraft.value || '');
+const currentRoleInputs = computed(() => {
+  if (!sessionData.value?.state?.role_inputs) return [];
+  return sessionData.value.state.role_inputs[roleTab.value] || [];
 });
 
-// ----- 함수 정의 ----- //
+const renderedContractDraft = computed(() => renderMarkdown(lastContractDraft.value || ''));
 
-// 세션 상세 조회
 const fetchSessionDetail = async () => {
   isLoading.value = true;
-  errorMessage.value = '';
-  
   try {
     const response = await fetch(`${API_BASE_URL}/v1/archive/session/${sessionId.value}`);
     const result = await response.json();
-    
     if (result.state?.code === 'S0000' || result.state === 'SUCCESS') {
       sessionData.value = result.data;
     } else {
-      errorMessage.value = result.state?.msg || result.detail || '세션 정보를 불러오는데 실패했습니다.';
+      errorMessage.value = result.state?.msg || '로드 실패';
     }
   } catch (error) {
-    console.error('세션 상세 조회 실패:', error);
-    errorMessage.value = `서버 연결 실패: ${error.message}`;
+    errorMessage.value = error.message;
   } finally {
     isLoading.value = false;
   }
 };
 
-// 뒤로가기
-const goBack = () => {
-  router.push('/archive');
-};
-
-// 단계 라벨 반환
-const getStepLabel = (step) => {
-  return stepLabels[step] || step || '-';
-};
-
-// 단계별 색상 반환
-const getStepColor = (step) => {
-  const colors = {
-    introduction: 'blue-grey',
-    work_scope: 'blue',
-    work_period: 'indigo',
-    budget: 'purple',
-    revisions: 'pink',
-    copyright: 'orange',
-    confidentiality: 'amber',
-    conflict_resolution: 'red',
-    finalization: 'teal',
-    completed: 'green'
-  };
-  return colors[step] || 'grey';
-};
-
-// 참여자 색상
-const getParticipantColor = (participant) => {
-  if (participant === 'assistant') return 'teal';
-  if (participant === 'client') return 'blue';
-  if (participant === 'provider') return 'orange';
-  return 'grey';
-};
-
-// 참여자 라벨
+const goBack = () => router.push('/archive');
+const getStepLabel = (s) => stepLabels[s] || s || '-';
+const getChatText = (c) => c.message?.bd?.text || '';
+const getDataLabel = (k) => dataLabels[k] || k;
+const formatDataValue = (v) => (typeof v === 'string' && v.length > 30 ? v.substring(0,30)+'...' : v);
 const getParticipantLabel = (chat) => {
-  if (chat.participant === 'assistant') return 'AI';
-  if (chat.participant === 'client') {
-    return chat.message?.hd?.user_name || '의뢰인';
-  }
-  if (chat.participant === 'provider') {
-    return chat.message?.hd?.user_name || '용역자';
-  }
-  return chat.participant;
+  if (chat.participant === 'provider') return '용역자'; 
+  return '상대방';
 };
 
-// 채팅 정렬
-const getChatAlignment = (participant) => {
-  if (participant === 'assistant') return 'justify-start';
-  return 'justify-end';
+const formatDate = (d) => {
+  if(!d) return '-';
+  return new Date(d).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit'});
 };
 
-// 버블 색상
-const getBubbleColor = (participant) => {
-  if (participant === 'assistant') return 'grey-lighten-3';
-  if (participant === 'client') return 'blue-lighten-4';
-  if (participant === 'provider') return 'orange-lighten-4';
-  return 'grey-lighten-2';
+const formatDateSimple = (d) => {
+  if(!d) return '';
+  return new Date(d).toLocaleTimeString('ko-KR', { hour: '2-digit', minute:'2-digit'});
 };
 
-// 채팅 텍스트 추출
-const getChatText = (chat) => {
-  return chat.message?.bd?.text || JSON.stringify(chat.message?.bd || chat.message);
+const renderMarkdown = (md) => {
+  if(!md) return '';
+  return md.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 };
 
-// 데이터 라벨
-const getDataLabel = (key) => {
-  return dataLabels[key] || key;
-};
-
-// 데이터 값 포맷팅
-const formatDataValue = (value) => {
-  if (value === null || value === undefined) return '미입력';
-  if (typeof value === 'boolean') return value ? '확인됨' : '미확인';
-  if (typeof value === 'string' && value.length > 50) {
-    return value.substring(0, 50) + '...';
-  }
-  return value;
-};
-
-// 날짜 포맷팅
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  } catch {
-    return dateString;
-  }
-};
-
-// Markdown 렌더링 (경량)
-const escapeHtml = (str = '') =>
-  str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-
-const renderMarkdown = (md = '') => {
-  let html = escapeHtml(md);
-  // 헤더
-  html = html.replace(/^###\s+(.+)$/gm, '<h4 class="text-subtitle-1 font-weight-bold mt-4 mb-2">$1</h4>');
-  html = html.replace(/^##\s+(.+)$/gm, '<h3 class="text-h6 font-weight-bold mt-4 mb-2">$1</h3>');
-  html = html.replace(/^#\s+(.+)$/gm, '<h2 class="text-h5 font-weight-bold mt-4 mb-2">$1</h2>');
-  // 볼드/이탤릭
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-  // 리스트
-  html = html.replace(/^(?:-\s+.+\n?)+/gm, (block) => {
-    const items = block
-      .trim()
-      .split(/\n/)
-      .map((li) => li.replace(/^-\s+/, ''));
-    return `<ul class="ml-4 mb-2">${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
-  });
-  // 번호 리스트
-  html = html.replace(/^(\d+)\.\s+(.+)$/gm, '<div class="ml-4 mb-1"><strong>$1.</strong> $2</div>');
-  // 테이블 (간단 처리)
-  html = html.replace(/\|(.+)\|/g, '<div class="table-row">$1</div>');
-  // 수평선
-  html = html.replace(/^\*\*\*$/gm, '<hr class="my-4" />');
-  // 줄바꿈
-  html = html.replace(/\n/g, '<br />');
-  return html;
-};
-
-// 계약서 복사
 const copyContractDraft = () => {
-  if (lastContractDraft.value) {
-    navigator.clipboard
-      .writeText(lastContractDraft.value)
-      .then(() => {
-        alert('계약서 초안이 클립보드에 복사되었습니다.');
-      })
-      .catch(() => {
-        alert('복사 실패. 다시 시도해주세요.');
-      });
-  }
+  navigator.clipboard.writeText(lastContractDraft.value).then(() => alert('복사완료'));
+};
+
+const isUserMessage = (chatParticipant) => {
+  return sessionData.value?.state?.user_info?.role === chatParticipant;
 };
 </script>
 
 <style scoped>
-.info-item {
-  padding: 8px 0;
-}
-
-.contract-content {
-  font-size: 14px;
-  line-height: 1.8;
-}
-
-.contract-content h2,
-.contract-content h3,
-.contract-content h4 {
-  margin-top: 16px;
-  margin-bottom: 8px;
-}
-
-.contract-content ul {
-  padding-left: 20px;
-}
-
-.contract-content li {
-  margin-bottom: 4px;
-}
-
-.border-b {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.border-t {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
+.gap-4 { gap: 16px; }
+.text-body-2 { word-break: break-word; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 3px; }
 </style>
