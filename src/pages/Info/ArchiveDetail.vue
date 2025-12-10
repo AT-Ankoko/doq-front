@@ -79,7 +79,7 @@
           </v-card-text>
         </v-card>
 
-        <v-card rounded="xl" elevation="0" class="flex-grow-1 d-flex flex-column" style="min-height: 500px; background-color: #FFFFFF">
+        <v-card rounded="xl" elevation="0" class="d-flex flex-column" style="min-height: 400px; max-height: 600px; background-color: #FFFFFF">
           <div class="d-flex align-center px-6 py-4 border-b">
             <v-icon color="primary" class="mr-2">mdi-message-text-outline</v-icon>
             <span class="text-h6 font-weight-bold text-grey-darken-3">채팅 내역</span>
@@ -163,8 +163,8 @@
           </v-card-text>
         </v-card>
 
-        <v-card rounded="xl" elevation="0" class="flex-grow-1 d-flex flex-column" style="background-color: #FFFFFF">
-          <div class="d-flex align-center px-6 py-4 border-b">
+        <v-card rounded="xl" elevation="0" class="d-flex flex-column" style="background-color: #FFFFFF">
+          <div class="d-flex align-center px-6 py-4 border-b mb-2">
             <v-icon color="primary" class="mr-2">mdi-history</v-icon>
             <span class="text-h6 font-weight-bold text-grey-darken-3">역할별 입력 내역</span>
           </div>
@@ -195,7 +195,7 @@
               </v-btn>
             </div>
 
-            <div class="overflow-y-auto" style="max-height: 400px;">
+            <div class="overflow-y-auto" style="max-height: 453px; min-height: 453px;">
               <template v-if="currentRoleInputs.length > 0">
                 <div 
                   v-for="(input, index) in currentRoleInputs" 
