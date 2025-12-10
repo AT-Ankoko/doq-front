@@ -32,7 +32,7 @@
     <v-row v-if="sessionData" class="match-height">
       <v-col cols="12" md="8" class="d-flex flex-column gap-4">
         
-        <v-card rounded="xl" elevation="0" class="mb-4" style="background-color: #FFFFFF">
+        <v-card rounded="xl" elevation="0" style="background-color: #FFFFFF">
           <div class="d-flex align-center justify-space-between px-6 py-4 border-b">
             <div class="d-flex align-center">
               <v-icon color="primary" class="mr-2">mdi-account-details-outline</v-icon>
@@ -57,22 +57,18 @@
               ></v-progress-linear>
             </div>
             <v-row>
-              <v-col cols="6" md="3">
-                <span class="text-caption text-grey mb-1 d-block">시작자</span>
-                <p class="text-body-2 font-weight-bold text-grey-darken-3 ma-0">{{ sessionData.state?.user_info?.user_name || '-' }}</p>
-              </v-col>
-              <v-col cols="6" md="3">
-                <span class="text-caption text-grey mb-1 d-block">역할</span>
+              <v-col cols="6" md="4">
+                <span class="text-caption text-grey mb-2 d-block">역할</span>
                 <v-chip size="small" color="grey-darken-3" variant="flat" label class="font-weight-medium">
                   {{ sessionData.state?.user_info?.role === 'client' ? '의뢰인' : '용역자' }}
                 </v-chip>
               </v-col>
-              <v-col cols="6" md="3">
-                <span class="text-caption text-grey mb-1 d-block">시작일</span>
+              <v-col cols="6" md="4">
+                <span class="text-caption text-grey mb-2 d-block">시작일</span>
                 <p class="text-caption text-grey-darken-3 ma-0 font-weight-medium">{{ formatDate(sessionData.state?.created_at) }}</p>
               </v-col>
-              <v-col cols="6" md="3">
-                <span class="text-caption text-grey mb-1 d-block">수정일</span>
+              <v-col cols="6" md="4">
+                <span class="text-caption text-grey mb-2  d-block">수정일</span>
                 <p class="text-caption text-grey-darken-3 ma-0 font-weight-medium">{{ formatDate(sessionData.state?.updated_at) }}</p>
               </v-col>
             </v-row>
@@ -103,28 +99,29 @@
                   </div>
                 </article>
 
-                <!-- 사용자 메시지 (시작자) -->
-                <article v-else-if="isUserMessage(chat.participant)" class="d-flex flex-column align-end mb-6">
+                <!-- 의뢰인 (Client) 메시지 - 항상 오른쪽 -->
+                <article v-else-if="chat.participant === 'client'" class="d-flex flex-column align-end mb-6">
                   <div class="d-flex align-center mb-1">
                     <span class="text-caption text-grey mr-2">{{ formatDateSimple(chat.created_at) }}</span>
+                    <span class="font-weight-bold text-caption text-primary pl-1">의뢰인</span>
                   </div>
                   <div 
-                    class="pa-4 bg-primary rounded-lg rounded-tr-0 text-white text-body-2 elevation-0"
-                    style="max-width: 80%; white-space: pre-wrap; line-height: 1.6;"
+                    class="pa-4 rounded-lg rounded-tr-0 text-grey-darken-3 text-body-2 elevation-0"
+                    style="max-width: 80%; white-space: pre-wrap; line-height: 1.6; background-color: #E3F2FD;"
                   >
                     {{ getChatText(chat) }}
                   </div>
                 </article>
 
-                <!-- 상대방 메시지 -->
-                <article v-else class="d-flex flex-column align-start mb-6">
+                <!-- 용역자 (Provider) 메시지 - 항상 오른쪽 -->
+                <article v-else-if="chat.participant === 'provider'" class="d-flex flex-column align-end mb-6">
                   <div class="d-flex align-center mb-1">
-                    <span class="font-weight-bold text-caption text-primary pl-1">{{ getParticipantLabel(chat) }}</span>
-                    <span class="text-caption text-grey ml-2">{{ formatDateSimple(chat.created_at) }}</span>
+                    <span class="text-caption text-grey mr-2">{{ formatDateSimple(chat.created_at) }}</span>
+                    <span class="font-weight-bold text-caption text-grey-darken-2 pl-1">용역자</span>
                   </div>
                   <div 
-                    class="pa-4 rounded-lg rounded-tl-0 text-grey-darken-3 text-body-2 elevation-0"
-                    style="max-width: 85%; white-space: pre-wrap; line-height: 1.6; background-color: #E3F2FD;"
+                    class="pa-4 bg-primary rounded-lg rounded-tr-0 text-white text-body-2 elevation-0"
+                    style="max-width: 80%; white-space: pre-wrap; line-height: 1.6;"
                   >
                     {{ getChatText(chat) }}
                   </div>
@@ -195,7 +192,7 @@
               </v-btn>
             </div>
 
-            <div class="overflow-y-auto" style="max-height: 453px; min-height: 453px;">
+            <div class="overflow-y-auto" style="max-height: 285px; min-height: 285px;">
               <template v-if="currentRoleInputs.length > 0">
                 <div 
                   v-for="(input, index) in currentRoleInputs" 
@@ -375,10 +372,6 @@ const getStepLabel = (s) => stepLabels[s] || s || '-';
 const getChatText = (c) => c.message?.bd?.text || '';
 const getDataLabel = (k) => dataLabels[k] || k;
 const formatDataValue = (v) => (typeof v === 'string' && v.length > 30 ? v.substring(0,30)+'...' : v);
-const getParticipantLabel = (chat) => {
-  if (chat.participant === 'provider') return '용역자'; 
-  return '상대방';
-};
 
 const formatDate = (d) => {
   if(!d) return '-';
@@ -399,9 +392,6 @@ const copyContractDraft = () => {
   navigator.clipboard.writeText(lastContractDraft.value).then(() => alert('복사완료'));
 };
 
-const isUserMessage = (chatParticipant) => {
-  return sessionData.value?.state?.user_info?.role === chatParticipant;
-};
 </script>
 
 <style scoped>

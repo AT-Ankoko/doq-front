@@ -311,7 +311,7 @@
                 <h2
                   class="font-weight-bold text-h6 text-grey-darken-3 mb-0"
                 >
-                  계약서 초안
+                  {{ contractTitle }}
                 </h2>
               </div>
               <v-chip
@@ -466,7 +466,7 @@ import { MockWebSocket } from '@/services/ws/mockSocket.js';
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 
 // ----- 상태 변수 ----- //
-const USE_MOCK = false; // 모의 WebSocket | 사용 중:true / 가짜 웹소켓: false
+const USE_MOCK = false; // 모의 WebSocket 사용 여부
 const socket = ref(null);
 const isConnected = ref(false);
 const messages = ref([]);
@@ -483,6 +483,7 @@ const showMetaPanel = ref(true);
 const showSessionDialog = ref(true);
 const inputSessionId = ref('');
 const errorMessage = ref('');
+const contractTitle = ref('계약서 초안');
 
 const API_URL = 'http://localhost:9571/v1/session/connect';
 const WS_BASE_URL = 'ws://localhost:9571/v1/session/chat';
@@ -509,18 +510,37 @@ const escapeHtml = (str = '') =>
   str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 const renderMarkdown = (md = '') => {
-  let html = escapeHtml(md);
-  html = html.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
-  html = html.replace(/^##\s+(.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^#\s+(.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-  html = html.replace(/^(?:-\s+.+\n?)+/gm, (block) => {
-    const items = block.trim().split(/\n/).map((li) => li.replace(/^-\s+/, ''));
-    return `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
-  });
-  html = html.replace(/\n/g, '<br />');
-  return html;
+  let html = escapeHtml(md);
+
+  const listItems = [];
+  // ul
+  html = html.replace(/^(?:-\s+.+\n?)+/gm, (match) => {
+    const items = match.split('\n').filter(Boolean).map(item => `<li>${item.replace(/-\s+/, '')}</li>`).join('');
+    const list = `<ul>${items}</ul>`;
+    listItems.push(list);
+    return `__LIST_${listItems.length - 1}__`;
+  });
+  // ol
+  html = html.replace(/^(?:\d+\.\s+.+\n?)+/gm, (match) => {
+    const items = match.split('\n').filter(Boolean).map(item => `<li>${item.replace(/\d+\.\s+/, '')}</li>`).join('');
+    const list = `<ol>${items}</ol>`;
+    listItems.push(list);
+    return `__LIST_${listItems.length - 1}__`;
+  });
+
+  html = html.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
+  html = html.replace(/^##\s+(.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^#\s+(.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  html = html.replace(/\n/g, '<br />');
+
+  // Restore lists
+  html = html.replace(/__LIST_(\d+)__/g, (match, index) => {
+    return listItems[parseInt(index, 10)];
+  });
+
+  return html;
 };
 
 const renderedContract = computed(() => renderMarkdown(contractDraft.value));
@@ -547,6 +567,7 @@ const createNewSession = async () => {
       currentStep.value = '';
       progressPercentage.value = 0;
       metaInfo.value = null;
+      contractTitle.value = '계약서 초안';
       await new Promise((resolve) => setTimeout(resolve, 500));
       connectWebSocket();
       return;
@@ -572,6 +593,7 @@ const createNewSession = async () => {
     currentStep.value = '';
     progressPercentage.value = 0;
     metaInfo.value = null;
+    contractTitle.value = '계약서 초안';
     connectWebSocket();
   } catch (error) {
     console.error(error);
@@ -598,6 +620,7 @@ const joinExistingSession = async () => {
     currentStep.value = '';
     progressPercentage.value = 0;
     metaInfo.value = null;
+    contractTitle.value = '계약서 초안';
     inputSessionId.value = '';
     connectWebSocket();
   } catch (error) {
@@ -647,6 +670,7 @@ const connectWebSocket = () => {
           timestamp: new Date(),
         });
         if (data.bd?.contract_draft) contractDraft.value = data.bd.contract_draft;
+        if (data.bd?.contract_title) contractTitle.value = data.bd.contract_title;
         if (data.hd?.step) currentStep.value = data.hd.step;
         if (data.bd?.progress_percentage !== undefined) progressPercentage.value = data.bd.progress_percentage;
         if (data.bd?.meta) {
