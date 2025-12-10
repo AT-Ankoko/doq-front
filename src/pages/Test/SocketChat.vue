@@ -21,6 +21,78 @@
         class="d-flex flex-column"
         style="flex: 1.4; min-width: 0; height: 100%; overflow: visible;"
       >
+        <!-- 세션 아이디 입력 다이얼로그 -->
+        <v-dialog
+          v-model="showSessionDialog"
+          persistent
+          width="500"
+        >
+          <v-card>
+            <v-card-title class="text-h6 font-weight-bold">
+              <v-icon class="mr-2" color="primary">mdi-connection</v-icon>
+              세션 연결
+            </v-card-title>
+            
+            <v-card-text class="pt-4">
+              <div class="mb-4">
+                <p class="text-body-2 text-grey-darken-2 mb-4">
+                  새 세션을 생성하거나 기존 세션에 참여할 수 있습니다.
+                </p>
+              </div>
+
+              <div class="d-flex flex-column gap-3">
+                <!-- 새 세션 생성 -->
+                <div>
+                  <v-btn
+                    block
+                    color="primary"
+                    variant="flat"
+                    size="large"
+                    @click="createNewSession"
+                    :loading="isLoading"
+                  >
+                    <v-icon start>mdi-plus-circle</v-icon>
+                    새 세션 생성
+                  </v-btn>
+                  <p class="text-caption text-grey mt-2 mb-0">새로운 세션을 생성하고 연결합니다</p>
+                </div>
+
+                <!-- 구분선 -->
+                <div class="d-flex align-center gap-2 my-2">
+                  <v-divider></v-divider>
+                  <span class="text-caption text-grey-darken-1">또는</span>
+                  <v-divider></v-divider>
+                </div>
+
+                <!-- 기존 세션 참여 -->
+                <div>
+                  <p class="text-caption text-grey font-weight-bold mb-2">세션 아이디</p>
+                  <v-text-field
+                    v-model="inputSessionId"
+                    placeholder="세션 아이디 입력 (예: sbd4d9d9c6a)"
+                    variant="outlined"
+                    size="small"
+                    density="compact"
+                    @keyup.enter="joinExistingSession"
+                  ></v-text-field>
+                  <v-btn
+                    block
+                    color="success"
+                    variant="flat"
+                    size="large"
+                    @click="joinExistingSession"
+                    :loading="isLoading"
+                    :disabled="!inputSessionId.trim()"
+                  >
+                    <v-icon start>mdi-login</v-icon>
+                    세션 참여
+                  </v-btn>
+                </div>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
+
         <section
           aria-label="AI 채팅 인터페이스"
           class="d-flex flex-column w-100 h-100 rounded-xl elevation-0 border ma-2"
@@ -59,6 +131,15 @@
             </v-btn-toggle>
 
             <v-spacer></v-spacer>
+
+            <v-btn
+              icon="mdi-restart"
+              size="small"
+              variant="text"
+              @click="showSessionDialog = true"
+              color="primary"
+              title="새 세션 연결"
+            ></v-btn>
 
             <v-chip
               size="small"
@@ -374,6 +455,8 @@ const isLoading = ref(false);
 const progressPercentage = ref(0);
 const metaInfo = ref(null);
 const showMetaPanel = ref(true);
+const showSessionDialog = ref(true);
+const inputSessionId = ref('');
 
 const API_URL = 'http://localhost:9571/v1/session/connect';
 const WS_BASE_URL = 'ws://localhost:9571/v1/session/chat';
@@ -417,19 +500,90 @@ const renderMarkdown = (md = '') => {
 const renderedContract = computed(() => renderMarkdown(contractDraft.value));
 
 onMounted(() => {
-  initializeSession();
-  emit('set-top-nav', false);
-  emit('set-side-nav', true);
+  emit('set-top-nav', false);
+  emit('set-side-nav', true);
 });
 
 onUnmounted(() => {
-  if (socket.value) socket.value.close();
+  if (socket.value) socket.value.close();
 });
 
+// 새 세션 생성
+const createNewSession = async () => {
+  isLoading.value = true;
+  try {
+    if (USE_MOCK) {
+      sessionId.value = 'mock-session-id-12345';
+      showSessionDialog.value = false;
+      messages.value = [];
+      contractDraft.value = '';
+      currentStep.value = '';
+      progressPercentage.value = 0;
+      metaInfo.value = null;
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      connectWebSocket();
+      return;
+    }
+    const payload = {
+      userId: 'user123',
+      client_name: userProfiles['갑'].name,
+      provider_name: userProfiles['을'].name,
+      contract_date: userProfiles['갑'].contractDate,
+    };
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) throw new Error(`API 오류: ${response.status}`);
+    const data = await response.json();
+    sessionId.value = data.sid;
+    showSessionDialog.value = false;
+    messages.value = [];
+    contractDraft.value = '';
+    currentStep.value = '';
+    progressPercentage.value = 0;
+    metaInfo.value = null;
+    connectWebSocket();
+  } catch (error) {
+    console.error(error);
+    alert('세션 생성에 실패했습니다.');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// 기존 세션 참여
+const joinExistingSession = async () => {
+  if (!inputSessionId.value.trim()) {
+    alert('세션 아이디를 입력해주세요.');
+    return;
+  }
+  
+  isLoading.value = true;
+  try {
+    sessionId.value = inputSessionId.value.trim();
+    showSessionDialog.value = false;
+    messages.value = [];
+    contractDraft.value = '';
+    currentStep.value = '';
+    progressPercentage.value = 0;
+    metaInfo.value = null;
+    inputSessionId.value = '';
+    connectWebSocket();
+  } catch (error) {
+    console.error(error);
+    alert('세션 참여에 실패했습니다.');
+    showSessionDialog.value = true;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const initializeSession = async () => {
-  isLoading.value = true;
-  try {
-    if (USE_MOCK) {
+  isLoading.value = true;
+  try {
+    if (USE_MOCK) {
       sessionId.value = 'mock-session-id-12345';
       await new Promise((resolve) => setTimeout(resolve, 500));
       connectWebSocket();
