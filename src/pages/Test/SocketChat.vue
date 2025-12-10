@@ -34,6 +34,18 @@
             </v-card-title>
             
             <v-card-text class="pt-4">
+              <v-alert
+                v-if="errorMessage"
+                type="error"
+                variant="tonal"
+                class="mb-4"
+                density="compact"
+                closable
+                @click:close="errorMessage = ''"
+              >
+                {{ errorMessage }}
+              </v-alert>
+
               <div class="mb-4">
                 <p class="text-body-2 text-grey-darken-2 mb-4">
                   새 세션을 생성하거나 기존 세션에 참여할 수 있습니다.
@@ -140,6 +152,19 @@
               color="primary"
               title="새 세션 연결"
             ></v-btn>
+
+            <v-chip
+              v-if="sessionId"
+              size="small"
+              color="blue-lighten-5"
+              text-color="blue-darken-2"
+              class="font-weight-bold mr-2"
+              style="height: 24px; cursor: pointer;"
+              title="클릭하여 세션 아이디 복사"
+              @click="copySessionId"
+            >
+              SID: {{ sessionId }}
+            </v-chip>
 
             <v-chip
               size="small"
@@ -457,6 +482,7 @@ const metaInfo = ref(null);
 const showMetaPanel = ref(true);
 const showSessionDialog = ref(true);
 const inputSessionId = ref('');
+const errorMessage = ref('');
 
 const API_URL = 'http://localhost:9571/v1/session/connect';
 const WS_BASE_URL = 'ws://localhost:9571/v1/session/chat';
@@ -515,6 +541,7 @@ const createNewSession = async () => {
     if (USE_MOCK) {
       sessionId.value = 'mock-session-id-12345';
       showSessionDialog.value = false;
+      errorMessage.value = '';
       messages.value = [];
       contractDraft.value = '';
       currentStep.value = '';
@@ -539,6 +566,7 @@ const createNewSession = async () => {
     const data = await response.json();
     sessionId.value = data.sid;
     showSessionDialog.value = false;
+    errorMessage.value = '';
     messages.value = [];
     contractDraft.value = '';
     currentStep.value = '';
@@ -547,7 +575,7 @@ const createNewSession = async () => {
     connectWebSocket();
   } catch (error) {
     console.error(error);
-    alert('세션 생성에 실패했습니다.');
+    errorMessage.value = `세션 생성 실패: ${error?.message || '알 수 없는 오류'}`;
   } finally {
     isLoading.value = false;
   }
@@ -564,6 +592,7 @@ const joinExistingSession = async () => {
   try {
     sessionId.value = inputSessionId.value.trim();
     showSessionDialog.value = false;
+    errorMessage.value = '';
     messages.value = [];
     contractDraft.value = '';
     currentStep.value = '';
@@ -573,7 +602,7 @@ const joinExistingSession = async () => {
     connectWebSocket();
   } catch (error) {
     console.error(error);
-    alert('세션 참여에 실패했습니다.');
+    errorMessage.value = `세션 참여 실패: ${error?.message || '알 수 없는 오류'}`;
     showSessionDialog.value = true;
   } finally {
     isLoading.value = false;
@@ -589,23 +618,11 @@ const initializeSession = async () => {
       connectWebSocket();
       return;
     }
-    const payload = {
-      userId: 'user123',
-      client_name: userProfiles['갑'].name,
-      provider_name: userProfiles['을'].name,
-      contract_date: userProfiles['갑'].contractDate,
-    };
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) throw new Error(`API 오류: ${response.status}`);
-    const data = await response.json();
-    sessionId.value = data.sid;
-    connectWebSocket();
+    // 자동 생성 호출을 막아, 다이얼로그에서 명시적으로 생성/참여하도록 유지
+    errorMessage.value = '세션을 생성하거나 참여하려면 다이얼로그에서 진행해주세요.';
   } catch (error) {
     console.error(error);
+    errorMessage.value = error?.message || '세션 초기화 중 오류가 발생했습니다.';
   } finally {
     isLoading.value = false;
   }
@@ -622,21 +639,33 @@ const connectWebSocket = () => {
   socket.value.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
-      if (data.hd?.event === 'llm.response') {
-        messages.value.push({
-          role: 'llm',
-          text: data.bd?.text || '응답 없음',
-          timestamp: new Date(),
-        });
-        if (data.bd?.contract_draft) contractDraft.value = data.bd.contract_draft;
-        if (data.hd?.step) currentStep.value = data.hd.step;
-        if (data.bd?.progress_percentage !== undefined) progressPercentage.value = data.bd.progress_percentage;
-        if (data.bd?.meta) {
-          metaInfo.value = data.bd.meta;
-          showMetaPanel.value = true;
-        }
-        scrollToBottom();
-      }
+      // LLM 응답 브로드캐스트
+      if (data.hd?.event === 'llm.response') {
+        messages.value.push({
+          role: 'llm',
+          text: data.bd?.text || '응답 없음',
+          timestamp: new Date(),
+        });
+        if (data.bd?.contract_draft) contractDraft.value = data.bd.contract_draft;
+        if (data.hd?.step) currentStep.value = data.hd.step;
+        if (data.bd?.progress_percentage !== undefined) progressPercentage.value = data.bd.progress_percentage;
+        if (data.bd?.meta) {
+          metaInfo.value = data.bd.meta;
+          showMetaPanel.value = true;
+        }
+        scrollToBottom();
+      }
+
+      // 다른 사용자의 채팅 브로드캐스트 (chat.message)
+      if (data.hd?.event === 'chat.message') {
+        const incomingRole = data.hd?.user_name || data.hd?.role || '상대';
+        messages.value.push({
+          role: incomingRole,
+          text: data.bd?.text || '메시지 없음',
+          timestamp: new Date(),
+        });
+        scrollToBottom();
+      }
     } catch (e) { console.error(e); }
   };
   socket.value.onclose = () => { isConnected.value = false; };
@@ -671,6 +700,13 @@ const sendMessage = () => {
 };
 
 const getStepLabel = (step) => stepLabels[step] || '대기 중...';
+
+const copySessionId = () => {
+  if (!sessionId.value) return;
+  navigator.clipboard.writeText(sessionId.value)
+    .then(() => alert('세션 아이디를 복사했습니다.'))
+    .catch(() => alert('세션 아이디 복사에 실패했습니다.'));
+};
 
 const copyContractDraft = () => {
   if (contractDraft.value) {
