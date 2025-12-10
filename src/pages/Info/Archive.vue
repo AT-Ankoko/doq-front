@@ -1,48 +1,45 @@
 <template>
   <v-container class="pa-6">
-    <!-- 헤더 -->
-    <div class="d-flex align-center justify-between mb-6">
-      <div>
-        <h1 class="text-h4 font-weight-bold mb-2">세션 아카이브</h1>
-        <p class="text-body-2 text-grey">저장된 계약 세션 목록을 확인하세요.</p>
+    <div class="mb-6">
+      <div class="d-flex align-center mb-4">
+        <h1 class="text-h4 font-weight-bold mr-3">세션 아카이브</h1>
+        <v-btn
+          icon="mdi-refresh"
+          color="primary"
+          variant="flat"
+          size="x-small"
+          rounded="lg"
+          @click="fetchSessions"
+          :loading="isLoading"
+        ></v-btn>
       </div>
-      <v-btn 
-        color="primary" 
-        variant="outlined" 
-        @click="fetchSessions"
-        :loading="isLoading"
-      >
-        <v-icon class="mr-2">mdi-refresh</v-icon>
-        새로고침
-      </v-btn>
+      <p class="text-body-2 text-grey">저장된 계약 세션 목록을 확인하세요.</p>
     </div>
 
-    <!-- 로딩 상태 -->
     <v-progress-linear v-if="isLoading" indeterminate color="primary" class="mb-4"></v-progress-linear>
 
-    <!-- 에러 메시지 -->
     <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-4" closable @click:close="errorMessage = ''">
       {{ errorMessage }}
     </v-alert>
 
-    <!-- 세션 목록 테이블 -->
-    <v-card rounded="xl">
+    <v-card rounded="xl" elevation="0" border>
       <v-card-text class="pa-0">
         <v-data-table
+          v-model:items-per-page="itemsPerPage"
+          v-model:page="page"
           :headers="tableHeaders"
           :items="sessions"
           :loading="isLoading"
           hover
+          must-sort
           class="session-table"
           item-value="sid"
-          :items-per-page="10"
+          hide-default-footer
         >
-          <!-- 제목 -->
           <template #item.title="{ item }">
-            <div class="d-flex flex-column">
+            <div class="d-flex flex-column py-2">
               <span 
-                class="font-weight-medium text-primary cursor-pointer" 
-                style="text-decoration: underline; text-underline-offset: 2px;"
+                class="font-weight-medium text-primary cursor-pointer text-decoration-underline" 
                 @click="viewSession(item.sid)"
               >
                 {{ getSessionTitle(item) }}
@@ -51,25 +48,23 @@
             </div>
           </template>
 
-          <!-- 사용자 이름 -->
           <template #item.user_name="{ item }">
-            <v-chip size="small" color="blue-grey" variant="flat">
+            <v-chip size="small" color="blue-grey-darken-1" variant="flat" label class="font-weight-medium">
               {{ item.user_name || '미지정' }}
             </v-chip>
           </template>
 
-          <!-- 현재 단계 -->
           <template #item.current_step="{ item }">
             <v-chip 
               size="small" 
-              :color="getStepColor(item.current_step)"
+              color="grey-darken-3"
               variant="flat"
+              label
             >
               {{ getStepLabel(item.current_step) }}
             </v-chip>
           </template>
 
-          <!-- 진행률 -->
           <template #item.progress="{ item }">
             <div class="d-flex align-center" style="min-width: 120px;">
               <v-progress-linear
@@ -77,34 +72,78 @@
                 color="primary"
                 height="6"
                 rounded
-                class="mr-2"
+                class="mr-3"
               ></v-progress-linear>
-              <span class="text-caption">{{ item.progress || 0 }}%</span>
+              <span class="text-caption font-weight-bold text-grey-darken-1">{{ item.progress || 0 }}%</span>
             </div>
           </template>
 
-          <!-- 수정일시 -->
           <template #item.updated_at="{ item }">
-            <span class="text-caption text-grey">{{ formatDate(item.updated_at) }}</span>
+            <span class="text-caption text-grey-darken-1">{{ formatDate(item.updated_at) }}</span>
           </template>
 
-          <!-- 액션 -->
           <template #item.actions="{ item }">
             <v-btn
-              icon="mdi-eye"
+              variant="outlined"
+              color="grey-lighten-1"
               size="small"
-              variant="text"
-              color="primary"
+              class="text-grey-darken-1"
+              rounded="pill"
               @click="viewSession(item.sid)"
-            ></v-btn>
+              style="border-color: #E0E0E0;"
+            >
+              <v-icon start size="small" class="mr-1">mdi-eye-outline</v-icon>
+              상세보기
+            </v-btn>
           </template>
 
-          <!-- 빈 상태 -->
           <template #no-data>
-            <div class="text-center pa-8">
-              <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-archive-off-outline</v-icon>
+            <div class="text-center pa-10">
+              <v-icon size="64" color="grey-lighten-2" class="mb-4">mdi-archive-off-outline</v-icon>
               <p class="text-h6 text-grey mb-2">저장된 세션이 없습니다</p>
               <p class="text-body-2 text-grey-lighten-1">새로운 계약 세션을 시작해보세요.</p>
+            </div>
+          </template>
+
+          <template #bottom>
+            <div class="d-flex align-center justify-space-between pa-4 border-t">
+              <div class="d-flex align-center">
+                <span class="text-caption text-grey mr-3">Items per page:</span>
+                <v-text-field
+                  v-model.number="itemsPerPage"
+                  type="number"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                  min="1"
+                  style="width: 80px;"
+                  class="compact-select text-caption"
+                ></v-text-field>
+              </div>
+
+              <div class="d-flex align-center">
+                <span class="text-caption text-grey mr-4">
+                  {{ pageStart }}-{{ pageEnd }} of {{ sessions.length }}
+                </span>
+                <div class="d-flex">
+                  <v-btn 
+                    icon="mdi-chevron-left" 
+                    variant="text" 
+                    density="comfortable"
+                    color="grey"
+                    :disabled="page === 1"
+                    @click="page--"
+                  ></v-btn>
+                  <v-btn 
+                    icon="mdi-chevron-right" 
+                    variant="text" 
+                    density="comfortable"
+                    color="grey"
+                    :disabled="page >= pageCount"
+                    @click="page++"
+                  ></v-btn>
+                </div>
+              </div>
             </div>
           </template>
         </v-data-table>
@@ -114,32 +153,30 @@
 </template>
 
 <script setup>
-// ----- 선언부 (Imports, Props, Emits, Router) ----- //
-import { onMounted, onUnmounted, ref, defineEmits } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { onMounted, onUnmounted, ref, computed } from "vue";
+import { useRouter } from "vue-router";
 
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 const router = useRouter();
-const route = useRoute();
 
-// ----- 상태 변수 (State & Refs) ----- //
+// ----- 상태 변수 ----- //
 const isLoading = ref(false);
 const errorMessage = ref('');
 const sessions = ref([]);
+const page = ref(1);
+const itemsPerPage = ref(10); // 기본값 10
 
 const API_BASE_URL = 'http://localhost:9571';
 
-// 테이블 헤더
 const tableHeaders = [
-  { title: '제목', key: 'title', sortable: true },
-  { title: '사용자', key: 'user_name', sortable: true },
-  { title: '현재 단계', key: 'current_step', sortable: true },
-  { title: '진행률', key: 'progress', sortable: true },
-  { title: '수정일시', key: 'updated_at', sortable: true },
-  { title: '', key: 'actions', sortable: false, width: '60px' }
+  { title: '제목', key: 'title', sortable: true, width: '25%' },
+  { title: '사용자', key: 'user_name', sortable: true, width: '10%' },
+  { title: '현재 단계', key: 'current_step', sortable: true, width: '15%' },
+  { title: '진행률', key: 'progress', sortable: true, width: '20%' },
+  { title: '수정일시', key: 'updated_at', sortable: true, width: '15%' },
+  { title: '', key: 'actions', sortable: false, align: 'end', width: '15%' }
 ];
 
-// 단계별 라벨 매핑
 const stepLabels = {
   introduction: '소개',
   work_scope: '작업 범위',
@@ -153,123 +190,101 @@ const stepLabels = {
   completed: '완료'
 };
 
-// ----- 라이프 사이클 (Lifecycle Hooks) ----- //
+// ----- Computed (페이지네이션 계산) ----- //
+const pageCount = computed(() => Math.ceil(sessions.value.length / itemsPerPage.value));
+const pageStart = computed(() => (page.value - 1) * itemsPerPage.value + 1);
+const pageEnd = computed(() => Math.min(page.value * itemsPerPage.value, sessions.value.length));
+
+// ----- 라이프 사이클 ----- //
 onMounted(() => {
   emit('set-side-nav', false);
   emit('set-top-nav', true);
   fetchSessions();
 });
 
-onUnmounted(() => {});
-
-// ----- 함수 정의 (Methods) ----- //
-
-// 세션 목록 조회
+// ----- 함수 정의 ----- //
 const fetchSessions = async () => {
   isLoading.value = true;
   errorMessage.value = '';
-  
   try {
     const response = await fetch(`${API_BASE_URL}/v1/archive/sessions`);
     const result = await response.json();
-    
-    // state가 객체인 경우 (code로 성공 여부 확인)
     if (result.state?.code === 'S0000' || result.state === 'SUCCESS') {
       sessions.value = result.data || [];
     } else {
-      errorMessage.value = result.state?.msg || result.detail || '세션 목록을 불러오는데 실패했습니다.';
+      errorMessage.value = result.state?.msg || result.detail || '실패했습니다.';
     }
   } catch (error) {
-    console.error('세션 목록 조회 실패:', error);
+    console.error(error);
     errorMessage.value = `서버 연결 실패: ${error.message}`;
   } finally {
     isLoading.value = false;
   }
 };
 
-// 세션 상세 페이지로 이동
 const viewSession = (sid) => {
   router.push(`/archive/${sid}`);
 };
 
-// 단계 라벨 반환
-const getStepLabel = (step) => {
-  return stepLabels[step] || step || '대기 중';
-};
+const getStepLabel = (step) => stepLabels[step] || step || '대기 중';
 
-// 단계별 색상 반환
-const getStepColor = (step) => {
-  const colors = {
-    introduction: 'blue-grey',
-    work_scope: 'blue',
-    work_period: 'indigo',
-    budget: 'purple',
-    revisions: 'pink',
-    copyright: 'orange',
-    confidentiality: 'amber',
-    conflict_resolution: 'red',
-    finalization: 'teal',
-    completed: 'green'
-  };
-  return colors[step] || 'grey';
-};
-
-// 세션 제목 생성
 const getSessionTitle = (item) => {
-  // 1. category가 있으면 해당 값 사용 (가장 정확한 계약명)
   if (item.category && item.category !== '{{category}}') {
     return item.category.includes('용역') ? item.category : `${item.category} 용역`;
   }
-  
-  // 2. work_scope가 있으면 사용
   if (item.work_scope && item.work_scope !== '{{category}}') {
     return item.work_scope;
   }
-  
-  // 3. 기본값: 사용자 이름 + 계약서
   const userName = item.user_name || '익명';
   return `${userName}님의 계약서`;
 };
 
-// 세션 ID 축약
 const truncateSid = (sid) => {
   if (!sid) return '-';
   if (sid.length <= 12) return sid;
   return sid.substring(0, 12) + '...';
 };
 
-// 날짜 포맷팅
 const formatDate = (dateString) => {
   if (!dateString) return '-';
   try {
     const date = new Date(dateString);
     return date.toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit'
     });
-  } catch {
-    return dateString;
-  }
+  } catch { return dateString; }
 };
-</script> 
+</script>
 
 <style scoped>
 .session-table {
-  border-radius: 16px;
+  background-color: transparent;
 }
 
-.gap-4 {
-  gap: 16px;
+/* 테이블 헤더 스타일 조정 */
+:deep(.v-data-table-header__content) {
+  font-weight: bold;
+  color: #424242;
+  font-size: 0.875rem;
 }
 
-.cursor-pointer {
-  cursor: pointer;
+/* 정렬 아이콘 크기 조정 */
+:deep(.v-data-table-header__sort .v-icon) {
+  font-size: 1rem !important;
 }
 
-.cursor-pointer:hover {
-  opacity: 0.8;
+/* 셀렉트 박스 스타일 강제 조정 (작게 만들기) */
+:deep(.compact-select .v-field__input) {
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  min-height: 32px !important;
+  font-size: 0.8rem;
+}
+:deep(.compact-select .v-field__append-inner) {
+  padding-top: 4px !important;
+}
+:deep(.compact-select .v-field__outline) {
+  --v-field-border-opacity: 0.2;
 }
 </style>
