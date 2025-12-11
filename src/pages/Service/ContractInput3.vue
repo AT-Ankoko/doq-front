@@ -252,10 +252,10 @@ const createSessionAndGo = async () => {
     if (!res.ok) throw new Error('세션 생성 실패');
     const data = await res.json();
     
-    // [경로 수정 완료]
+    // [경로 수정: /contract-chat로 이동]
     router.push({ 
-      path: '/test/socket-chat', 
-      query: { sid: data.sid, role: currentRole } 
+      path: '/contract-chat', 
+      query: { sid: data.sid } 
     });
     
   } catch (e) {
@@ -271,10 +271,10 @@ const joinSessionAndGo = () => {
   if(!targetSid.value.trim()) return alert("세션 ID를 입력해주세요.");
   preparePendingMessage();
   
-  // [경로 수정 완료]
+  // [경로 수정: /contract-chat로 이동]
   router.push({ 
-    path: '/test/socket-chat', 
-    query: { sid: targetSid.value, role: currentRole } 
+    path: '/contract-chat', 
+    query: { sid: targetSid.value } 
   });
 };
 </script>
