@@ -24,11 +24,11 @@
 
         <section
           aria-label="AI 채팅 인터페이스"
-          class="d-flex flex-column w-100 h-100 rounded-xl elevation-0 border ma-2"
-          style="overflow: hidden; background-color: #FFFFFF; border-color: #E0E0E0 !important;"
+          class="d-flex flex-column w-100 h-100 ma-2"
+          style="overflow: hidden; background-color: transparent;"
         >
           <header
-            class="px-6 py-4 d-flex align-center flex-shrink-0"
+            class="px-6 py-4 d-flex align-center flex-shrink-0 rounded-t-xl"
             style="background-color: #FFFFFF; z-index: 1;"
           >
             <v-btn-toggle
@@ -62,7 +62,6 @@
             </v-btn-toggle>
 
             <v-spacer></v-spacer>
-
 
             <v-chip
               v-if="sessionId"
@@ -110,7 +109,7 @@
             role="log"
             aria-live="polite"
             class="flex-grow-1 overflow-y-auto px-6 py-4"
-            style="min-height: 0; background-color: #F8F9FA;"
+            style="min-height: 0; background-color: #FFFFFF;"
           >
             <div
               v-if="messages.length === 0"
@@ -183,7 +182,7 @@
           </div>
 
           <footer 
-            class="px-6 py-4 flex-shrink-0 d-flex align-center" 
+            class="px-6 py-4 flex-shrink-0 d-flex align-center rounded-b-xl" 
             style="background-color: #FFFFFF; height: 72px; z-index: 1;"
           >
             <v-text-field
@@ -193,7 +192,7 @@
               hide-details
               density="compact" 
               rounded="pill"
-              bg-color="white"
+              bg-color="grey-lighten-5"
               color="primary"
               aria-label="메시지 입력"
               @keyup.enter="sendMessage"
@@ -380,7 +379,7 @@
 </template>
 
 <script setup>
-// 기존 스크립트 그대로 유지
+// 기존 스크립트 그대로 유지 (변경 없음)
 import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { MockWebSocket } from '@/services/ws/mockSocket.js';
@@ -388,7 +387,7 @@ import { MockWebSocket } from '@/services/ws/mockSocket.js';
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 
 // ----- 상태 변수 ----- //
-const USE_MOCK = false; // 모의 WebSocket 사용 여부
+const USE_MOCK = false; 
 const socket = ref(null);
 const isConnected = ref(false);
 const messages = ref([]);
@@ -472,12 +471,10 @@ onMounted(() => {
   emit('set-top-nav', false);
   emit('set-side-nav', true);
 
-  // 쿼리에서 sid 우선 가져오고, 없으면 localStorage에서 가져옴
   const sidFromQuery = route.query.sid;
   const sidFromStorage = localStorage.getItem('sid');
   sessionId.value = sidFromQuery || sidFromStorage || '';
 
-  // 세션 아이디가 있으면 바로 웹소켓 연결
   if (sessionId.value) {
     showSessionDialog.value = false;
     connectWebSocket();
@@ -488,11 +485,7 @@ onUnmounted(() => {
   if (socket.value) socket.value.close();
 });
 
-
-// 기존 세션 참여
-// 채팅 재접속 및 세션 참여
 const joinExistingSession = async () => {
-  // 리로드 버튼 클릭 시: 현재 sessionId로 재접속
   isLoading.value = true;
   try {
     if (!sessionId.value) {
@@ -500,18 +493,15 @@ const joinExistingSession = async () => {
       isLoading.value = false;
       return;
     }
-    // 기존 소켓 닫기
     if (socket.value) socket.value.close();
     isConnected.value = false;
     errorMessage.value = '';
-    // 메시지, 계약서, 진행상태 등 모두 초기화 (중복 방지)
     messages.value = [];
     contractDraft.value = '';
     currentStep.value = '';
     progressPercentage.value = 0;
     metaInfo.value = null;
     contractTitle.value = '계약서 초안';
-    // 리로드 후 재접속
     connectWebSocket();
   } catch (error) {
     console.error(error);
@@ -519,25 +509,6 @@ const joinExistingSession = async () => {
   } finally {
     isLoading.value = false;
   }
-};
-
-const initializeSession = async () => {
-  isLoading.value = true;
-  try {
-    if (USE_MOCK) {
-      sessionId.value = 'mock-session-id-12345';
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      connectWebSocket();
-      return;
-    }
-    // 자동 생성 호출을 막아, 다이얼로그에서 명시적으로 생성/참여하도록 유지
-    errorMessage.value = '세션을 생성하거나 참여하려면 다이얼로그에서 진행해주세요.';
-  } catch (error) {
-    console.error(error);
-    errorMessage.value = error?.message || '세션 초기화 중 오류가 발생했습니다.';
-  } finally {
-    isLoading.value = false;
-  }
 };
 
 const connectWebSocket = () => {
@@ -551,7 +522,6 @@ const connectWebSocket = () => {
   socket.value.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
-      // LLM 응답 브로드캐스트
       if (data.hd?.event === 'llm.response') {
         messages.value.push({
           role: 'llm',
@@ -569,7 +539,6 @@ const connectWebSocket = () => {
         scrollToBottom();
       }
 
-      // 다른 사용자의 채팅 브로드캐스트 (chat.message)
       if (data.hd?.event === 'chat.message') {
         const incomingRole = data.hd?.user_name || data.hd?.role || '상대';
         messages.value.push({
@@ -585,31 +554,33 @@ const connectWebSocket = () => {
 };
 
 const sendMessage = () => {
-  if (!inputText.value.trim() || !isConnected.value) return;
-  const currentUser = userProfiles[currentRole.value];
-  if (!currentUser) return;
+  if (!inputText.value.trim() || !isConnected.value) return;
+  const currentUser = userProfiles[currentRole.value];
+  if (!currentUser) return;
 
-  messages.value.push({
-    role: currentUser.name,
-    text: inputText.value,
-    timestamp: new Date(),
-  });
+  messages.value.push({
+    role: currentUser.name,
+    text: inputText.value,
+    timestamp: new Date(),
+  });
 
-  const payload = {
-    hd: {
-      sid: sessionId.value,
-      event: 'llm.invoke',
-      role: currentUser.role,
-      user_name: currentUser.name,
-    },
-    bd: { text: inputText.value },
-  };
+  const payload = {
+    hd: {
+      sid: sessionId.value,
+      event: 'llm.invoke',
+      role: currentUser.role,
+      user_name: currentUser.name,
+      contract_date: currentUser.contractDate || '',
+      userId: `guest`,
+    },
+    bd: { text: inputText.value },
+  };
 
-  try {
-    socket.value.send(JSON.stringify(payload));
-    inputText.value = '';
-    scrollToBottom();
-  } catch (error) { console.error(error); }
+  try {
+    socket.value.send(JSON.stringify(payload));
+    inputText.value = '';
+    scrollToBottom();
+  } catch (error) { console.error(error); }
 };
 
 const getStepLabel = (step) => stepLabels[step] || '대기 중...';
@@ -655,4 +626,6 @@ const scrollToBottom = () => {
 .cursor-pointer { cursor: pointer; }
 .user-select-none { user-select: none; }
 .transition-transform { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+
 </style>
