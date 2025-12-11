@@ -485,8 +485,8 @@ const inputSessionId = ref('');
 const errorMessage = ref('');
 const contractTitle = ref('계약서 초안');
 
-const API_URL = 'http://localhost:9571/v1/session/connect';
-const WS_BASE_URL = 'ws://localhost:9571/v1/session/chat';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL;
 
 const stepLabels = {
   introduction: '소개 및 초기 정보 수집',
@@ -578,7 +578,7 @@ const createNewSession = async () => {
       provider_name: userProfiles['을'].name,
       contract_date: userProfiles['갑'].contractDate,
     };
-    const response = await fetch(API_URL, {
+    const response = await fetch(`${API_BASE_URL}/v1/session/connect`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

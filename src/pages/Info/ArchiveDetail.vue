@@ -223,7 +223,8 @@ const sessionId = ref('');
 const roleTab = ref('client');
 const showContractDialog = ref(false);
 
-const API_BASE_URL = 'http://localhost:9571';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL;
 
 const stepLabels = {
   introduction: '소개',
