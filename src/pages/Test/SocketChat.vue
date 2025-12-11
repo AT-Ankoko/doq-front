@@ -129,7 +129,7 @@
                 height="24"
                 style="border: none;"
               >
-                고예경 (갑)
+                {{ userProfiles.갑.name }} (갑)
               </v-btn>
               <v-btn
                 value="을"
@@ -138,7 +138,7 @@
                 height="24"
                 style="border: none;"
               >
-                김영지 (을)
+                {{ userProfiles.을.name }} (을)
               </v-btn>
             </v-btn-toggle>
 
@@ -459,20 +459,27 @@
 </template>
 
 <script setup>
-// 기존 스크립트 그대로 유지
-import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, nextTick, computed, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { MockWebSocket } from '@/services/ws/mockSocket.js';
+import { useStorageWithExpiry } from '@/common/useStorageWithExpiry';
 
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
+const route = useRoute();
+const { getItem } = useStorageWithExpiry();
 
 // ----- 상태 변수 ----- //
-const USE_MOCK = false; // 모의 WebSocket 사용 여부
+const USE_MOCK = false;
 const socket = ref(null);
 const isConnected = ref(false);
 const messages = ref([]);
 const inputText = ref('');
 const chatArea = ref(null);
-const currentRole = ref('갑');
+
+// 역할 설정
+const myRoleQuery = route.query.role || 'client'; 
+const currentRole = ref(myRoleQuery === 'client' ? '갑' : '을'); 
+
 const contractDraft = ref('');
 const currentStep = ref('');
 const sessionId = ref('');
@@ -489,91 +496,113 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL;
 
 const stepLabels = {
-  introduction: '소개 및 초기 정보 수집',
-  work_scope: '작업 범위/내용',
-  work_period: '작업 기간',
-  budget: '대금/지급 조건',
-  revisions: '수정 정책',
-  copyright: '저작권 귀속',
-  confidentiality: '기밀 유지',
-  conflict_resolution: '갈등 중재',
-  finalization: '최종 확인',
-  completed: '계약 완료',
+  introduction: '소개 및 초기 정보 수집',
+  work_scope: '작업 범위/내용',
+  work_period: '작업 기간',
+  budget: '대금/지급 조건',
+  revisions: '수정 정책',
+  copyright: '저작권 귀속',
+  confidentiality: '기밀 유지',
+  conflict_resolution: '갈등 중재',
+  finalization: '최종 확인',
+  completed: '계약 완료',
 };
 
-const userProfiles = {
-  갑: { name: '고예경', role: 'client', contractDate: '2025-12-07' },
-  을: { name: '김영지', role: 'provider', contractDate: '2025-12-07' },
-};
+// [동적 프로필 생성] localStorage 데이터 활용
+const savedData = getItem('contractData') || {};
+const clientInfo = savedData.client || {};
+const performerInfo = savedData.performer || {};
+const myUserId = 'user_' + Math.random().toString(36).substr(2, 5);
 
-const escapeHtml = (str = '') =>
-  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const userProfiles = reactive({
+  갑: { 
+    name: clientInfo.name || '의뢰인', 
+    role: 'client', 
+    contractDate: clientInfo.contractDate || '2025-01-01', 
+    userId: myRoleQuery === 'client' ? myUserId : 'partner_client' 
+  },
+  을: { 
+    name: performerInfo.name || '용역자', 
+    role: 'provider', 
+    contractDate: performerInfo.contractDate || '2025-01-01', 
+    userId: myRoleQuery === 'performer' ? myUserId : 'partner_provider' 
+  },
+});
 
+const escapeHtml = (str = '') => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const renderMarkdown = (md = '') => {
   let html = escapeHtml(md);
-
   const listItems = [];
-  // ul
   html = html.replace(/^(?:-\s+.+\n?)+/gm, (match) => {
     const items = match.split('\n').filter(Boolean).map(item => `<li>${item.replace(/-\s+/, '')}</li>`).join('');
-    const list = `<ul>${items}</ul>`;
-    listItems.push(list);
+    listItems.push(`<ul>${items}</ul>`);
     return `__LIST_${listItems.length - 1}__`;
   });
-  // ol
   html = html.replace(/^(?:\d+\.\s+.+\n?)+/gm, (match) => {
     const items = match.split('\n').filter(Boolean).map(item => `<li>${item.replace(/\d+\.\s+/, '')}</li>`).join('');
-    const list = `<ol>${items}</ol>`;
-    listItems.push(list);
+    listItems.push(`<ol>${items}</ol>`);
     return `__LIST_${listItems.length - 1}__`;
   });
-
-  html = html.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
-  html = html.replace(/^##\s+(.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^#\s+(.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-  html = html.replace(/\n/g, '<br />');
-
-  // Restore lists
-  html = html.replace(/__LIST_(\d+)__/g, (match, index) => {
-    return listItems[parseInt(index, 10)];
-  });
-
+  html = html.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>').replace(/^##\s+(.+)$/gm, '<h3>$1</h3>').replace(/^#\s+(.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>').replace(/\n/g, '<br />');
+  html = html.replace(/__LIST_(\d+)__/g, (match, index) => listItems[parseInt(index, 10)]);
   return html;
 };
-
 const renderedContract = computed(() => renderMarkdown(contractDraft.value));
 
 onMounted(() => {
   emit('set-top-nav', false);
   emit('set-side-nav', true);
+
+  if (route.query.sid) {
+    sessionId.value = route.query.sid;
+    showSessionDialog.value = false;
+    connectWebSocket();
+  }
 });
 
 onUnmounted(() => {
   if (socket.value) socket.value.close();
 });
 
-// 새 세션 생성
+// [자동 전송 로직]
+watch(isConnected, (connected) => {
+  if (connected) checkAndSendPendingMessage();
+});
+
+const checkAndSendPendingMessage = () => {
+  const pendingMsg = localStorage.getItem('pending_contract_msg');
+  if (pendingMsg) {
+    const currentUser = userProfiles[currentRole.value];
+    const payload = {
+      hd: {
+        sid: sessionId.value,
+        event: 'llm.invoke',
+        userId: currentUser.userId,
+        role: currentUser.role,
+        user_name: currentUser.name,
+        // 👇 백엔드 요구사항에 맞춰 필수 추가
+        client_name: userProfiles['갑'].name,
+        provider_name: userProfiles['을'].name,
+      },
+      bd: { text: pendingMsg },
+    };
+    try {
+      console.log("🚀 [Socket] 전송 패킷:", JSON.stringify(payload, null, 2));
+      socket.value.send(JSON.stringify(payload));
+      localStorage.removeItem('pending_contract_msg');
+    } catch (error) { console.error(error); }
+  }
+};
+
+// ... (기존 createNewSession, joinExistingSession, connectWebSocket 등 나머지 함수들은 유지하되 userProfiles 참조만 주의)
+
 const createNewSession = async () => {
   isLoading.value = true;
   try {
-    if (USE_MOCK) {
-      sessionId.value = 'mock-session-id-12345';
-      showSessionDialog.value = false;
-      errorMessage.value = '';
-      messages.value = [];
-      contractDraft.value = '';
-      currentStep.value = '';
-      progressPercentage.value = 0;
-      metaInfo.value = null;
-      contractTitle.value = '계약서 초안';
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      connectWebSocket();
-      return;
-    }
+    const currentUser = userProfiles[currentRole.value];
     const payload = {
-      userId: 'user123',
+      userId: currentUser.userId,
       client_name: userProfiles['갑'].name,
       provider_name: userProfiles['을'].name,
       contract_date: userProfiles['갑'].contractDate,
@@ -597,19 +626,14 @@ const createNewSession = async () => {
     connectWebSocket();
   } catch (error) {
     console.error(error);
-    errorMessage.value = `세션 생성 실패: ${error?.message || '알 수 없는 오류'}`;
+    errorMessage.value = `세션 생성 실패: ${error?.message || '오류'}`;
   } finally {
     isLoading.value = false;
   }
 };
 
-// 기존 세션 참여
 const joinExistingSession = async () => {
-  if (!inputSessionId.value.trim()) {
-    alert('세션 아이디를 입력해주세요.');
-    return;
-  }
-  
+  if (!inputSessionId.value.trim()) return alert('세션 아이디를 입력해주세요.');
   isLoading.value = true;
   try {
     sessionId.value = inputSessionId.value.trim();
@@ -625,44 +649,26 @@ const joinExistingSession = async () => {
     connectWebSocket();
   } catch (error) {
     console.error(error);
-    errorMessage.value = `세션 참여 실패: ${error?.message || '알 수 없는 오류'}`;
+    errorMessage.value = `세션 참여 실패: ${error?.message || '오류'}`;
     showSessionDialog.value = true;
   } finally {
     isLoading.value = false;
   }
 };
 
-const initializeSession = async () => {
-  isLoading.value = true;
-  try {
-    if (USE_MOCK) {
-      sessionId.value = 'mock-session-id-12345';
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      connectWebSocket();
-      return;
-    }
-    // 자동 생성 호출을 막아, 다이얼로그에서 명시적으로 생성/참여하도록 유지
-    errorMessage.value = '세션을 생성하거나 참여하려면 다이얼로그에서 진행해주세요.';
-  } catch (error) {
-    console.error(error);
-    errorMessage.value = error?.message || '세션 초기화 중 오류가 발생했습니다.';
-  } finally {
-    isLoading.value = false;
-  }
-};
-
 const connectWebSocket = () => {
-  if (!sessionId.value) return;
-  const wsUrl = `${WS_BASE_URL}?sid=${sessionId.value}`;
-  
-  if (USE_MOCK) socket.value = new MockWebSocket(wsUrl);
-  else socket.value = new WebSocket(wsUrl);
+  if (!sessionId.value) return;
+  const clientName = encodeURIComponent(userProfiles['갑'].name);
+  const providerName = encodeURIComponent(userProfiles['을'].name);
+  const wsUrl = `${WS_BASE_URL}?sid=${sessionId.value}&client_name=${clientName}&provider_name=${providerName}`;
+  
+  if (USE_MOCK) socket.value = new MockWebSocket(wsUrl);
+  else socket.value = new WebSocket(wsUrl);
 
-  socket.value.onopen = () => { isConnected.value = true; };
-  socket.value.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      // LLM 응답 브로드캐스트
+  socket.value.onopen = () => { isConnected.value = true; };
+  socket.value.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
       if (data.hd?.event === 'llm.response') {
         messages.value.push({
           role: 'llm',
@@ -679,8 +685,6 @@ const connectWebSocket = () => {
         }
         scrollToBottom();
       }
-
-      // 다른 사용자의 채팅 브로드캐스트 (chat.message)
       if (data.hd?.event === 'chat.message') {
         const incomingRole = data.hd?.user_name || data.hd?.role || '상대';
         messages.value.push({
@@ -690,75 +694,72 @@ const connectWebSocket = () => {
         });
         scrollToBottom();
       }
-    } catch (e) { console.error(e); }
-  };
-  socket.value.onclose = () => { isConnected.value = false; };
+    } catch (e) { console.error(e); }
+  };
+  socket.value.onclose = () => { isConnected.value = false; };
 };
 
 const sendMessage = () => {
-  if (!inputText.value.trim() || !isConnected.value) return;
-  const currentUser = userProfiles[currentRole.value];
-  if (!currentUser) return;
+  if (!inputText.value.trim() || !isConnected.value) return;
+  const currentUser = userProfiles[currentRole.value];
+  if (!currentUser) return;
 
-  messages.value.push({
-    role: currentUser.name,
-    text: inputText.value,
-    timestamp: new Date(),
-  });
+  messages.value.push({
+    role: currentUser.name,
+    text: inputText.value,
+    timestamp: new Date(),
+  });
 
-  const payload = {
-    hd: {
-      sid: sessionId.value,
-      event: 'llm.invoke',
-      role: currentUser.role,
-      user_name: currentUser.name,
-    },
-    bd: { text: inputText.value },
-  };
+  const payload = {
+    hd: {
+      sid: sessionId.value,
+      event: 'llm.invoke',
+      userId: currentUser.userId,
+      role: currentUser.role,
+      user_name: currentUser.name,
+      // 👇 백엔드 요구사항에 맞춰 필수 추가
+      client_name: userProfiles['갑'].name,
+      provider_name: userProfiles['을'].name,
+    },
+    bd: { text: inputText.value },
+  };
 
-  try {
-    socket.value.send(JSON.stringify(payload));
-    inputText.value = '';
-    scrollToBottom();
-  } catch (error) { console.error(error); }
+  try {
+    console.log("🚀 [Socket] 전송 패킷:", JSON.stringify(payload, null, 2));
+    socket.value.send(JSON.stringify(payload));
+    inputText.value = '';
+    scrollToBottom();
+  } catch (error) { console.error(error); }
 };
 
 const getStepLabel = (step) => stepLabels[step] || '대기 중...';
-
 const copySessionId = () => {
   if (!sessionId.value) return;
-  navigator.clipboard.writeText(sessionId.value)
-    .then(() => alert('세션 아이디를 복사했습니다.'))
-    .catch(() => alert('세션 아이디 복사에 실패했습니다.'));
+  navigator.clipboard.writeText(sessionId.value).then(() => alert('세션 아이디 복사 완료')).catch(() => alert('복사 실패'));
 };
-
 const copyContractDraft = () => {
-  if (contractDraft.value) {
-    navigator.clipboard.writeText(contractDraft.value)
-      .then(() => alert('복사되었습니다.'))
-      .catch(() => alert('실패했습니다.'));
-  }
+  if (contractDraft.value) {
+    navigator.clipboard.writeText(contractDraft.value).then(() => alert('복사되었습니다.')).catch(() => alert('실패했습니다.'));
+  }
 };
-
 const downloadContractDraft = () => {
-  if (contractDraft.value) {
-    const element = document.createElement('a');
-    const file = new Blob([contractDraft.value], { type: 'text/plain;charset=utf-8' });
-    element.href = URL.createObjectURL(file);
-    element.download = `contract.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  }
+  if (contractDraft.value) {
+    const element = document.createElement('a');
+    const file = new Blob([contractDraft.value], { type: 'text/plain;charset=utf-8' });
+    element.href = URL.createObjectURL(file);
+    element.download = `contract.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  }
 };
-
 const scrollToBottom = () => {
-  nextTick(() => {
-    if (chatArea.value) {
-      const el = chatArea.value.$el ?? chatArea.value;
-      el.scrollTop = el.scrollHeight;
-    }
-  });
+  nextTick(() => {
+    if (chatArea.value) {
+      const el = chatArea.value.$el ?? chatArea.value;
+      el.scrollTop = el.scrollHeight;
+    }
+  });
 };
 </script>
 
