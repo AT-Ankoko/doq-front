@@ -241,33 +241,10 @@
       </v-col>
     </v-row>
 
-    <v-dialog v-model="showContractDialog" max-width="800" scrollable>
-      <v-card rounded="xl" style="background-color: #FFFFFF">
-        <v-card-title class="d-flex align-center pa-4 border-b">
-          <v-icon class="mr-2">mdi-file-document</v-icon>
-          계약서 초안
-          <v-spacer></v-spacer>
-          <v-btn icon="mdi-close" variant="text" @click="showContractDialog = false"></v-btn>
-        </v-card-title>
-        
-        <v-card-text class="pa-6" style="max-height: 70vh; overflow-y: auto;">
-          <div 
-            class="contract-content mx-auto" 
-            style="max-width: 680px;" 
-            v-html="renderedContractDraft"
-          ></div>
-        </v-card-text>
-
-        <v-card-actions class="pa-4 border-t">
-          <v-btn variant="outlined" size="small" @click="copyContractDraft">
-            <v-icon class="mr-1" size="18">mdi-content-copy</v-icon>
-            복사
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn variant="text" @click="showContractDialog = false">닫기</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <ContractDraftDialog 
+      v-model="showContractDialog" 
+      :contract-draft="lastContractDraft" 
+    />
   </v-container>
 </template>
 
@@ -275,17 +252,12 @@
 // ----- 선언부 (Imports, Props, Emits, Router) ----- //
 import { onMounted, ref, computed, defineEmits } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import markdownit from 'markdown-it';
+import ContractDraftDialog from '@/components/ContractDraftDialog.vue';
 
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 
 const router = useRouter();
 const route = useRoute();
-
-const md = markdownit({
-  html: true,
-  breaks: true,
-});
 
 // ----- 상태 변수 (State & Refs) ----- //
 const isLoading = ref(false);
@@ -380,11 +352,6 @@ const currentRoleInputs = computed(() => {
   return sessionData.value.state.role_inputs[roleTab.value] || [];
 });
 
-const renderedContractDraft = computed(() => {
-  const draft = lastContractDraft.value || '';
-  return md.render(draft);
-});
-
 const fetchSessionDetail = async () => {
   isLoading.value = true;
   try {
@@ -418,10 +385,6 @@ const formatDateSimple = (d) => {
   return new Date(d).toLocaleTimeString('ko-KR', { hour: '2-digit', minute:'2-digit'});
 };
 
-const copyContractDraft = () => {
-  navigator.clipboard.writeText(lastContractDraft.value).then(() => alert('복사완료'));
-};
-
 </script>
 
 <style scoped>
@@ -429,42 +392,4 @@ const copyContractDraft = () => {
 .text-body-2 { word-break: break-word; }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 3px; }
-
-.contract-content :deep(h1),
-.contract-content :deep(h2),
-.contract-content :deep(h3) {
-  margin-top: 24px;
-  margin-bottom: 16px;
-  font-weight: 700;
-  line-height: 1.4;
-}
-
-.contract-content :deep(h1) { font-size: 1.8em; }
-.contract-content :deep(h2) { font-size: 1.5em; }
-.contract-content :deep(h3) { font-size: 1.2em; }
-
-.contract-content :deep(table) {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1.5em;
-  margin-bottom: 1.5em;
-  border: 1px solid #ccc;
-  font-size: 0.95em;
-}
-
-.contract-content :deep(th),
-.contract-content :deep(td) {
-  border: 1px solid #ccc;
-  padding: 12px 15px;
-  text-align: left;
-}
-
-.contract-content :deep(th) {
-  background-color: #f5f5f5;
-  font-weight: 600;
-}
-
-.contract-content :deep(tr:nth-child(even)) {
-  background-color: #fafafa;
-}
 </style>
