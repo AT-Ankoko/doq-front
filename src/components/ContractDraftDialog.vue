@@ -19,7 +19,7 @@
           <div 
             v-for="(pageHtml, index) in pages" 
             :key="index"
-            class="a4-page elevation-4 mb-8"
+            class="a4-page elevation-4"
           >
             <div class="page-header">
               <img 
@@ -79,10 +79,8 @@ const emit = defineEmits(['update:modelValue']);
 const md = markdownit({ 
   html: true, 
   breaks: true,
-  typographer: true // 특수문자 및 따옴표 처리 개선
+  typographer: true 
 });
-
-// markdown-it 볼드 마크다운 정상 처리 (커스텀 렌더러 완전히 제거)
 
 const pages = ref([]); 
 
@@ -103,8 +101,7 @@ const paginateContent = (markdownText) => {
 
   let fullHtml = md.render(markdownText);
 
-  // [핵심 추가] 마크다운 파싱 후 남아있는 **텍스트** 패턴을 strong 태그로 변환
-  // (정규식: **텍스트**) → <strong>텍스트</strong>
+  // 마크다운 파싱 후 남아있는 **텍스트** 패턴을 strong 태그로 변환
   fullHtml = fullHtml.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
   const hiddenEl = hiddenContentRef.value;
@@ -182,6 +179,7 @@ const handlePrint = () => {
 .doc-scroll-area {
   height: 75vh;
   overflow-y: auto;
+  position: relative; /* [수정됨] 이 속성이 없으면 숨겨진 calculation div가 영역 밖으로 밀려나 빈 공간을 만듭니다. */
 }
 
 /* A4 페이지 공통 스타일 */
@@ -259,14 +257,11 @@ const handlePrint = () => {
   .calculation-mode { display: none !important; }
 }
 
-/* [핵심 수정] 
-  - strong, b 태그에 대해 font-weight를 강제로 지정 
-  - Vuetify나 다른 CSS Reset에 의해 굵기가 사라지는 것을 방지
-*/
+/* 스타일 리셋 방지 및 강조 스타일 */
 .a4-page :deep(strong),
 .a4-page :deep(b) {
   font-weight: 700 !important;
-  color: #000000; /* 강조를 위해 약간 더 진하게 */
+  color: #000000; 
 }
 
 .a4-page :deep(h1) { font-size: 22px; font-weight: 800; margin-bottom: 24px; border-bottom: 2px solid #000; padding-bottom: 10px; line-height: 1.2; }
