@@ -43,29 +43,29 @@
             </v-chip>
           </div>
           <v-card-text class="pa-6">
-            <div class="mb-6">
-              <div class="d-flex justify-space-between mb-2">
-                <span class="text-caption font-weight-bold text-grey-darken-1">진행률</span>
-                <span class="text-caption font-weight-bold text-primary">{{ sessionData.state?.progress_percentage || 0 }}%</span>
+            <div class="d-flex align-center flex-wrap">
+              <div class="flex-grow-1 mr-8" style="min-width: 200px;">
+                <div class="d-flex justify-space-between mb-1">
+                  <span class="text-caption font-weight-bold text-grey-darken-1">진행률</span>
+                  <span class="text-caption font-weight-bold text-primary">{{ sessionData.state?.progress_percentage || 0 }}%</span>
+                </div>
+                <v-progress-linear
+                  :model-value="sessionData.state?.progress_percentage || 0"
+                  color="primary"
+                  height="8"
+                  rounded
+                  bg-color="grey-lighten-3"
+                ></v-progress-linear>
               </div>
-              <v-progress-linear
-                :model-value="sessionData.state?.progress_percentage || 0"
-                color="primary"
-                height="8"
-                rounded
-                bg-color="grey-lighten-3"
-              ></v-progress-linear>
+              <div class="mr-8">
+                <span class="text-caption text-grey mb-1 d-block">시작일</span>
+                <p class="text-body-2 text-grey-darken-3 ma-0 font-weight-bold">{{ formatDate(sessionData.state?.created_at) }}</p>
+              </div>
+              <div>
+                <span class="text-caption text-grey mb-1 d-block">수정일</span>
+                <p class="text-body-2 text-grey-darken-3 ma-0 font-weight-bold">{{ formatDate(sessionData.state?.updated_at) }}</p>
+              </div>
             </div>
-            <v-row>
-              <v-col cols="6" md="4">
-                <span class="text-caption text-grey mb-2 d-block">시작일</span>
-                <p class="text-caption text-grey-darken-3 ma-0 font-weight-medium">{{ formatDate(sessionData.state?.created_at) }}</p>
-              </v-col>
-              <v-col cols="6" md="4">
-                <span class="text-caption text-grey mb-2  d-block">수정일</span>
-                <p class="text-caption text-grey-darken-3 ma-0 font-weight-medium">{{ formatDate(sessionData.state?.updated_at) }}</p>
-              </v-col>
-            </v-row>
           </v-card-text>
         </v-card>
 
