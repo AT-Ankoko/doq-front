@@ -48,10 +48,12 @@
             </div>
           </template>
 
-          <template #item.user_name="{ item }">
-            <v-chip size="small" color="blue-grey-darken-1" variant="flat" label class="font-weight-medium">
-              {{ item.user_name || '미지정' }}
-            </v-chip>
+          <template #item.client_name="{ item }">
+            <span class="text-caption font-weight-bold text-grey-darken-3">{{ item.client_name || '-' }}</span>
+          </template>
+
+          <template #item.provider_name="{ item }">
+            <span class="text-caption text-grey-darken-2">{{ item.provider_name || '-' }}</span>
           </template>
 
           <template #item.current_step="{ item }">
@@ -171,11 +173,12 @@ const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL;
 
 const tableHeaders = [
   { title: '제목', key: 'title', sortable: true, width: '25%' },
-  { title: '사용자', key: 'user_name', sortable: true, width: '10%' },
+  { title: '의뢰인', key: 'client_name', sortable: true, width: '10%' },
+  { title: '용역인', key: 'provider_name', sortable: true, width: '10%' },
   { title: '현재 단계', key: 'current_step', sortable: true, width: '15%' },
-  { title: '진행률', key: 'progress', sortable: true, width: '20%' },
+  { title: '진행률', key: 'progress', sortable: true, width: '15%' },
   { title: '수정일시', key: 'updated_at', sortable: true, width: '15%' },
-  { title: '', key: 'actions', sortable: false, align: 'end', width: '15%' }
+  { title: '', key: 'actions', sortable: false, align: 'end', width: '10%' }
 ];
 
 const stepLabels = {
@@ -236,6 +239,11 @@ const getSessionTitle = (item) => {
   if (item.work_scope && item.work_scope !== '{{category}}') {
     return item.work_scope;
   }
+  
+  if (item.client_name) {
+    return `${item.client_name}님의 계약서`;
+  }
+  
   const userName = item.user_name || '익명';
   return `${userName}님의 계약서`;
 };
