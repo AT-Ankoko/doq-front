@@ -28,6 +28,13 @@
                   alt="Company Logo" 
                   class="header-logo"
                 />
+                
+                <!-- <img 
+                  v-if="qrCodeDataUrl" 
+                  :src="qrCodeDataUrl" 
+                  alt="QR Code" 
+                  class="header-qrcode"
+                /> -->
               </div>
 
               <div class="page-body">
@@ -65,15 +72,17 @@
 import { ref, watch, nextTick } from 'vue';
 import markdownit from 'markdown-it';
 import html2pdf from 'html2pdf.js';
+import QRCode from 'qrcode'; // [추가됨] npm install qrcode 필요
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
-  contractDraft: { type: String, default: '' }
+  contractDraft: { type: String, default: '' },
+  // [추가됨] QR코드에 넣을 URL (없으면 현재 페이지 주소 사용)
+  documentUrl: { type: String, default: '' } 
 });
 
 const emit = defineEmits(['update:modelValue']);
 
-// Markdown 설정
 const md = markdownit({ 
   html: true, 
   breaks: true,
@@ -81,6 +90,7 @@ const md = markdownit({
 });
 
 const pages = ref([]); 
+const qrCodeDataUrl = ref(''); // [추가됨] 생성된 QR 이미지 데이터
 
 const hiddenPageRef = ref(null);
 const hiddenContentRef = ref(null);
@@ -89,12 +99,30 @@ const PAGE_CONTENT_HEIGHT_PX = 964;
 
 watch(() => [props.contractDraft, props.modelValue], async ([newDraft, isOpen]) => {
   if (isOpen && newDraft) {
+    await generateQrCode(); // [추가됨] QR 생성
     await nextTick();
     paginateContent(newDraft);
   }
 }, { immediate: true });
 
-// 페이지 분할 로직
+// [추가됨] QR 코드 생성 함수
+const generateQrCode = async () => {
+  try {
+    // props로 URL이 넘어오면 사용, 없으면 현재 브라우저 주소 사용
+    const targetUrl = props.documentUrl || window.location.href;
+    
+    qrCodeDataUrl.value = await QRCode.toDataURL(targetUrl, {
+      margin: 0,
+      color: {
+        dark: '#000000', // QR 코드 색상
+        light: '#FFFFFF' // 배경색
+      }
+    });
+  } catch (err) {
+    console.error('QR Code generation failed', err);
+  }
+};
+
 const paginateContent = (markdownText) => {
   if (!hiddenContentRef.value) return;
 
@@ -143,36 +171,19 @@ const paginateContent = (markdownText) => {
 // --- PDF 설정 ---
 const getPdfOptions = () => {
   return {
-    margin: 0, // 기본 마진 제거
+    margin: 0, 
     filename: `계약서_${new Date().toISOString().slice(0,10)}.pdf`,
     image: { type: 'jpeg', quality: 1.0 },
     html2canvas: { 
       scale: 2, 
       useCORS: true, 
       scrollY: 0,
-      windowWidth: 794, // A4 pixel width (96dpi) 고정
-      // height: undefined // 높이는 html2pdf 자동 계산에 맡김
+      windowWidth: 794,
+      height: undefined
     },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    // [중요] 자동 페이지 나눔을 방지하고 우리가 나눈 페이지 그대로 사용
     pagebreak: { mode: 'avoid-all' } 
   };
-};
-
-const saveAsPdf = () => {
-  const element = document.getElementById('print-area');
-  
-  // PDF 변환 중 스타일 변경 (여백 제거, 높이 조정 등)
-  element.classList.add('printing-mode');
-  
-  html2pdf()
-    .set(getPdfOptions())
-    .from(element)
-    .save()
-    .then(() => {
-      // 변환 후 스타일 복구
-      element.classList.remove('printing-mode');
-    });
 };
 
 const handlePrint = () => {
@@ -193,17 +204,12 @@ const handlePrint = () => {
 </script>
 
 <style scoped>
-/* 화면 스크롤 영역 */
 .doc-scroll-area {
   height: 75vh;
   overflow-y: auto;
   position: relative; 
 }
 
-/* [Print Container]
-  PDF 캡처 대상 컨테이너.
-  Flex Column을 사용하여 div 사이의 공백(Whitespace) 제거 
-*/
 .print-container {
   width: 210mm;
   padding: 0;
@@ -213,10 +219,9 @@ const handlePrint = () => {
   flex-direction: column;
 }
 
-/* A4 페이지 공통 스타일 */
 .a4-page {
   width: 210mm;
-  height: 297mm; /* 화면에서는 정사이즈 */
+  height: 297mm; 
   padding: 0; 
   background-color: white;
   box-sizing: border-box;
@@ -231,30 +236,23 @@ const handlePrint = () => {
   flex-direction: column;
 }
 
-/* 화면 미리보기용: 페이지 사이 간격과 그림자 */
 .mb-8 { margin-bottom: 32px !important; }
 
-/* [Printing Mode]
-  PDF 생성 시 강제 적용되는 스타일 
-*/
 .print-container.printing-mode .a4-page {
-  box-shadow: none !important;      /* 그림자 제거 */
-  margin-bottom: 0 !important;      /* 마진 제거 */
-  border: none !important;          /* 테두리 제거 */
+  box-shadow: none !important;
+  margin-bottom: 0 !important;
+  border: none !important;
   
-  /* [핵심] 렌더링 오차로 인한 빈 페이지 생성 방지 (0.2mm 축소) */
   height: 296.8mm !important;       
   min-height: 296.8mm !important;
   max-height: 296.8mm !important;
   overflow: hidden;
 }
 
-/* 마지막 페이지도 마진 없이 딱 붙게 처리 */
 .print-container.printing-mode .a4-page:last-child {
   margin-bottom: 0 !important;
 }
 
-/* 높이 계산용 숨김 영역 */
 .calculation-mode {
   position: absolute;
   top: 0;
@@ -264,14 +262,15 @@ const handlePrint = () => {
   z-index: -1;
 }
 
-/* --- 페이지 내부 레이아웃 --- */
+/* --- [수정됨] 페이지 헤더 스타일 --- */
 .page-header {
   width: 100%;
   height: 64px;               
   background-color: #000000;  
-  padding: 16px 40px;         
+  padding: 16px 8px 16px 40px;         
   display: flex;
-  align-items: center;        
+  align-items: center;  
+  justify-content: space-between; /* [추가됨] 양 끝 정렬 */      
   flex-shrink: 0;
 }
 
@@ -282,6 +281,15 @@ const handlePrint = () => {
   display: block;
 }
 
+/* [추가됨] QR 코드 스타일 */
+.header-qrcode {
+  height: 48px; /* 로고 높이와 동일 */
+  width: 48px;  /* 정사각형 */
+  background-color: white; /* 검은 헤더 위에서 인식되도록 배경 흰색 */
+  padding: 2px; /* QR 코드 주변 여백 (Quiet Zone) */
+  object-fit: contain;
+}
+
 .page-body {
   flex-grow: 1;
   padding: 28px 36px 60px 36px; 
@@ -290,7 +298,6 @@ const handlePrint = () => {
 .page-content { 
   width: 100%; 
   height: 964px;
-  /* border: 2px dashed #1976d2; */
   border-radius: 8px;
   box-sizing: border-box;
   overflow: hidden; 
@@ -304,7 +311,6 @@ const handlePrint = () => {
   width: 100%;
 }
 
-/* 브라우저 기본 인쇄(Ctrl+P) 대응 */
 @media print {
   @page { margin: 0 !important; size: A4; }
   body, html { margin: 0 !important; padding: 0 !important; }
@@ -315,14 +321,12 @@ const handlePrint = () => {
   .calculation-mode { display: none !important; }
 }
 
-/* --- Markdown 컨텐츠 스타일 --- */
 .a4-page :deep(strong),
 .a4-page :deep(b) {
   font-weight: 700 !important;
   color: #000000; 
 }
 
-/* 불필요한 요소 제거 */
 .a4-page :deep(hr) {
   display: none !important;
 }
