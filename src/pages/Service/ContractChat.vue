@@ -470,33 +470,47 @@ const userProfiles = reactive({
 const escapeHtml = (str = '') =>
   str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+
 const renderMarkdown = (md = '') => {
+  // 1. HTML 이스케이프
   let html = escapeHtml(md);
 
+  // ✅ [핵심 수정] 볼드/이탤릭 처리를 리스트 처리보다 "먼저" 수행합니다.
+  // 이렇게 해야 리스트(- ) 안에 있는 **글자**도 <strong>으로 변환된 뒤에 리스트로 묶입니다.
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+  // 2. 리스트(ul, ol) 처리
   const listItems = [];
-  // ul
+  
+  // ul (순서 없는 리스트)
   html = html.replace(/^(?:-\s+.+\n?)+/gm, (match) => {
-    const items = match.split('\n').filter(Boolean).map(item => `<li>${item.replace(/-\s+/, '')}</li>`).join('');
+    const items = match.split('\n').filter(Boolean).map(item => {
+      // 이미 위에서 strong 태그로 변했어도, 앞의 '- '만 잘라내면 되므로 문제없음
+      return `<li>${item.replace(/^-\s+/, '')}</li>`;
+    }).join('');
     const list = `<ul>${items}</ul>`;
     listItems.push(list);
     return `__LIST_${listItems.length - 1}__`;
   });
-  // ol
+
+  // ol (순서 있는 리스트)
   html = html.replace(/^(?:\d+\.\s+.+\n?)+/gm, (match) => {
-    const items = match.split('\n').filter(Boolean).map(item => `<li>${item.replace(/\d+\.\s+/, '')}</li>`).join('');
+    const items = match.split('\n').filter(Boolean).map(item => {
+      return `<li>${item.replace(/^\d+\.\s+/, '')}</li>`;
+    }).join('');
     const list = `<ol>${items}</ol>`;
     listItems.push(list);
     return `__LIST_${listItems.length - 1}__`;
   });
 
+  // 3. 헤더 및 줄바꿈 처리
   html = html.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
   html = html.replace(/^##\s+(.+)$/gm, '<h3>$1</h3>');
   html = html.replace(/^#\s+(.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
   html = html.replace(/\n/g, '<br />');
 
-  // Restore lists
+  // 4. 리스트 복원
   html = html.replace(/__LIST_(\d+)__/g, (match, index) => {
     return listItems[parseInt(index, 10)];
   });
