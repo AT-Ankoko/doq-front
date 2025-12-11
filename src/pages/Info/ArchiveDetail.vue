@@ -223,8 +223,7 @@ const sessionId = ref('');
 const roleTab = ref('client');
 const showContractDialog = ref(false);
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://doq-server.onrender.com';
 
 const stepLabels = {
   introduction: '소개',
@@ -287,8 +286,14 @@ const contractName = computed(() => {
   if (category && category !== '{{category}}') {
     return category.includes('용역') ? category : `${category} 용역`;
   }
-  const name = sessionData.value?.state?.user_info?.user_name;
-  return name ? `${name}님의 계약서` : '계약서 상세';
+  const userInfo = sessionData.value?.state?.user_info;
+  if (userInfo?.client_name && userInfo?.provider_name) {
+    return `${userInfo.client_name} - ${userInfo.provider_name} 계약`;
+  }
+  if (userInfo?.client_name) {
+    return `${userInfo.client_name}님의 계약`;
+  }
+  return '계약서 상세';
 });
 
 const currentRoleInputs = computed(() => {
