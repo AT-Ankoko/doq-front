@@ -394,8 +394,8 @@ const inputSessionId = ref('');
 const errorMessage = ref('');
 const contractTitle = ref('계약서 초안');
 
-const API_URL = 'http://localhost:9571/v1/session/connect';
-const WS_BASE_URL = 'ws://localhost:9571/v1/session/chat';
+const API_URL = 'https://doq-server.onrender.com/v1/session/connect';
+const WS_BASE_URL = 'wss://doq-server.onrender.com/v1/session/chat';
 
 const stepLabels = {
   introduction: '소개 및 초기 정보 수집',
@@ -463,54 +463,6 @@ onUnmounted(() => {
   if (socket.value) socket.value.close();
 });
 
-// 새 세션 생성
-const createNewSession = async () => {
-  isLoading.value = true;
-  try {
-    if (USE_MOCK) {
-      sessionId.value = 'mock-session-id-12345';
-      showSessionDialog.value = false;
-      errorMessage.value = '';
-      messages.value = [];
-      contractDraft.value = '';
-      currentStep.value = '';
-      progressPercentage.value = 0;
-      metaInfo.value = null;
-      contractTitle.value = '계약서 초안';
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      connectWebSocket();
-      return;
-    }
-    const payload = {
-      userId: 'user123',
-      client_name: userProfiles['갑'].name,
-      provider_name: userProfiles['을'].name,
-      contract_date: userProfiles['갑'].contractDate,
-    };
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) throw new Error(`API 오류: ${response.status}`);
-    const data = await response.json();
-    sessionId.value = data.sid;
-    showSessionDialog.value = false;
-    errorMessage.value = '';
-    messages.value = [];
-    contractDraft.value = '';
-    currentStep.value = '';
-    progressPercentage.value = 0;
-    metaInfo.value = null;
-    contractTitle.value = '계약서 초안';
-    connectWebSocket();
-  } catch (error) {
-    console.error(error);
-    errorMessage.value = `세션 생성 실패: ${error?.message || '알 수 없는 오류'}`;
-  } finally {
-    isLoading.value = false;
-  }
-};
 
 // 기존 세션 참여
 const joinExistingSession = async () => {

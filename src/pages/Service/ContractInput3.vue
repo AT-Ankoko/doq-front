@@ -210,33 +210,11 @@ const selectType = (type) => {
   showSessionDialog.value = true;
 };
 
-// AI용 메시지 포장
-const preparePendingMessage = () => {
-  const allData = getItem('contractData') || {};
-  const myData = allData[currentRole] || {};
-  const roleKr = currentRole === 'client' ? '의뢰인(갑)' : '용역자(을)';
-  
-  const message = `
-[사전 입력 정보]
-- 역할: ${roleKr}
-- 성함/상호: ${myData.name || '미입력'}
-- 연락처: ${myData.contact || '미입력'}
-- 사업자번호: ${myData.businessNumber || '미입력'}
-- 주소: ${myData.address || '미입력'}
-- 희망 프로젝트 유형: ${selectedType.value?.title || '미정'}
-
-위 정보를 바탕으로 계약 논의를 진행하겠습니다.
-  `.trim();
-
-  localStorage.setItem('pending_contract_msg', message);
-  return myData;
-};
 
 // [방장] 세션 생성 후 이동 -> /test/socket-chat
 const createSessionAndGo = async () => {
   isLoading.value = true;
   try {
-    const myData = preparePendingMessage();
     // contractData를 session_info 구조로 변환
     const contractDataRaw = getItem('contractData') || {};
     const userId = 'user_' + Math.random().toString(36).substr(2, 9);
@@ -252,6 +230,8 @@ const createSessionAndGo = async () => {
     if (!res.ok) throw new Error('세션 생성 실패');
     const data = await res.json();
     
+    // sid를 localStorage에도 저장
+    localStorage.setItem('sid', data.sid);
     // [경로 수정: /contract-chat로 이동]
     router.push({ 
       path: '/contract-chat', 
@@ -269,8 +249,9 @@ const createSessionAndGo = async () => {
 // [참여자] 기존 세션 이동 -> /test/socket-chat
 const joinSessionAndGo = () => {
   if(!targetSid.value.trim()) return alert("세션 ID를 입력해주세요.");
-  preparePendingMessage();
   
+  // sid를 localStorage에도 저장
+  localStorage.setItem('sid', targetSid.value);
   // [경로 수정: /contract-chat로 이동]
   router.push({ 
     path: '/contract-chat', 
