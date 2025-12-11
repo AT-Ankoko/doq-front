@@ -14,27 +14,29 @@
       </v-card-title>
       
       <v-card-text class="pa-0 bg-blue-grey-lighten-5 doc-scroll-area">
-        <div class="doc-wrapper py-12 d-flex flex-column align-center" id="print-area">
+        <div class="doc-wrapper py-12 d-flex flex-column align-center">
           
-          <div 
-            v-for="(pageHtml, index) in pages" 
-            :key="index"
-            class="a4-page elevation-4"
-          >
+          <div id="print-area" class="print-container">
+            <div 
+              v-for="(pageHtml, index) in pages" 
+              :key="index"
+              class="a4-page elevation-4 mb-8" 
+            >
             <div class="page-header">
-              <img 
-                src="@/assets/main-logo-white.svg" 
-                alt="Company Logo" 
-                class="header-logo"
-              />
-            </div>
+                <img 
+                  src="@/assets/main-logo-white.svg" 
+                  alt="Company Logo" 
+                  class="header-logo"
+                />
+              </div>
 
-            <div class="page-body">
-              <div class="page-content" v-html="pageHtml"></div>
-            </div>
-            
-            <div class="page-footer text-grey text-caption text-center">
-              - {{ index + 1 }} -
+              <div class="page-body">
+                <div class="page-content" v-html="pageHtml"></div>
+              </div>
+              
+              <div class="page-footer text-grey text-caption text-center">
+                - {{ index + 1 }} -
+              </div>
             </div>
           </div>
 
@@ -75,7 +77,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-// typographer 옵션 추가 (특수문자 처리 개선)
 const md = markdownit({ 
   html: true, 
   breaks: true,
@@ -98,10 +99,7 @@ watch(() => [props.contractDraft, props.modelValue], async ([newDraft, isOpen]) 
 
 const paginateContent = (markdownText) => {
   if (!hiddenContentRef.value) return;
-
   let fullHtml = md.render(markdownText);
-
-  // 마크다운 파싱 후 남아있는 **텍스트** 패턴을 strong 태그로 변환
   fullHtml = fullHtml.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
   const hiddenEl = hiddenContentRef.value;
@@ -121,12 +119,9 @@ const paginateContent = (markdownText) => {
 
     if (currentHeight > PAGE_CONTENT_HEIGHT_PX) {
       hiddenEl.removeChild(clone);
-
       if (currentPageNodes.length > 0) {
-        const pageHtml = currentPageNodes.map(node => node.outerHTML).join('');
-        currentPages.push(pageHtml);
+        currentPages.push(currentPageNodes.map(node => node.outerHTML).join(''));
       }
-
       hiddenEl.innerHTML = '';
       hiddenEl.appendChild(child.cloneNode(true));
       currentPageNodes = [child];
@@ -136,8 +131,7 @@ const paginateContent = (markdownText) => {
   });
 
   if (currentPageNodes.length > 0) {
-    const pageHtml = currentPageNodes.map(node => node.outerHTML).join('');
-    currentPages.push(pageHtml);
+    currentPages.push(currentPageNodes.map(node => node.outerHTML).join(''));
   }
 
   pages.value = currentPages;
@@ -146,28 +140,48 @@ const paginateContent = (markdownText) => {
 // --- PDF 설정 ---
 const getPdfOptions = () => {
   return {
-    margin: 0,
+    margin: 0, // PDF 자체 마진 제거
     filename: `계약서_${new Date().toISOString().slice(0,10)}.pdf`,
-    image: { type: 'jpeg', quality: 1.0 },
-    html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { 
+      scale: 2, 
+      useCORS: true, 
+      scrollY: 0,
+      // [수정 4] 캡처 시 창 너비를 A4 너비에 맞게 고정하여 레이아웃 깨짐 방지
+      windowWidth: 794 // 약 210mm in pixels (96dpi 기준)
+    },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: 'avoid-all' } 
+    pagebreak: { mode: ['css', 'legacy'] } // [수정 5] 페이지 나눔 모드 명시
   };
 };
 
 const saveAsPdf = () => {
+  // [수정 6] PDF 생성 전 화면상의 마진/그림자 임시 제거 (필요시)
   const element = document.getElementById('print-area');
-  html2pdf().set(getPdfOptions()).from(element).save();
+  
+  // PDF 생성 시에는 화면의 갭을 없애기 위해 클래스 조작이 필요할 수 있음
+  element.classList.add('printing-mode');
+  
+  html2pdf()
+    .set(getPdfOptions())
+    .from(element)
+    .save()
+    .then(() => {
+      element.classList.remove('printing-mode');
+    });
 };
 
 const handlePrint = () => {
   const element = document.getElementById('print-area');
+  element.classList.add('printing-mode');
+  
   html2pdf()
     .set(getPdfOptions())
     .from(element)
     .toPdf()
     .get('pdf')
     .then((pdf) => {
+      element.classList.remove('printing-mode');
       pdf.autoPrint();
       window.open(pdf.output('bloburl'), '_blank');
     });
@@ -175,11 +189,18 @@ const handlePrint = () => {
 </script>
 
 <style scoped>
-/* 화면 스크롤 영역 */
 .doc-scroll-area {
   height: 75vh;
   overflow-y: auto;
-  position: relative; /* [수정됨] 이 속성이 없으면 숨겨진 calculation div가 영역 밖으로 밀려나 빈 공간을 만듭니다. */
+  position: relative; 
+}
+
+/* [수정 7] print-container 스타일 추가 */
+.print-container {
+  width: 210mm; /* A4 너비 고정 */
+  padding: 0;
+  margin: 0;
+  background-color: transparent;
 }
 
 /* A4 페이지 공통 스타일 */
@@ -189,15 +210,28 @@ const handlePrint = () => {
   padding: 0; 
   background-color: white;
   box-sizing: border-box;
-  
   color: #333333;           
   font-size: 11px;          
   font-family: "Pretendard", "Malgun Gothic", sans-serif;
   line-height: 1.6;
-  
   position: relative;
   display: flex;
   flex-direction: column;
+  /* 페이지 구분을 위한 그림자 (PDF 캡처시 제거됨) */
+}
+
+/* [수정 8] PDF 캡처 중(.printing-mode)일 때 스타일 강제 적용 */
+/* 중요: html2canvas는 현재 화면의 스타일을 그대로 찍기 때문에 
+   캡처 순간에 마진과 그림자를 없애야 합니다. */
+.print-container.printing-mode .a4-page {
+  box-shadow: none !important;
+  margin-bottom: 0 !important; /* 페이지 사이 갭 제거 */
+  border: none !important;
+}
+
+/* 미리보기 화면에서의 페이지 간격 (PDF 캡처시는 위 코드로 무시됨) */
+.mb-8 {
+  margin-bottom: 32px !important;
 }
 
 .calculation-mode {
@@ -236,7 +270,6 @@ const handlePrint = () => {
   height: 964px;
   border: 2px dashed #1976d2;
   border-radius: 8px;
-  background: rgba(25, 118, 210, 0.04);
   box-sizing: border-box;
   overflow: hidden; 
   display: block; 
@@ -249,30 +282,17 @@ const handlePrint = () => {
   width: 100%;
 }
 
+/* @media print는 브라우저 인쇄(Ctrl+P)용이며 html2pdf에는 영향을 덜 주지만 유지 */
 @media print {
   @page { margin: 0 !important; size: A4; }
   body, html { margin: 0 !important; padding: 0 !important; }
-  .a4-page { margin: 0; box-shadow: none; border: none; page-break-after: always; }
-  .page-content { border: none !important; background: none !important; height: auto !important; }
-  .calculation-mode { display: none !important; }
+  .doc-wrapper { padding: 0 !important; }
+  .a4-page { margin: 0 !important; padding: 0 !important; box-shadow: none; border: none; page-break-after: always; }
+  .page-header, .page-body { padding: 0 !important; } /* 필요시 조절 */
 }
 
-/* 스타일 리셋 방지 및 강조 스타일 */
-.a4-page :deep(strong),
-.a4-page :deep(b) {
-  font-weight: 700 !important;
-  color: #000000; 
-}
-
-/* 페이지 중간에 불필요한 hr(수평선) 완전 제거 */
-.a4-page :deep(hr) {
-  border: none !important;
-  background: none !important;
-  height: 0 !important;
-  margin: 0 !important;
-  display: none !important;
-}
-
+.a4-page :deep(strong), .a4-page :deep(b) { font-weight: 700 !important; color: #000000; }
+.a4-page :deep(hr) { display: none !important; }
 .a4-page :deep(h1) { font-size: 22px; font-weight: 800; margin-bottom: 24px; border-bottom: 2px solid #000; padding-bottom: 10px; line-height: 1.2; }
 .a4-page :deep(h2) { font-size: 16px; font-weight: 700; margin-top: 24px; margin-bottom: 8px; color: #07043A; }
 .a4-page :deep(h3) { font-size: 14px; color: #07043A; font-weight: 700; margin-top: 20px; margin-bottom: 8px; border-bottom: 2px solid #07043A; padding-bottom: 8px; }
