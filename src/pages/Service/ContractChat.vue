@@ -75,6 +75,16 @@
               SID: {{ sessionId }}
             </v-chip>
 
+            <v-btn
+              icon="mdi-refresh"
+              color="primary"
+              variant="text"
+              size="small"
+              class="ml-2"
+              title="채팅 재접속"
+              @click="joinExistingSession"
+            ></v-btn>
+
             <v-chip
               size="small"
               :color="isConnected ? 'grey-lighten-2' : 'red-lighten-4'"
@@ -478,29 +488,32 @@ onUnmounted(() => {
 
 
 // 기존 세션 참여
+// 채팅 재접속 및 세션 참여
 const joinExistingSession = async () => {
-  if (!inputSessionId.value.trim()) {
-    alert('세션 아이디를 입력해주세요.');
-    return;
-  }
-  
+  // 리로드 버튼 클릭 시: 현재 sessionId로 재접속
   isLoading.value = true;
   try {
-    sessionId.value = inputSessionId.value.trim();
-    showSessionDialog.value = false;
+    if (!sessionId.value) {
+      alert('세션 아이디가 없습니다.');
+      isLoading.value = false;
+      return;
+    }
+    // 기존 소켓 닫기
+    if (socket.value) socket.value.close();
+    isConnected.value = false;
     errorMessage.value = '';
+    // 메시지, 계약서, 진행상태 등 모두 초기화 (중복 방지)
     messages.value = [];
     contractDraft.value = '';
     currentStep.value = '';
     progressPercentage.value = 0;
     metaInfo.value = null;
     contractTitle.value = '계약서 초안';
-    inputSessionId.value = '';
+    // 리로드 후 재접속
     connectWebSocket();
   } catch (error) {
     console.error(error);
-    errorMessage.value = `세션 참여 실패: ${error?.message || '알 수 없는 오류'}`;
-    showSessionDialog.value = true;
+    errorMessage.value = `채팅 재접속 실패: ${error?.message || '알 수 없는 오류'}`;
   } finally {
     isLoading.value = false;
   }
