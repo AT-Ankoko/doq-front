@@ -23,7 +23,7 @@
           >
             <div class="page-header">
               <img 
-                src="https://via.placeholder.com/80x22/000000/FFFFFF?text=LOGO" 
+                src="@/assets/main-logo-white.svg" 
                 alt="Company Logo" 
                 class="header-logo"
               />
