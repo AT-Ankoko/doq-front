@@ -97,7 +97,7 @@
                 <article v-else-if="chat.participant === 'client'" class="d-flex flex-column align-end mb-6">
                   <div class="d-flex align-center mb-1">
                     <span class="text-caption text-grey mr-2">{{ formatDateSimple(chat.created_at) }}</span>
-                    <span class="font-weight-bold text-caption text-primary pl-1">의뢰인</span>
+                    <span class="font-weight-bold text-caption text-grey-darken-2 pl-1">의뢰인</span>
                   </div>
                   <div 
                     class="pa-4 rounded-lg rounded-tr-0 text-grey-darken-3 text-body-2 elevation-0"
