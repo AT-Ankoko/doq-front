@@ -77,7 +77,6 @@ import QRCode from 'qrcode'; // [추가됨] npm install qrcode 필요
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
   contractDraft: { type: String, default: '' },
-  // [추가됨] QR코드에 넣을 URL (없으면 현재 페이지 주소 사용)
   documentUrl: { type: String, default: '' } 
 });
 
@@ -90,7 +89,7 @@ const md = markdownit({
 });
 
 const pages = ref([]); 
-const qrCodeDataUrl = ref(''); // [추가됨] 생성된 QR 이미지 데이터
+const qrCodeDataUrl = ref(''); 
 
 const hiddenPageRef = ref(null);
 const hiddenContentRef = ref(null);
@@ -99,24 +98,18 @@ const PAGE_CONTENT_HEIGHT_PX = 964;
 
 watch(() => [props.contractDraft, props.modelValue], async ([newDraft, isOpen]) => {
   if (isOpen && newDraft) {
-    await generateQrCode(); // [추가됨] QR 생성
+    await generateQrCode(); 
     await nextTick();
     paginateContent(newDraft);
   }
 }, { immediate: true });
 
-// [추가됨] QR 코드 생성 함수
 const generateQrCode = async () => {
   try {
-    // props로 URL이 넘어오면 사용, 없으면 현재 브라우저 주소 사용
     const targetUrl = props.documentUrl || window.location.href;
-    
     qrCodeDataUrl.value = await QRCode.toDataURL(targetUrl, {
       margin: 0,
-      color: {
-        dark: '#000000', // QR 코드 색상
-        light: '#FFFFFF' // 배경색
-      }
+      color: { dark: '#000000', light: '#FFFFFF' }
     });
   } catch (err) {
     console.error('QR Code generation failed', err);
@@ -134,6 +127,47 @@ const paginateContent = (markdownText) => {
 
   const parser = new DOMParser();
   const doc = parser.parseFromString(fullHtml, 'text/html');
+
+  // -----------------------------------------------------------
+  // [수정됨] '(인)' 테이블 셀 디자인 커스텀 로직
+  // -----------------------------------------------------------
+  const tdElements = doc.querySelectorAll('td');
+  
+  tdElements.forEach(td => {
+    if (td.textContent.includes('(인)')) {
+      // 1. TD 자체 설정 (공간 확보 및 정렬)
+      td.style.height = '100px'; 
+      td.style.verticalAlign = 'middle'; // 세로 중앙 정렬
+      
+      // 2. 내부 서명 박스 생성
+      const signBox = document.createElement('div');
+      signBox.textContent = '(인)';
+      
+      // 3. 서명 박스 스타일 적용
+      Object.assign(signBox.style, {
+        width: '60px',
+        height: '60px',               // 정사각형
+        border: '2px solid #E0E0E0',  // 테두리 컬러 및 두께
+        borderRadius: '6px',          // 라운드
+        color: '#999999',             // 텍스트 컬러
+        fontSize: '11px',             // 폰트 사이즈
+        fontWeight: 'normal',
+        margin: '0 auto',             // TD 내부 가로 중앙 정렬
+        
+        // 박스 내부 텍스트 정중앙 정렬 (Flex)
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        boxSizing: 'border-box'
+      });
+
+      // 4. 기존 텍스트를 지우고 박스로 교체
+      td.innerHTML = ''; 
+      td.appendChild(signBox);
+    }
+  });
+  // -----------------------------------------------------------
+
   const children = Array.from(doc.body.children);
 
   let currentPages = [];
@@ -225,12 +259,10 @@ const handlePrint = () => {
   padding: 0; 
   background-color: white;
   box-sizing: border-box;
-  
   color: #333333;           
   font-size: 11px;          
   font-family: "Pretendard", "Malgun Gothic", sans-serif;
   line-height: 1.6;
-  
   position: relative;
   display: flex;
   flex-direction: column;
@@ -242,7 +274,6 @@ const handlePrint = () => {
   box-shadow: none !important;
   margin-bottom: 0 !important;
   border: none !important;
-  
   height: 296.8mm !important;       
   min-height: 296.8mm !important;
   max-height: 296.8mm !important;
@@ -262,7 +293,7 @@ const handlePrint = () => {
   z-index: -1;
 }
 
-/* --- [수정됨] 페이지 헤더 스타일 --- */
+/* --- 페이지 헤더 스타일 --- */
 .page-header {
   width: 100%;
   height: 64px;               
@@ -270,7 +301,7 @@ const handlePrint = () => {
   padding: 16px 8px 16px 40px;         
   display: flex;
   align-items: center;  
-  justify-content: space-between; /* [추가됨] 양 끝 정렬 */      
+  justify-content: space-between;     
   flex-shrink: 0;
 }
 
@@ -281,12 +312,11 @@ const handlePrint = () => {
   display: block;
 }
 
-/* [추가됨] QR 코드 스타일 */
 .header-qrcode {
-  height: 48px; /* 로고 높이와 동일 */
-  width: 48px;  /* 정사각형 */
-  background-color: white; /* 검은 헤더 위에서 인식되도록 배경 흰색 */
-  padding: 2px; /* QR 코드 주변 여백 (Quiet Zone) */
+  height: 48px; 
+  width: 48px;  
+  background-color: white; 
+  padding: 2px; 
   object-fit: contain;
 }
 
