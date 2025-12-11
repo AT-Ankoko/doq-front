@@ -128,45 +128,69 @@ const paginateContent = (markdownText) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(fullHtml, 'text/html');
 
-  // -----------------------------------------------------------
-  // [수정됨] '(인)' 테이블 셀 디자인 커스텀 로직
-  // -----------------------------------------------------------
+  // ===========================================================
+  // [1] '(인)' 서명란 스타일링
+  // ===========================================================
   const tdElements = doc.querySelectorAll('td');
-  
   tdElements.forEach(td => {
     if (td.textContent.includes('(인)')) {
-      // 1. TD 자체 설정 (공간 확보 및 정렬)
       td.style.height = '100px'; 
-      td.style.verticalAlign = 'middle'; // 세로 중앙 정렬
+      td.style.verticalAlign = 'middle'; 
       
-      // 2. 내부 서명 박스 생성
       const signBox = document.createElement('div');
       signBox.textContent = '(인)';
       
-      // 3. 서명 박스 스타일 적용
       Object.assign(signBox.style, {
         width: '60px',
-        height: '60px',               // 정사각형
-        border: '2px solid #E0E0E0',  // 테두리 컬러 및 두께
-        borderRadius: '6px',          // 라운드
-        color: '#999999',             // 텍스트 컬러
-        fontSize: '11px',             // 폰트 사이즈
+        height: '60px',
+        border: '2px solid #E0E0E0',
+        borderRadius: '6px',
+        color: '#999999',
+        fontSize: '11px',
         fontWeight: 'normal',
-        margin: '0 auto',             // TD 내부 가로 중앙 정렬
-        
-        // 박스 내부 텍스트 정중앙 정렬 (Flex)
+        margin: '0 auto',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         boxSizing: 'border-box'
       });
 
-      // 4. 기존 텍스트를 지우고 박스로 교체
       td.innerHTML = ''; 
       td.appendChild(signBox);
     }
   });
-  // -----------------------------------------------------------
+
+  // ===========================================================
+  // [2] '첨부: 개발 세부내역...' 박스 스타일링
+  // ===========================================================
+  const pElements = doc.querySelectorAll('p'); 
+  
+  pElements.forEach(p => {
+    if (p.textContent.includes('첨부: 개발 세부내역 및 견적서 (필수)')) {
+      Object.assign(p.style, {
+        width: '100%',                
+        height: '40px',               
+        backgroundColor: '#F8FAFC',   
+        border: '1px solid #E0E0E0',  
+        borderRadius: '6px',          
+        
+        display: 'flex',
+        justifyContent: 'center',     
+        alignItems: 'center',         
+        textAlign: 'center',
+        
+        // [수정됨] 전체 굵게 설정을 제거하고 normal로 변경
+        // 이렇게 해야 마크다운의 **텍스트** 만 굵게 표시됩니다.
+        fontSize: '11px',
+        fontWeight: 'normal',            
+        color: '#333333',
+        
+        margin: '16px 0',             
+        boxSizing: 'border-box'       
+      });
+    }
+  });
+  // ===========================================================
 
   const children = Array.from(doc.body.children);
 
