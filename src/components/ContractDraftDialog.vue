@@ -20,9 +20,9 @@
             <div 
               v-for="(pageHtml, index) in pages" 
               :key="index"
-              class="a4-page elevation-4 mb-8" 
+              class="a4-page elevation-4 mb-8"
             >
-            <div class="page-header">
+              <div class="page-header">
                 <img 
                   src="@/assets/main-logo-white.svg" 
                   alt="Company Logo" 
@@ -52,13 +52,9 @@
 
       <v-card-actions class="pa-4 border-t bg-white">
         <v-spacer></v-spacer>
-        <v-btn variant="outlined" color="secondary" class="mr-2" @click="handlePrint">
+        <v-btn variant="flat" color="primary" @click="handlePrint">
           <v-icon start>mdi-printer</v-icon>
           인쇄
-        </v-btn>
-        <v-btn variant="flat" color="primary" @click="saveAsPdf">
-          <v-icon start>mdi-download</v-icon>
-          PDF 저장
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -77,6 +73,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
+// Markdown 설정
 const md = markdownit({ 
   html: true, 
   breaks: true,
@@ -97,8 +94,10 @@ watch(() => [props.contractDraft, props.modelValue], async ([newDraft, isOpen]) 
   }
 }, { immediate: true });
 
+// 페이지 분할 로직
 const paginateContent = (markdownText) => {
   if (!hiddenContentRef.value) return;
+
   let fullHtml = md.render(markdownText);
   fullHtml = fullHtml.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
@@ -119,9 +118,12 @@ const paginateContent = (markdownText) => {
 
     if (currentHeight > PAGE_CONTENT_HEIGHT_PX) {
       hiddenEl.removeChild(clone);
+
       if (currentPageNodes.length > 0) {
-        currentPages.push(currentPageNodes.map(node => node.outerHTML).join(''));
+        const pageHtml = currentPageNodes.map(node => node.outerHTML).join('');
+        currentPages.push(pageHtml);
       }
+
       hiddenEl.innerHTML = '';
       hiddenEl.appendChild(child.cloneNode(true));
       currentPageNodes = [child];
@@ -131,7 +133,8 @@ const paginateContent = (markdownText) => {
   });
 
   if (currentPageNodes.length > 0) {
-    currentPages.push(currentPageNodes.map(node => node.outerHTML).join(''));
+    const pageHtml = currentPageNodes.map(node => node.outerHTML).join('');
+    currentPages.push(pageHtml);
   }
 
   pages.value = currentPages;
@@ -140,26 +143,26 @@ const paginateContent = (markdownText) => {
 // --- PDF 설정 ---
 const getPdfOptions = () => {
   return {
-    margin: 0, // PDF 자체 마진 제거
+    margin: 0, // 기본 마진 제거
     filename: `계약서_${new Date().toISOString().slice(0,10)}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
+    image: { type: 'jpeg', quality: 1.0 },
     html2canvas: { 
       scale: 2, 
       useCORS: true, 
       scrollY: 0,
-      // [수정 4] 캡처 시 창 너비를 A4 너비에 맞게 고정하여 레이아웃 깨짐 방지
-      windowWidth: 794 // 약 210mm in pixels (96dpi 기준)
+      windowWidth: 794, // A4 pixel width (96dpi) 고정
+      // height: undefined // 높이는 html2pdf 자동 계산에 맡김
     },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['css', 'legacy'] } // [수정 5] 페이지 나눔 모드 명시
+    // [중요] 자동 페이지 나눔을 방지하고 우리가 나눈 페이지 그대로 사용
+    pagebreak: { mode: 'avoid-all' } 
   };
 };
 
 const saveAsPdf = () => {
-  // [수정 6] PDF 생성 전 화면상의 마진/그림자 임시 제거 (필요시)
   const element = document.getElementById('print-area');
   
-  // PDF 생성 시에는 화면의 갭을 없애기 위해 클래스 조작이 필요할 수 있음
+  // PDF 변환 중 스타일 변경 (여백 제거, 높이 조정 등)
   element.classList.add('printing-mode');
   
   html2pdf()
@@ -167,6 +170,7 @@ const saveAsPdf = () => {
     .from(element)
     .save()
     .then(() => {
+      // 변환 후 스타일 복구
       element.classList.remove('printing-mode');
     });
 };
@@ -189,51 +193,68 @@ const handlePrint = () => {
 </script>
 
 <style scoped>
+/* 화면 스크롤 영역 */
 .doc-scroll-area {
   height: 75vh;
   overflow-y: auto;
   position: relative; 
 }
 
-/* [수정 7] print-container 스타일 추가 */
+/* [Print Container]
+  PDF 캡처 대상 컨테이너.
+  Flex Column을 사용하여 div 사이의 공백(Whitespace) 제거 
+*/
 .print-container {
-  width: 210mm; /* A4 너비 고정 */
+  width: 210mm;
   padding: 0;
   margin: 0;
   background-color: transparent;
+  display: flex;
+  flex-direction: column;
 }
 
 /* A4 페이지 공통 스타일 */
 .a4-page {
   width: 210mm;
-  height: 297mm;
+  height: 297mm; /* 화면에서는 정사이즈 */
   padding: 0; 
   background-color: white;
   box-sizing: border-box;
+  
   color: #333333;           
   font-size: 11px;          
   font-family: "Pretendard", "Malgun Gothic", sans-serif;
   line-height: 1.6;
+  
   position: relative;
   display: flex;
   flex-direction: column;
-  /* 페이지 구분을 위한 그림자 (PDF 캡처시 제거됨) */
 }
 
-/* [수정 8] PDF 캡처 중(.printing-mode)일 때 스타일 강제 적용 */
-/* 중요: html2canvas는 현재 화면의 스타일을 그대로 찍기 때문에 
-   캡처 순간에 마진과 그림자를 없애야 합니다. */
+/* 화면 미리보기용: 페이지 사이 간격과 그림자 */
+.mb-8 { margin-bottom: 32px !important; }
+
+/* [Printing Mode]
+  PDF 생성 시 강제 적용되는 스타일 
+*/
 .print-container.printing-mode .a4-page {
-  box-shadow: none !important;
-  margin-bottom: 0 !important; /* 페이지 사이 갭 제거 */
-  border: none !important;
+  box-shadow: none !important;      /* 그림자 제거 */
+  margin-bottom: 0 !important;      /* 마진 제거 */
+  border: none !important;          /* 테두리 제거 */
+  
+  /* [핵심] 렌더링 오차로 인한 빈 페이지 생성 방지 (0.2mm 축소) */
+  height: 296.8mm !important;       
+  min-height: 296.8mm !important;
+  max-height: 296.8mm !important;
+  overflow: hidden;
 }
 
-/* 미리보기 화면에서의 페이지 간격 (PDF 캡처시는 위 코드로 무시됨) */
-.mb-8 {
-  margin-bottom: 32px !important;
+/* 마지막 페이지도 마진 없이 딱 붙게 처리 */
+.print-container.printing-mode .a4-page:last-child {
+  margin-bottom: 0 !important;
 }
 
+/* 높이 계산용 숨김 영역 */
 .calculation-mode {
   position: absolute;
   top: 0;
@@ -243,6 +264,7 @@ const handlePrint = () => {
   z-index: -1;
 }
 
+/* --- 페이지 내부 레이아웃 --- */
 .page-header {
   width: 100%;
   height: 64px;               
@@ -268,7 +290,7 @@ const handlePrint = () => {
 .page-content { 
   width: 100%; 
   height: 964px;
-  border: 2px dashed #1976d2;
+  /* border: 2px dashed #1976d2; */
   border-radius: 8px;
   box-sizing: border-box;
   overflow: hidden; 
@@ -282,17 +304,29 @@ const handlePrint = () => {
   width: 100%;
 }
 
-/* @media print는 브라우저 인쇄(Ctrl+P)용이며 html2pdf에는 영향을 덜 주지만 유지 */
+/* 브라우저 기본 인쇄(Ctrl+P) 대응 */
 @media print {
   @page { margin: 0 !important; size: A4; }
   body, html { margin: 0 !important; padding: 0 !important; }
   .doc-wrapper { padding: 0 !important; }
   .a4-page { margin: 0 !important; padding: 0 !important; box-shadow: none; border: none; page-break-after: always; }
-  .page-header, .page-body { padding: 0 !important; } /* 필요시 조절 */
+  .page-header, .page-body { padding: 0 !important; }
+  .page-content { border: none !important; background: none !important; height: auto !important; }
+  .calculation-mode { display: none !important; }
 }
 
-.a4-page :deep(strong), .a4-page :deep(b) { font-weight: 700 !important; color: #000000; }
-.a4-page :deep(hr) { display: none !important; }
+/* --- Markdown 컨텐츠 스타일 --- */
+.a4-page :deep(strong),
+.a4-page :deep(b) {
+  font-weight: 700 !important;
+  color: #000000; 
+}
+
+/* 불필요한 요소 제거 */
+.a4-page :deep(hr) {
+  display: none !important;
+}
+
 .a4-page :deep(h1) { font-size: 22px; font-weight: 800; margin-bottom: 24px; border-bottom: 2px solid #000; padding-bottom: 10px; line-height: 1.2; }
 .a4-page :deep(h2) { font-size: 16px; font-weight: 700; margin-top: 24px; margin-bottom: 8px; color: #07043A; }
 .a4-page :deep(h3) { font-size: 14px; color: #07043A; font-weight: 700; margin-top: 20px; margin-bottom: 8px; border-bottom: 2px solid #07043A; padding-bottom: 8px; }
