@@ -47,7 +47,7 @@
                 height="24"
                 style="border: none;"
               >
-                고예경 (갑)
+                {{ userProfiles.갑.name }} (갑)
               </v-btn>
               <v-btn
                 value="을"
@@ -57,7 +57,7 @@
                 height="24"
                 style="border: none;"
               >
-                김영지 (을)
+                {{ userProfiles.을.name }} (을)
               </v-btn>
             </v-btn-toggle>
 
@@ -380,7 +380,7 @@
 
 <script setup>
 // 기존 스크립트 그대로 유지 (변경 없음)
-import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, nextTick, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { MockWebSocket } from '@/services/ws/mockSocket.js';
 
@@ -423,10 +423,49 @@ const stepLabels = {
   completed: '계약 완료',
 };
 
-const userProfiles = {
-  갑: { name: '고예경', role: 'client', contractDate: '2025-12-07' },
-  을: { name: '김영지', role: 'provider', contractDate: '2025-12-07' },
-};
+// [수정] 스크립트 상단의 데이터 로딩 부분
+
+// 1. 기본값 설정
+let clientName = '의뢰인';
+let providerName = '계약자';
+let contractDate = '2025-01-01';
+
+// 2. 로컬스토리지에서 데이터 가져오기
+try {
+  const rawData = localStorage.getItem('contractData');
+  if (rawData) {
+    const parsed = JSON.parse(rawData);
+    
+    // 핵심 수정 1: { value: { ... } } 구조일 경우를 대비해 .value를 벗겨냅니다.
+    const savedData = parsed.value || parsed;
+    
+    console.log("📂 로컬 데이터 원본:", savedData);
+
+    // 갑(Client) 정보 덮어쓰기
+    if (savedData.client?.name) {
+      clientName = savedData.client.name;
+    }
+    if (savedData.client?.contractDate) {
+      contractDate = savedData.client.contractDate;
+    }
+    
+    // 핵심 수정 2: provider가 아니라 'performer' 키도 확인하도록 수정
+    const pName = savedData.provider?.name || savedData.performer?.name;
+    if (pName) {
+      providerName = pName;
+    }
+    
+    console.log("✅ 최종 적용 이름:", clientName, providerName);
+  }
+} catch (e) {
+  console.log("⚠️ 로컬 데이터 파싱 실패, 기본값 사용", e);
+}
+
+// 3. userProfiles 생성 (기존 코드와 동일)
+const userProfiles = reactive({
+  갑: { name: clientName, role: 'client', contractDate: contractDate },
+  을: { name: providerName, role: 'provider', contractDate: contractDate },
+});
 
 const escapeHtml = (str = '') =>
   str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
