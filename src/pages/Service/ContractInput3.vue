@@ -139,7 +139,7 @@ const route = useRoute();
 const { setItem, getItem } = useStorageWithExpiry();
 
 const currentRole = route.query.role || 'client';
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = 'https://doq-server.onrender.com';
 
 const showSessionDialog = ref(false);
 const isLoading = ref(false);
@@ -156,6 +156,47 @@ onMounted(() => {
   emit('set-top-nav', true);
   emit('set-side-nav', false);
 });
+
+// contractData를 session_info 구조로 변환
+function formatBusinessNumber(num) {
+  // 사업자번호: 10자리 → 123-45-67890
+  const digits = num.replace(/\D/g, '').slice(0, 10);
+  if (digits.length === 10)
+    return `${digits.slice(0,3)}-${digits.slice(3,5)}-${digits.slice(5)}`;
+  return num;
+}
+
+function formatPhoneNumber(num) {
+  // 연락처: 01012345678 → 010-1234-5678, 0212345678 → 02-1234-5678
+  const digits = num.replace(/\D/g, '');
+  if (digits.startsWith('02')) {
+    if (digits.length === 10)
+      return `${digits.slice(0,2)}-${digits.slice(2,6)}-${digits.slice(6)}`;
+    if (digits.length === 9)
+      return `${digits.slice(0,2)}-${digits.slice(2,5)}-${digits.slice(5)}`;
+  } else {
+    if (digits.length === 11)
+      return `${digits.slice(0,3)}-${digits.slice(3,7)}-${digits.slice(7)}`;
+    if (digits.length === 10)
+      return `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
+  }
+  return num;
+}
+
+function contractDataToSessionInfo(contractData, userId) {
+  const client = contractData.client || {};
+  const performer = contractData.performer || {};
+  return {
+    userId: userId || '',
+    client_name: client.name || '',
+    provider_name: performer.name || '',
+    contract_date: client.contractDate || performer.contractDate || '',
+    client_business_number: client.businessNumber ? formatBusinessNumber(client.businessNumber) : '',
+    client_contact: client.contact ? formatPhoneNumber(client.contact) : '',
+    provider_business_number: performer.businessNumber ? formatBusinessNumber(performer.businessNumber) : '',
+    provider_contact: performer.contact ? formatPhoneNumber(performer.contact) : '',
+  };
+}
 
 // 카드 선택 시 다이얼로그 오픈
 const selectType = (type) => {
@@ -196,13 +237,12 @@ const createSessionAndGo = async () => {
   isLoading.value = true;
   try {
     const myData = preparePendingMessage();
-    const payload = {
-      userId: 'user_' + Math.random().toString(36).substr(2, 9),
-      client_name: currentRole === 'client' ? myData.name : '상대방',
-      provider_name: currentRole === 'performer' ? myData.name : '상대방',
-      contract_date: myData.contractDate
-    };
+    // contractData를 session_info 구조로 변환
+    const contractDataRaw = getItem('contractData') || {};
+    const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    const payload = contractDataToSessionInfo(contractDataRaw, userId);
 
+    console.log('[POST] /v1/session/connect payload:', payload);
     const res = await fetch(`${API_BASE_URL}/v1/session/connect`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
