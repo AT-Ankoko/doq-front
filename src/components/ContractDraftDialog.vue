@@ -264,13 +264,22 @@ const handlePrint = () => {
   color: #000000; 
 }
 
+/* 페이지 중간에 불필요한 hr(수평선) 완전 제거 */
+.a4-page :deep(hr) {
+  border: none !important;
+  background: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  display: none !important;
+}
+
 .a4-page :deep(h1) { font-size: 22px; font-weight: 800; margin-bottom: 24px; border-bottom: 2px solid #000; padding-bottom: 10px; line-height: 1.2; }
 .a4-page :deep(h2) { font-size: 16px; font-weight: 700; margin-top: 24px; margin-bottom: 8px; color: #07043A; }
 .a4-page :deep(h3) { font-size: 14px; color: #07043A; font-weight: 700; margin-top: 20px; margin-bottom: 8px; border-bottom: 2px solid #07043A; padding-bottom: 8px; }
 .a4-page :deep(table) { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 11px; }
 .a4-page :deep(th), .a4-page :deep(td) { border: 1px solid #E0E0E0; padding: 0 10px; height: 28px; }
-.a4-page :deep(th) { background-color: #E0E0E0; color: #666666; font-size: 10px; font-weight: 700; text-align: center; }
+.a4-page :deep(th) { background-color: #F8FAFC; color: #666666; font-size: 10px; font-weight: 700; text-align: center; }
 .a4-page :deep(p) { margin-bottom: 8px; text-align: justify; word-break: break-all; }
 .a4-page :deep(ul), .a4-page :deep(ol) { margin-bottom: 8px; padding-left: 24px; }
-.a4-page :deep(li) { margin-bottom: 4px; }
+.a4-page :deep(li) { margin-bottom: 4px; border-bottom: none !important; }
 </style>
