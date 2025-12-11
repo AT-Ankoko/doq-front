@@ -428,7 +428,7 @@ const stepLabels = {
 // 1. 기본값 설정
 let clientName = '의뢰인';
 let providerName = '계약자';
-let contractDate = '2025-01-01';
+let contractDate = '2025-12-12';
 
 // 2. 로컬스토리지에서 데이터 가져오기
 try {
