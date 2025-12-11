@@ -576,19 +576,17 @@ const checkAndSendPendingMessage = () => {
     const currentUser = userProfiles[currentRole.value];
     const payload = {
       hd: {
-        sid: sessionId.value,
-        event: 'llm.invoke',
-        userId: currentUser.userId,
-        role: currentUser.role,
-        user_name: currentUser.name,
-        // 👇 백엔드 요구사항에 맞춰 필수 추가
-        client_name: userProfiles['갑'].name,
-        provider_name: userProfiles['을'].name,
+        event: "llm.invoke",      // 필수 (고정)
+        sid: sessionId.value,     // 필수
+        role: currentUser.role,   // 필수 ('client' or 'provider')
+        asker: currentUser.role,  // 🔥 필수! (role과 동일한 값)
+        user_name: currentUser.name, // 필수 (예: '고예경')
+        contract_date: userProfiles['갑'].contractDate // 선택 (보내주면 좋음)
       },
       bd: { text: pendingMsg },
     };
     try {
-      console.log("🚀 [Socket] 전송 패킷:", JSON.stringify(payload, null, 2));
+      console.log("🚀 [Final Fix] 전송 패킷:", JSON.stringify(payload, null, 2));
       socket.value.send(JSON.stringify(payload));
       localStorage.removeItem('pending_contract_msg');
     } catch (error) { console.error(error); }
@@ -712,20 +710,18 @@ const sendMessage = () => {
 
   const payload = {
     hd: {
-      sid: sessionId.value,
-      event: 'llm.invoke',
-      userId: currentUser.userId,
-      role: currentUser.role,
-      user_name: currentUser.name,
-      // 👇 백엔드 요구사항에 맞춰 필수 추가
-      client_name: userProfiles['갑'].name,
-      provider_name: userProfiles['을'].name,
+      event: "llm.invoke",      // 필수 (고정)
+      sid: sessionId.value,     // 필수
+      role: currentUser.role,   // 필수 ('client' or 'provider')
+      asker: currentUser.role,  // 🔥 필수! (role과 동일한 값)
+      user_name: currentUser.name, // 필수 (예: '고예경')
+      contract_date: userProfiles['갑'].contractDate // 선택 (보내주면 좋음)
     },
     bd: { text: inputText.value },
   };
 
   try {
-    console.log("🚀 [Socket] 전송 패킷:", JSON.stringify(payload, null, 2));
+    console.log("🚀 [Final Fix] 전송 패킷:", JSON.stringify(payload, null, 2));
     socket.value.send(JSON.stringify(payload));
     inputText.value = '';
     scrollToBottom();
