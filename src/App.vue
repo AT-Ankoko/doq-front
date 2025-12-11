@@ -59,6 +59,7 @@
         variant="text"
         append-icon="mdi-chevron-down"
         @click="clickNavBtn('/about')"
+        disabled
       >
         About
       </v-btn>
@@ -67,6 +68,7 @@
         variant="text"
         append-icon="mdi-chevron-down"
         @click="clickNavBtn('/team')"
+        disabled
       >
         Team
       </v-btn>
@@ -75,6 +77,7 @@
         variant="text"
         append-icon="mdi-chevron-down"
         @click="clickNavBtn('/howtouse')"
+        disabled
       >
         How to Use
       </v-btn>
