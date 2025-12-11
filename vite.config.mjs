@@ -55,7 +55,7 @@ export default defineConfig({
     host: true, // 로컬 네트워크에서 접근 가능하도록 설정
     proxy: {
       '/api': {
-        target: 'https://dungdong-be.onrender.com',
+        target: 'https://doq-server.onrender.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },

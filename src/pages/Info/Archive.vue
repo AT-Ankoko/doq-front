@@ -49,7 +49,7 @@
           </template>
 
           <template #item.client_name="{ item }">
-            <span class="text-caption font-weight-bold text-grey-darken-3">{{ item.client_name || '-' }}</span>
+            <span class="text-caption text-grey-darken-2">{{ item.client_name || '-' }}</span>
           </template>
 
           <template #item.provider_name="{ item }">
@@ -168,8 +168,7 @@ const sessions = ref([]);
 const page = ref(1);
 const itemsPerPage = ref(10); // 기본값 10
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://doq-server.onrender.com';
 
 const tableHeaders = [
   { title: '제목', key: 'title', sortable: true, width: '25%' },
