@@ -37,11 +37,12 @@
               variant="flat"
               class="bg-transparent"
               style="gap: 8px; height: auto;" 
-              selected-class="bg-primary text-white elevation-2"
+              selected-class="bg-primary text-white"
             >
               <v-btn
                 value="갑"
-                class="px-4 rounded-pill text-body-2 font-weight-bold bg-grey-lighten-4 text-grey-darken-1"
+                class="px-4 rounded-pill text-body-2 font-weight-bold bg-grey-lighten-4"
+                :style="currentRole !== '갑' ? 'color: #BED0F4;' : 'color: #174DC9;'"
                 size="large"
                 height="24"
                 style="border: none;"
@@ -50,7 +51,8 @@
               </v-btn>
               <v-btn
                 value="을"
-                class="px-4 rounded-pill text-body-2 font-weight-bold bg-grey-lighten-4 text-grey-darken-1"
+                class="px-4 rounded-pill text-body-2 font-weight-bold bg-grey-lighten-4"
+                :style="currentRole !== '을' ? 'color: #BED0F4;' : 'color: #174DC9;'"
                 size="large"
                 height="24"
                 style="border: none;"
