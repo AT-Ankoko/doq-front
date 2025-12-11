@@ -58,12 +58,12 @@
                 ></v-progress-linear>
               </div>
               <div class="mr-8">
-                <span class="text-caption text-grey mb-1 d-block">시작일</span>
-                <p class="text-body-2 text-grey-darken-3 ma-0 font-weight-bold">{{ formatDate(sessionData.state?.created_at) }}</p>
+                <span class="text-caption text-grey font-weight-bold mb-1 d-block">시작일</span>
+                <p class="text-body-2 text-grey-darken-3 ma-0">{{ formatDate(sessionData.state?.created_at) }}</p>
               </div>
               <div>
-                <span class="text-caption text-grey mb-1 d-block">수정일</span>
-                <p class="text-body-2 text-grey-darken-3 ma-0 font-weight-bold">{{ formatDate(sessionData.state?.updated_at) }}</p>
+                <span class="text-caption text-grey font-weight-bold mb-1 d-block">수정일</span>
+                <p class="text-body-2 text-grey-darken-3 ma-0">{{ formatDate(sessionData.state?.updated_at) }}</p>
               </div>
             </div>
           </v-card-text>
@@ -138,17 +138,89 @@
             <span class="text-h6 font-weight-bold text-grey-darken-3">수집된 계약 데이터</span>
           </div>
           <v-card-text class="pa-4">
-            <v-row dense>
-              <v-col cols="6" v-for="(value, key) in filteredCollectedData" :key="key">
+            <v-row dense v-if="sessionData.state?.collected_data">
+              <v-col cols="6">
                 <div class="pa-3 rounded-lg h-100" style="background-color: #FAFAFA">
-                  <span class="text-caption text-grey font-weight-bold d-block mb-1">{{ getDataLabel(key) }}</span>
-                  <p class="text-body-2 font-weight-bold text-grey-darken-3 ma-0 text-truncate">
-                    {{ formatDataValue(value) }}
+                  <span class="text-caption text-grey font-weight-bold d-block mb-1">의뢰인 이름</span>
+                  <p class="text-body-2 text-grey-darken-3 ma-0 text-truncate">
+                    {{ formatDataValue(sessionData.state.collected_data.client_name) || '-' }}
+                  </p>
+                </div>
+              </v-col>
+              <v-col cols="6">
+                <div class="pa-3 rounded-lg h-100" style="background-color: #FAFAFA">
+                  <span class="text-caption text-grey font-weight-bold d-block mb-1">용역자 이름</span>
+                  <p class="text-body-2 text-grey-darken-3 ma-0 text-truncate">
+                    {{ formatDataValue(sessionData.state.collected_data.provider_name) || '-' }}
+                  </p>
+                </div>
+              </v-col>
+              <v-col cols="12">
+                <div class="pa-3 rounded-lg h-100" style="background-color: #FAFAFA">
+                  <span class="text-caption text-grey font-weight-bold d-block mb-1">작업 범위</span>
+                  <p class="text-body-2 text-grey-darken-3 ma-0 text-truncate">
+                    {{ formatDataValue(sessionData.state.collected_data.work_scope) || '-' }}
+                  </p>
+                </div>
+              </v-col>
+              <v-col cols="6">
+                <div class="pa-3 rounded-lg h-100" style="background-color: #FAFAFA">
+                  <span class="text-caption text-grey font-weight-bold d-block mb-1">시작일</span>
+                  <p class="text-body-2 text-grey-darken-3 ma-0 text-truncate">
+                    {{ formatDataValue(sessionData.state.collected_data.start_date) || '-' }}
+                  </p>
+                </div>
+              </v-col>
+              <v-col cols="6">
+                <div class="pa-3 rounded-lg h-100" style="background-color: #FAFAFA">
+                  <span class="text-caption text-grey font-weight-bold d-block mb-1">종료일</span>
+                  <p class="text-body-2 text-grey-darken-3 ma-0 text-truncate">
+                    {{ formatDataValue(sessionData.state.collected_data.end_date) || '-' }}
+                  </p>
+                </div>
+              </v-col>
+              <v-col cols="12">
+                <div class="pa-3 rounded-lg h-100" style="background-color: #FAFAFA">
+                  <span class="text-caption text-grey font-weight-bold d-block mb-1">작업 기간</span>
+                  <p class="text-body-2 text-grey-darken-3 ma-0 text-truncate">
+                    {{ formatDataValue(sessionData.state.collected_data.work_period) || '-' }}
+                  </p>
+                </div>
+              </v-col>
+              <v-col cols="12">
+                <div class="pa-3 rounded-lg h-100" style="background-color: #FAFAFA">
+                  <span class="text-caption text-grey font-weight-bold d-block mb-1">수정 횟수</span>
+                  <p class="text-body-2 text-grey-darken-3 ma-0 text-truncate">
+                    {{ formatDataValue(sessionData.state.collected_data.revision_count) || '-' }}
+                  </p>
+                </div>
+              </v-col>
+              <v-col cols="12">
+                <div class="pa-3 rounded-lg h-100" style="background-color: #FAFAFA">
+                  <span class="text-caption text-grey font-weight-bold d-block mb-1">저작권자</span>
+                  <p class="text-body-2 text-grey-darken-3 ma-0 text-truncate">
+                    {{ formatDataValue(sessionData.state.collected_data.copyright_owner) || '-' }}
+                  </p>
+                </div>
+              </v-col>
+              <v-col cols="12">
+                <div class="pa-3 rounded-lg h-100" style="background-color: #FAFAFA">
+                  <span class="text-caption text-grey font-weight-bold d-block mb-1">기밀유지 조건</span>
+                  <p class="text-body-2 text-grey-darken-3 ma-0 text-truncate">
+                    {{ formatDataValue(sessionData.state.collected_data.confidentiality_terms) || '-' }}
+                  </p>
+                </div>
+              </v-col>
+              <v-col cols="12">
+                <div class="pa-3 rounded-lg h-100" style="background-color: #FAFAFA">
+                  <span class="text-caption text-grey font-weight-bold d-block mb-1">특별 조건</span>
+                  <p class="text-body-2 text-grey-darken-3 ma-0 text-truncate">
+                    {{ formatDataValue(sessionData.state.collected_data.special_conditions) || '-' }}
                   </p>
                 </div>
               </v-col>
             </v-row>
-            <div v-if="!sessionData.state?.collected_data" class="text-center pa-4 text-grey">
+            <div v-else class="text-center pa-4 text-grey">
               데이터 없음
             </div>
           </v-card-text>
