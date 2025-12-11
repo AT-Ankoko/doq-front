@@ -354,6 +354,13 @@ const lastContractDraft = computed(() => {
 });
 
 const contractName = computed(() => {
+  if (lastContractDraft.value) {
+    const match = lastContractDraft.value.match(/계약명\s*[:：]\s*(.*?)(?:<|\n|$)/);
+    if (match && match[1]) {
+      return match[1].trim().replace(/\)$/, '');
+    }
+  }
+
   const category = sessionData.value?.state?.collected_data?.category;
   if (category && category !== '{{category}}') {
     return category.includes('용역') ? category : `${category} 용역`;
