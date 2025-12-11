@@ -370,6 +370,7 @@
 <script setup>
 // 기존 스크립트 그대로 유지
 import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import { MockWebSocket } from '@/services/ws/mockSocket.js';
 
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
@@ -385,6 +386,7 @@ const currentRole = ref('갑');
 const contractDraft = ref('');
 const currentStep = ref('');
 const sessionId = ref('');
+const route = useRoute();
 const isLoading = ref(false);
 const progressPercentage = ref(0);
 const metaInfo = ref(null);
@@ -457,6 +459,17 @@ const renderedContract = computed(() => renderMarkdown(contractDraft.value));
 onMounted(() => {
   emit('set-top-nav', false);
   emit('set-side-nav', true);
+
+  // 쿼리에서 sid 우선 가져오고, 없으면 localStorage에서 가져옴
+  const sidFromQuery = route.query.sid;
+  const sidFromStorage = localStorage.getItem('sid');
+  sessionId.value = sidFromQuery || sidFromStorage || '';
+
+  // 세션 아이디가 있으면 바로 웹소켓 연결
+  if (sessionId.value) {
+    showSessionDialog.value = false;
+    connectWebSocket();
+  }
 });
 
 onUnmounted(() => {
