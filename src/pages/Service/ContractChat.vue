@@ -382,12 +382,10 @@
 // 기존 스크립트 그대로 유지 (변경 없음)
 import { ref, reactive, onMounted, onUnmounted, nextTick, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { MockWebSocket } from '@/services/ws/mockSocket.js';
 
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 
 // ----- 상태 변수 ----- //
-const USE_MOCK = false; 
 const socket = ref(null);
 const isConnected = ref(false);
 const messages = ref([]);
@@ -568,8 +566,7 @@ const connectWebSocket = () => {
   if (!sessionId.value) return;
   const wsUrl = `${WS_BASE_URL}?sid=${sessionId.value}`;
   
-  if (USE_MOCK) socket.value = new MockWebSocket(wsUrl);
-  else socket.value = new WebSocket(wsUrl);
+  socket.value = new WebSocket(wsUrl);
 
   socket.value.onopen = () => { isConnected.value = true; };
   socket.value.onmessage = (event) => {
