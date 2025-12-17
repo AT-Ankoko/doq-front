@@ -70,11 +70,6 @@ const routes = [
     name: 'ContractChat',
     component: () => import(/* webpackChunkName: "contract-chat" */ "@/pages/Service/ContractChat.vue")
   },
-  {
-    path: '/test/socket-chat',
-    name: 'SocketChat',
-    component: () => import(/* webpackChunkName: "socket-chat" */ "@/pages/Test/SocketChat.vue")
-  },
 ];
 
 const router = createRouter({
