@@ -30,18 +30,16 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/GetOurRI/DungDong">
-    <img src="src/assets/logo.png" alt="Logo" width="80" height="80">
+  <a href="https://github.com/AT-Ankoko">
+    <img src="../assets/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-<h1 align="center">둥지동지</h1>
+<h1 align="center">DoQ</h1>
 
   <p align="center">
-    🖼️ 한 장의 이미지로 룸메이트 구하기!
+    DoQ(도큐) - 당신의 AI 계약 파트너
     <br />
-    <a href="https://getourri.github.io/DungDong"><strong>둥지동지 바로가기</strong></a>
-    <a href="https://github.com/GetOurRI"><strong>프로젝트 설명 바로가기</strong></a>
-    <br />
+    <a href="https://github.com/AT-Ankoko"><strong>DoQ 바로가기</strong></a>
     <br />
   </p>
 </div>
@@ -49,24 +47,18 @@
 <!-- 프로젝트 소개 -->
 ## 프로젝트 소개
 
-![둥지동지 스크린샷](src/assets/main_product_img.png)
+<p align="center">
+  <a href="https://youtu.be/JgfBLpiZuZk">
+    <img src="https://img.youtube.com/vi/gVFsfE3hT80/maxresdefault.jpg" alt="DoQ 홍보 영상 썸네일" width="720" />
+  </a>
+  <br />
+  <a href="https://youtu.be/JgfBLpiZuZk"><strong>홍보 영상 바로가기</strong></a>
+</p>
 
-둥지동지는 중앙대학교 다빈치 캠퍼스의 학우들이 기숙사 룸메이트를 빠르고 편하게 구할 수 있도록 기획한 프로젝트입니다.<br>
-자신의 기숙사 생활에 대한 설문을 기반으로 룸메이트 구인 글에 사용할 이미지를 자동으로 생성해줍니다.
-모바일 웹에 최적화된 UI를 통해 누구나 간편하게 이용할 수 있습니다.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-### 📚 기술 스택
-
-[![Vue][Vue.js]][Vue-url] [![Vuetify][Vuetify]][Vuetify-url] 
-[![Firebase][Firebase]][Firebase-url]
-[![Github Pages][Github Pages]][Github-Pages-url] 
-[![Figma][Figma]][Figma-url] 
+본 프로젝트 DoQ(도큐)는 법률 지식이 부족한 비전문가도 중계형 AI를 통해 일상 언어로 대화하며 손쉽게 법적 효럭
+을 갖춘 계약서를 작성할 수 있도록 돕는 맞춤 계약서 자동 생성 서비스이다.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- 시작하기 -->
@@ -74,37 +66,10 @@
 ### 사전 요구사항
 
 이 프로젝트는 `Vuetify`와 `Vue.js`를 기반으로 하고 있습니다. 
-
-
-### 설치
-
-1. Firebase에서 API 키 발급 [https://firebase.google.com/docs/firestore](https://firebase.google.com/docs/firestore)
-2. 레포 클론하기
-   ```sh
-   git clone https://github.com/Ebee1205/DungDong.git
-   ```
-3. NPM 패키지 설치
-   ```sh
-   npm install
-   ```
-4. `.env` 파일 생성 후 Firebase API 키 입력
-   ```.env
-   // .env file
-   
-    VITE_FIREBASE_API_KEY = 
-    VITE_FIREBASE_AUTH_DOMAIN = 
-    VITE_FIREBASE_PROJECT_ID = 
-    VITE_FIREBASE_STORAGE_BUCKET = 
-    VITE_FIREBASE_MESSAGING_SENDER_ID = 
-    VITE_FIREBASE_APP_ID = 
-    VITE_FIREBASE_MEASUREMENT_ID = 
-   ```
-<!-- 5. Change git remote url to avoid accidental pushes to base project
-   ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
-   ``` -->
-
+```
+npm install
+npm run dev
+```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
