@@ -31,7 +31,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/AT-Ankoko">
-    <img src="../assets/logo.png" alt="Logo" width="80" height="80">
+    <img src="https://github.com/AT-Ankoko/.github/raw/main/profile/logo.svg" alt="Logo" width="80" height="80">
   </a>
 
 <h1 align="center">DoQ</h1>
@@ -39,20 +39,26 @@
   <p align="center">
     DoQ(도큐) - 당신의 AI 계약 파트너
     <br />
-    <a href="https://github.com/AT-Ankoko"><strong>DoQ 바로가기</strong></a>
+    <a href="https://github.com/AT-Ankoko/doq-web-FE"><strong>DoQ FE</strong></a> . <a href="https://github.com/AT-Ankoko/doq-server"><strong>DoQ BE</strong></a> . <a href="https://github.com/AT-Ankoko/doq-mocksite"><strong>DoQ Mockup</strong></a>
     <br />
   </p>
 </div>
+
+
 
 <!-- 프로젝트 소개 -->
 ## 프로젝트 소개
 
 <p align="center">
+  <a href="https://youtu.be/JgfBLpiZuZk">
+    <!-- <img src="https://img.youtube.com/vi/gVFsfE3hT80/maxresdefault.jpg" alt="DoQ 홍보 영상 썸네일" width="720" /> -->
+  </a>
+  <br />
   <a href="https://youtu.be/JgfBLpiZuZk"><strong>홍보 영상 바로가기</strong></a>
 </p>
 
-본 프로젝트 DoQ(도큐)는 법률 지식이 부족한 비전문가도 중계형 AI를 통해 일상 언어로 대화하며 손쉽게 법적 효럭
-을 갖춘 계약서를 작성할 수 있도록 돕는 맞춤 계약서 자동 생성 서비스이다.
+본 프로젝트 **DoQ 도큐**는 법률 지식이 부족한 비전문가도 중계형 AI를 통해 일상 언어로 대화하며 손쉽게 법적 효럭
+을 갖춘 계약서를 작성할 수 있도록 돕는 **맞춤 계약서 자동 생성 서비스**이다.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
