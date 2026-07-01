@@ -48,10 +48,6 @@
 ## 프로젝트 소개
 
 <p align="center">
-  <a href="https://youtu.be/JgfBLpiZuZk">
-    <img src="https://img.youtube.com/vi/gVFsfE3hT80/maxresdefault.jpg" alt="DoQ 홍보 영상 썸네일" width="720" />
-  </a>
-  <br />
   <a href="https://youtu.be/JgfBLpiZuZk"><strong>홍보 영상 바로가기</strong></a>
 </p>
 
