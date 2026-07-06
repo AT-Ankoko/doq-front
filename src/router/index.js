@@ -19,7 +19,56 @@ const routes = [
   {
     path: '/home',
     name: 'Home',
-    component: () => import(/* webpackChunkName: "home" */ "@/pages/Home.vue")
+    component: () => import(/* webpackChunkName: "home" */ "@/pages/Home.vue"),
+    meta: { hideSidebar: true }
+  },
+  {
+    path: '/about',
+    name: 'About',
+    component: () => import(/* webpackChunkName: "about" */ "@/pages/Info/About.vue")
+  },
+  {
+    path: '/archive',
+    name: 'Archive',
+    component: () => import(/* webpackChunkName: "archive" */ "@/pages/Info/Archive.vue")
+  },
+  {
+    path: '/archive/:sid',
+    name: 'ArchiveDetail',
+    component: () => import(/* webpackChunkName: "archive-detail" */ "@/pages/Info/ArchiveDetail.vue")
+  },
+  {
+    path: '/howtouse',
+    name: 'HowToUse',
+    component: () => import(/* webpackChunkName: "howtouse" */ "@/pages/Info/HowToUse.vue")
+  },
+  {
+    path: '/team',
+    name: 'Team',
+    component: () => import(/* webpackChunkName: "team" */ "@/pages/Info/Team.vue")
+  },
+  {
+    path: '/contract-input1',
+    name: 'ContractInput1',
+    component: () => import(/* webpackChunkName: "contract-input1" */ "@/pages/Service/ContractInput1.vue"),
+    meta: { hideSidebar: true }
+  },
+  {
+    path: '/contract-input2',
+    name: 'ContractInput2',
+    component: () => import(/* webpackChunkName: "contract-input2" */ "@/pages/Service/ContractInput2.vue"),
+    meta: { hideSidebar: true }
+  },
+  {
+    path: '/contract-input3',
+    name: 'ContractInput3',
+    component: () => import(/* webpackChunkName: "contract-input3" */ "@/pages/Service/ContractInput3.vue"),
+    meta: { hideSidebar: true }
+  },
+  {
+    path: '/contract-chat',
+    name: 'ContractChat',
+    component: () => import(/* webpackChunkName: "contract-chat" */ "@/pages/Service/ContractChat.vue")
   },
 ];
 

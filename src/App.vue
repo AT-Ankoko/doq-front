@@ -1,7 +1,6 @@
 <template>
-  <v-app class="background">
+  <v-app>
 
-    <!-- 좌측 네비게이션 바 (제공해주신 스니펫 기반) -->
     <v-navigation-drawer
       v-if="showSideNav"
       rail
@@ -9,112 +8,102 @@
       color="#FFFFFF"
       class="rounded-e-xl"
     >
-      <!-- 
-        v-navigation-drawer 내부에 d-flex flex-column fill-height
-        div를 추가하여 v-spacer가 올바르게 작동하도록 합니다.
-      -->
       <div class="d-flex | flex-column | align-center | ga-3 | pa-2 | fill-height">
-        <!-- 로고 (경로: @/assets/logo.svg - 이 파일이 프로젝트에 존재해야 합니다) -->
         <v-icon class="mt-6 | mb-12">
           <v-img
             src="@/assets/logo.svg"
             width="30" height="30"
+            @click="clickNavBtn('/home')" 
+            style="cursor: pointer;"
           ></v-img>
         </v-icon>
 
-        <!-- 검색 버튼 -->
         <v-btn
+          density="comfortable" variant="tonal" color="#92A8FE"
           icon="mdi-magnify"
-          density="comfortable"
-          variant="tonal"
-          color="#717171"
         ></v-btn>
         
         <v-spacer></v-spacer>
 
-        <!-- 설정 버튼 -->
         <v-btn
+          density="comfortable" variant="tonal" color="#92A8FE"
           icon="mdi-cog-outline"
-          density="comfortable"
-          variant="tonal"
-          color="#717171"
         ></v-btn>
         
-        <!-- 계정 버튼 -->
         <v-btn
           class="mt-6 | mb-6"
+          density="comfortable" variant="tonal" color="#92A8FE"
           icon="mdi-account-circle-outline"
-          density="comfortable"
-          variant="tonal"
-          color="#717171"
         ></v-btn>
       </div>
     </v-navigation-drawer>
 
-    <!-- 상단 앱 바 -->
     <v-app-bar 
       v-if="showTopNav"
-      flat color="#E6E8E9" class="border-b"
+      flat
     >
-      <!-- 좌측 로고 -->
-      <!-- 'src' 경로는 실제 로고 파일 위치에 맞게 수정해주세요 -->
       <v-img
         class="ml-4"
-        src="@/assets/main-logo.svg"
-        max-height="30"
-        max-width="60"
+        src="@/assets/main-logo-text.svg"
+        max-height="24"
+        max-width="48"
         contain
+        @click="clickNavBtn('/home')" 
+        style="cursor: pointer;"
       ></v-img>
 
       <v-spacer></v-spacer>
 
-      <!-- 우측 메뉴 버튼 그룹 (예시) -->
       <v-btn 
-        class="mr-2" 
+        class="mr-2 | nav-text-btn" 
         variant="text"
         append-icon="mdi-chevron-down"
+        @click="clickNavBtn('/about')"
+        disabled
       >
         About
       </v-btn>
       <v-btn 
-        class="mr-2" 
+        class="mr-2 | nav-text-btn" 
         variant="text"
         append-icon="mdi-chevron-down"
+        @click="clickNavBtn('/team')"
+        disabled
       >
         Team
       </v-btn>
       <v-btn 
-        class="mr-2" 
+        class="mr-2 | nav-text-btn" 
         variant="text"
         append-icon="mdi-chevron-down"
+        @click="clickNavBtn('/howtouse')"
+        disabled
       >
         How to Use
       </v-btn>
       <v-btn 
-        class="mr-2" 
+        class="mr-2 | nav-text-btn" 
         variant="text"
         append-icon="mdi-chevron-down"
+        @click="clickNavBtn('/archive')"
       >
         Archive
       </v-btn>
     </v-app-bar>
 
-    <!-- 메인 컨텐츠 -->
     <v-main>
       <RouterView 
-        @hide-side-appbar="hideSideNav"
-        @hide-top-abbbar="hideTopNav"
+        @set-side-nav="setSideNav"
+        @set-top-nav="setTopNav"
       />
     </v-main>
   </v-app>
 
-  <!-- 다이얼로그 -->
   <v-dialog v-model="dialog.dialogActive" width="auto">
     <v-card class="pa-2 | pb-3" rounded="lg">
       <v-card-title class="text-title | pl-4 | pr-4 | pt-4">
         <v-row style="justify-content: start; align-items: center;">
           <v-col class="pt-0 | pb-0 | pl-4 | pr-1" cols="auto">
-            <!-- 로고 (경로: @/assets/logo.png - 이 파일이 프로젝트에 존재해야 합니다) -->
             <v-img
               src="@/assets/logo.png"
               height="24"
@@ -139,25 +128,24 @@
 </template>
 
 <script setup>
-// ----- 선언부 ----- //
-import { onMounted, onUnmounted, ref, computed, watch} from "vue";
-import { RouterView } from "vue-router"
+// ----- 선언부 (Imports, Props, Emits, Router) ----- //
+import { onMounted, onUnmounted, ref } from "vue";
+import { RouterView, useRouter, useRoute } from "vue-router";
 
-// 네비게이션 및 앱 바 표시 상태
+const router = useRouter();
+const route = useRoute();
+
+// ----- 상태 변수 (State & Refs) ----- //
 const showSideNav = ref(true);
 const showTopNav = ref(true);
-
-// 템플릿의 v-model="dialog.dialogActive"와 일치하도록 'isActive'를 'dialogActive'로 수정
 const dialog = ref({
   title: '',
   text: '',
   dialogActive: false, 
-  okButton() {}
+  okButton: () => {}
 });
 
-
-
-// ----- 라이프 사이클 ----- //
+// ----- 라이프 사이클 (Lifecycle Hooks) ----- //
 onMounted(() => {
 
 });
@@ -166,37 +154,28 @@ onUnmounted(() => {
 
 });
 
-// ----- 함수 정의 ----- //
-
-// 좌측 사이드바 숨기기
-function hideSideNav() {
-  showSideNav.value = false;
+// ----- 함수 정의 (Methods) ----- //
+const clickNavBtn = (path) => {
+  router.push(path);
 }
 
-// 상단 앱 바 숨기기
-function hideTopNav() {
-  showTopNav.value = false;
+const setSideNav = (value) => {
+  showSideNav.value = value;
 }
 
-
+const setTopNav = (value) => {
+  showTopNav.value = value;
+}
 </script>
 
 <style scoped>
 
-.margin-top-16 {
-  margin-top: 16px;
-}
-
-.padding-32 {
-  padding: 32px;
-}
-
-.padding-top-56 {
-  padding-top: 56px;
-}
-
-.padding-bottom-16 {
-  padding-bottom: 16px;
+:deep(.nav-text-btn .v-btn__content) {
+  font-family: "Actor";
+  font-weight: 400;
+  font-size: 14px;
+  color: #000000;
+  text-transform: none
 }
 
 </style>

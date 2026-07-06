@@ -1,9 +1,9 @@
-const Util = (function () {
+const Util = (() => {
     // 싱글톤 인스턴스
     let instance;
 
     // 인스턴스 생성 함수
-    function createInstance() {
+    const createInstance = () => {
         return {
          
 
@@ -12,7 +12,7 @@ const Util = (function () {
 
     return {
         // 싱글톤 인스턴스를 반환
-        getInstance() {
+        getInstance: () => {
             if (!instance) {
                 instance = createInstance();
             }

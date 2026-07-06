@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DemoUser",
+  "description": "PC 두 대 전시 시나리오 및 계약 입력 페이지를 위한 확장된 사용자 데이터 구조",
+  "type": "object",
+  "properties": {
+    "userId": {
+      "description": "사용자의 고유 식별자 (채팅 참여자 식별용)",
+      "type": "string"
+    },
+    "userName": {
+      "description": "UI에 표시될 사용자의 이름 또는 닉네임 (ContractInput2의 '성함/회사명')",
+      "type": "string",
+      "minLength": 1
+    },
+    "role": {
+      "description": "사용자 역할. '갑(client)' 또는 '을(performer)'",
+      "type": "string",
+      "enum": ["client", "performer"]
+    },
+    "contact": {
+      "description": "사용자의 연락처 (ContractInput2의 '연락처')",
+      "type": "string",
+      "pattern": "^\\d{2,3}-\\d{3,4}-\\d{4}$"
+    },
+    "businessNumber": {
+      "description": "사업자 등록 번호 (ContractInput2의 '사업자번호')",
+      "type": ["string", "null"],
+      "pattern": "^\\d{3}-\\d{2}-\\d{5}$"
+    },
+    "contractDate": {
+      "description": "계약 체결일 (ISO 8601 형식, ContractInput2의 '계약체결일')",
+      "type": ["string", "null"],
+      "format": "date"
+    },
+    "address": {
+      "description": "주소 (ContractInput2의 '주소')",
+      "type": ["string", "null"]
+    },
+    "contractIds": {
+      "description": "사용자가 참여중인 (가상의) 계약 ID 목록",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "userId",
+    "userName",
+    "role",
+    "contact"
+  ]
+}
