@@ -168,7 +168,7 @@ const sessions = ref([]);
 const page = ref(1);
 const itemsPerPage = ref(10); // 기본값 10
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://doq-server.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://15.152.162.244';
 
 const tableHeaders = [
   { title: '제목', key: 'title', sortable: true, width: '25%' },
