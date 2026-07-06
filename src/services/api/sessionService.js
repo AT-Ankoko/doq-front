@@ -1,6 +1,6 @@
 // src/services/api/sessionService.js
 
-const API_BASE_URL = 'http://localhost:8000'; // TODO: 환경 변수로 분리하는 것을 권장합니다.
+const API_BASE_URL = 'http://15.152.162.244/doq'; // TODO: 환경 변수로 분리하는 것을 권장합니다.
 
 /**
  * 서버에 새로운 채팅 세션을 요청하고 세션 ID를 받아옵니다.
@@ -9,7 +9,7 @@ const API_BASE_URL = 'http://localhost:8000'; // TODO: 환경 변수로 분리�
  */
 export async function getSessionId() {
   try {
-    const response = await fetch(`${API_BASE_URL}/v1/session/connect`, {
+    const response = await fetch(`${API_BASE_URL}/doq/session/connect`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

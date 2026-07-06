@@ -405,8 +405,8 @@ const inputSessionId = ref('');
 const errorMessage = ref('');
 const contractTitle = ref('계약서 초안');
 
-const API_URL = 'https://doq-server.onrender.com/v1/session/connect';
-const WS_BASE_URL = 'wss://doq-server.onrender.com/v1/session/chat';
+const API_URL = 'http://15.152.162.244/doq/session/connect';
+const WS_BASE_URL = 'http://15.152.162.244/doq/session/chat';
 
 const stepLabels = {
   introduction: '소개 및 초기 정보 수집',

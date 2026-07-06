@@ -4,6 +4,7 @@ import Vue from '@vitejs/plugin-vue'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import ViteFonts from 'unplugin-fonts/vite'
 import VueRouter from 'unplugin-vue-router/vite'
+import svgLoader from 'vite-svg-loader'
 
 // Utilities
 import { defineConfig } from 'vite'
@@ -11,7 +12,7 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/doq-web/' : '',
+  base: '/your-partner-doq',
   build: {
     outDir: 'docs',
     emptyOutDir: true,
@@ -27,9 +28,9 @@ export default defineConfig({
       styles: {
         configFile: 'src/styles/settings.scss',
       },
-      customVariables: ['src/styles/variables.scss']
     }),
     Components(),
+    svgLoader({ /* 플러그인 설정 (필요 시) */ })
   ],
   define: { 'process.env': 
     {
@@ -49,17 +50,6 @@ export default defineConfig({
       '.tsx',
       '.vue',
     ],
-  },
-  server: {
-    port: 3000,
-    host: true, // 로컬 네트워크에서 접근 가능하도록 설정
-    proxy: {
-      '/api': {
-        target: 'https://doq-server.onrender.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
   },
   css: {
     preprocessorOptions: {

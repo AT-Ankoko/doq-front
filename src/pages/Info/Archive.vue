@@ -210,7 +210,7 @@ const fetchSessions = async () => {
   isLoading.value = true;
   errorMessage.value = '';
   try {
-    const response = await fetch(`${API_BASE_URL}/v1/archive/sessions`);
+    const response = await fetch(`${API_BASE_URL}/doq/archive/sessions`);
     const result = await response.json();
     if (result.state?.code === 'S0000' || result.state === 'SUCCESS') {
       sessions.value = result.data || [];

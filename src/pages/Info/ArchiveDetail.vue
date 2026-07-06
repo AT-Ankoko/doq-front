@@ -355,7 +355,7 @@ const currentRoleInputs = computed(() => {
 const fetchSessionDetail = async () => {
   isLoading.value = true;
   try {
-    const response = await fetch(`${API_BASE_URL}/v1/archive/session/${sessionId.value}`);
+    const response = await fetch(`${API_BASE_URL}/doq/archive/session/${sessionId.value}`);
     const result = await response.json();
     if (result.state?.code === 'S0000' || result.state === 'SUCCESS') {
       sessionData.value = result.data;

@@ -220,8 +220,8 @@ const createSessionAndGo = async () => {
     const userId = 'user_' + Math.random().toString(36).substr(2, 9);
     const payload = contractDataToSessionInfo(contractDataRaw, userId);
 
-    console.log('[POST] /v1/session/connect payload:', payload);
-    const res = await fetch(`${API_BASE_URL}/v1/session/connect`, {
+    console.log('[POST] /doq/session/connect payload:', payload);
+    const res = await fetch(`${API_BASE_URL}/doq/session/connect`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
