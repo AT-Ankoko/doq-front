@@ -38,16 +38,6 @@ const routes = [
     component: () => import(/* webpackChunkName: "archive-detail" */ "@/pages/Info/ArchiveDetail.vue")
   },
   {
-    path: '/howtouse',
-    name: 'HowToUse',
-    component: () => import(/* webpackChunkName: "howtouse" */ "@/pages/Info/HowToUse.vue")
-  },
-  {
-    path: '/team',
-    name: 'Team',
-    component: () => import(/* webpackChunkName: "team" */ "@/pages/Info/Team.vue")
-  },
-  {
     path: '/contract-input1',
     name: 'ContractInput1',
     component: () => import(/* webpackChunkName: "contract-input1" */ "@/pages/Service/ContractInput1.vue"),
