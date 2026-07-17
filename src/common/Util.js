@@ -5,7 +5,6 @@ const Util = (function () {
     // 인스턴스 생성 함수
     function createInstance() {
         return {
-
             ValidKorEng(value) {
                 if (value === null || value === undefined || value === '') {
                     return false;
@@ -21,7 +20,6 @@ const Util = (function () {
 
                 return /^[A-Z_]+$/.test(String(value));
             },
-            
 
             ValidEngNumUpper(value) {
                 if (value === null || value === undefined || value === '') {
@@ -30,19 +28,106 @@ const Util = (function () {
 
                 return /^[A-Z0-9_]+$/.test(String(value));
             },
-            
+
+            /**
+             * 사업자등록번호 포맷
+             * 1234567890 → 123-45-67890
+             */
+            formatBusinessNumber(value) {
+                if (value === null || value === undefined || value === '') {
+                    return '';
+                }
+
+                const originalValue = String(value);
+                const digits = originalValue
+                    .replace(/\D/g, '')
+                    .slice(0, 10);
+
+                if (digits.length === 10) {
+                    return [
+                        digits.slice(0, 3),
+                        digits.slice(3, 5),
+                        digits.slice(5, 10),
+                    ].join('-');
+                }
+
+                return originalValue;
+            },
+
+            /**
+             * 전화번호 포맷
+             *
+             * 01012345678 → 010-1234-5678
+             * 0311234567  → 031-123-4567
+             * 0212345678  → 02-1234-5678
+             * 021234567   → 02-123-4567
+             */
+            formatPhoneNumber(value) {
+                if (value === null || value === undefined || value === '') {
+                    return '';
+                }
+
+                const originalValue = String(value);
+                const digits = originalValue.replace(/\D/g, '');
+
+                // 서울 지역번호
+                if (digits.startsWith('02')) {
+                    if (digits.length === 10) {
+                        return [
+                            digits.slice(0, 2),
+                            digits.slice(2, 6),
+                            digits.slice(6, 10),
+                        ].join('-');
+                    }
+
+                    if (digits.length === 9) {
+                        return [
+                            digits.slice(0, 2),
+                            digits.slice(2, 5),
+                            digits.slice(5, 9),
+                        ].join('-');
+                    }
+
+                    return originalValue;
+                }
+
+                // 휴대전화 및 기타 지역번호
+                if (digits.length === 11) {
+                    return [
+                        digits.slice(0, 3),
+                        digits.slice(3, 7),
+                        digits.slice(7, 11),
+                    ].join('-');
+                }
+
+                if (digits.length === 10) {
+                    return [
+                        digits.slice(0, 3),
+                        digits.slice(3, 6),
+                        digits.slice(6, 10),
+                    ].join('-');
+                }
+
+                return originalValue;
+            },
+
             formatUnixDate(value) {
                 if (value === null || value === undefined || value === '') {
                     return '-';
                 }
 
                 const numericValue = Number(value);
+
                 if (Number.isNaN(numericValue)) {
                     return '-';
                 }
 
-                // 10-digit unix seconds와 13-digit milliseconds 모두 지원
-                const milliseconds = numericValue < 1e12 ? numericValue * 1000 : numericValue;
+                // 10자리 Unix seconds와 13자리 milliseconds 모두 지원
+                const milliseconds =
+                    numericValue < 1e12
+                        ? numericValue * 1000
+                        : numericValue;
+
                 const date = new Date(milliseconds);
 
                 if (Number.isNaN(date.getTime())) {
@@ -55,18 +140,24 @@ const Util = (function () {
 
                 return `${year}-${month}-${day}`;
             },
+
             formatUnixDateTime(value) {
                 if (value === null || value === undefined || value === '') {
                     return '-';
                 }
 
                 const numericValue = Number(value);
+
                 if (Number.isNaN(numericValue)) {
                     return '-';
                 }
 
-                // 10-digit unix seconds와 13-digit milliseconds 모두 지원
-                const milliseconds = numericValue < 1e12 ? numericValue * 1000 : numericValue;
+                // 10자리 Unix seconds와 13자리 milliseconds 모두 지원
+                const milliseconds =
+                    numericValue < 1e12
+                        ? numericValue * 1000
+                        : numericValue;
+
                 const date = new Date(milliseconds);
 
                 if (Number.isNaN(date.getTime())) {
@@ -81,8 +172,6 @@ const Util = (function () {
 
                 return `${year}-${month}-${day} / ${hour}:${minute}`;
             },
-        
-
         };
     }
 
@@ -92,6 +181,7 @@ const Util = (function () {
             if (!instance) {
                 instance = createInstance();
             }
+
             return instance;
         },
     };
@@ -100,8 +190,16 @@ const Util = (function () {
 export default Util;
 
 // 사용 예시
-// Vue 컴포넌트에서 가져오기:
+//
+// import Util from '@/common/Util.js';
+//
 // const util = Util.getInstance();
-// 유효성 검사 호출: util.isNumeric("123"), util.formatPhoneNumber("1234567890")
-
-// 혹은 Util.getInstance().isNumeric("123") 로 바로 사용 가능
+//
+// util.formatBusinessNumber('1234567890');
+// 결과: '123-45-67890'
+//
+// util.formatPhoneNumber('01012345678');
+// 결과: '010-1234-5678'
+//
+// Util.getInstance().formatPhoneNumber('0212345678');
+// 결과: '02-1234-5678'
