@@ -157,9 +157,11 @@
 <script setup>
 import { onMounted, onUnmounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import Util from '@/common/Util.js';
 
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 const router = useRouter();
+const util = Util.getInstance();
 
 // ----- 상태 변수 ----- //
 const isLoading = ref(false);
@@ -248,20 +250,11 @@ const getSessionTitle = (item) => {
 };
 
 const truncateSid = (sid) => {
-  if (!sid) return '-';
-  if (sid.length <= 12) return sid;
-  return sid.substring(0, 12) + '...';
+  return util.truncateWithEllipsis(sid, 12, '-');
 };
 
 const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleString('ko-KR', {
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit'
-    });
-  } catch { return dateString; }
+  return util.formatDateTime(dateString, 'ko-KR');
 };
 </script>
 

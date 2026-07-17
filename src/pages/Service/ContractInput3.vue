@@ -131,15 +131,17 @@
 <script setup>
 import { reactive, ref, onMounted, defineEmits } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { navigateTo } from '@/common/RouterUtil.js';
 import { useStorageWithExpiry } from '@/common/useStorageWithExpiry';
+import httpClient, * as HttpHandler from '@/common/HttpHandler.js';
+import Util from '@/common/Util.js';
+
 
 const emit = defineEmits(['set-side-nav', 'set-top-nav']);
 const router = useRouter();
 const route = useRoute();
 const { setItem, getItem } = useStorageWithExpiry();
-
-const currentRole = route.query.role || 'client';
-const API_BASE_URL = 'https://doq-server.onrender.com';
+const util = Util.getInstance();
 
 const showSessionDialog = ref(false);
 const isLoading = ref(false);
@@ -157,32 +159,6 @@ onMounted(() => {
   emit('set-side-nav', false);
 });
 
-// contractData를 session_info 구조로 변환
-function formatBusinessNumber(num) {
-  // 사업자번호: 10자리 → 123-45-67890
-  const digits = num.replace(/\D/g, '').slice(0, 10);
-  if (digits.length === 10)
-    return `${digits.slice(0,3)}-${digits.slice(3,5)}-${digits.slice(5)}`;
-  return num;
-}
-
-function formatPhoneNumber(num) {
-  // 연락처: 01012345678 → 010-1234-5678, 0212345678 → 02-1234-5678
-  const digits = num.replace(/\D/g, '');
-  if (digits.startsWith('02')) {
-    if (digits.length === 10)
-      return `${digits.slice(0,2)}-${digits.slice(2,6)}-${digits.slice(6)}`;
-    if (digits.length === 9)
-      return `${digits.slice(0,2)}-${digits.slice(2,5)}-${digits.slice(5)}`;
-  } else {
-    if (digits.length === 11)
-      return `${digits.slice(0,3)}-${digits.slice(3,7)}-${digits.slice(7)}`;
-    if (digits.length === 10)
-      return `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
-  }
-  return num;
-}
-
 function contractDataToSessionInfo(contractData, userId) {
   const client = contractData.client || {};
   const performer = contractData.performer || {};
@@ -191,10 +167,10 @@ function contractDataToSessionInfo(contractData, userId) {
     client_name: client.name || '',
     provider_name: performer.name || '',
     contract_date: client.contractDate || performer.contractDate || '',
-    client_business_number: client.businessNumber ? formatBusinessNumber(client.businessNumber) : '',
-    client_contact: client.contact ? formatPhoneNumber(client.contact) : '',
-    provider_business_number: performer.businessNumber ? formatBusinessNumber(performer.businessNumber) : '',
-    provider_contact: performer.contact ? formatPhoneNumber(performer.contact) : '',
+    client_business_number: client.businessNumber ? util.formatBusinessNumber(client.businessNumber) : '',
+    client_contact: client.contact ? util.formatPhoneNumber(client.contact) : '',
+    provider_business_number: performer.businessNumber ? util.formatBusinessNumber(performer.businessNumber) : '',
+    provider_contact: performer.contact ? util.formatPhoneNumber(performer.contact) : '',
   };
 }
 

@@ -267,8 +267,6 @@ const sessionId = ref('');
 const roleTab = ref('client');
 const showContractDialog = ref(false);
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://doq-server.onrender.com';
-
 const stepLabels = {
   introduction: '소개',
   work_scope: '작업 범위',

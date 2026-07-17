@@ -23,11 +23,6 @@ const routes = [
     meta: { hideSidebar: true }
   },
   {
-    path: '/about',
-    name: 'About',
-    component: () => import(/* webpackChunkName: "about" */ "@/pages/Info/About.vue")
-  },
-  {
     path: '/archive',
     name: 'Archive',
     component: () => import(/* webpackChunkName: "archive" */ "@/pages/Info/Archive.vue")
